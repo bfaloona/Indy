@@ -8,6 +8,7 @@ Feature: Finding log messages at a particular time
     2000-09-07 14:07:41,529 [main] INFO  MyApp - Exiting application.
     """
     
+    
   Scenario: Count of messages at specified time
     When Indy parses the log file
     Then I expect Indy to find 1 log entry at 2000-09-07 14:07:41,508
@@ -21,10 +22,11 @@ Feature: Finding log messages at a particular time
     """
 
     
-  Scenario: No messages at the specified log level
+  Scenario: No messages at the specified time
     When Indy parses the log file
     Then I expect Indy to find no log entries at 2000-09-07 14:07:41,507
     
-  Scenario: No particular messages at the specified log level
+    
+  Scenario: No particular messages at the specified time
     When Indy parses the log file
-    Then I expect the last 2000-09-07-14:07:41,507
+    Then I expect the last 2000-09-07-14:07:41,507 to be nil
