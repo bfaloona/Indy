@@ -13,12 +13,12 @@ Feature: Finding log entries at an exact log level
     """
 	
   Scenario: Count of entries at specified log level
-    When Indy parses the log file for log severity INFO
-    Then I expect Indy to find 2 INFO log entries
+    When searching the log for the log severity INFO
+    Then I expect to have found 2 log entries
     
   
   Scenario: Particular entry at the specified log level
-    When Indy parses the log file for log severity INFO
+    When searching the log for the log severity INFO
     Then I expect the first entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
@@ -30,10 +30,5 @@ Feature: Finding log entries at an exact log level
     
     
   Scenario: No entries at the specified log level
-    When Indy parses the log file for log severity SEVERE
-    Then I expect Indy to have found no log entries
-    
-    
-  Scenario: No particular entries at the specified log level
-    When Indy parses the log file for the log severity SEVERE
-    Then I expect there not to be any entries
+    When searching the log for the log severity SEVERE
+    Then I expect to have found no log entries

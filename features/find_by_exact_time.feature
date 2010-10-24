@@ -10,12 +10,12 @@ Feature: Finding log messages at a particular time
     
     
   Scenario: Count of entries at the specified time
-    When Indy parses the log file for the time 2000-09-07 14:07:41,508 
+    When searching the log for the time 2000-09-07 14:07:41,508 
     Then I expect to have found 1 log entry 
     
     
   Scenario: Particular entry at the specified time
-    When Indy parses the log file for the time 2000-09-07 14:07:41,508 
+    When searching the log for the time 2000-09-07 14:07:41,508 
     Then I expect the last entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
@@ -23,10 +23,5 @@ Feature: Finding log messages at a particular time
 
     
   Scenario: No entries at the specified time
-    When Indy parses the log file for the time 2000-09-07 14:07:40,401 
-    Then I expect Indy to have found no log entries
-    
-    
-  Scenario: No particular entries at the specified time
-    When Indy parses the log file for the time 2000-09-07 14:07:40,401
-    Then I expect there not to be any entries
+    When searching the log for the time 2000-09-07 14:07:40,401 
+    Then I expect to have found no log entries

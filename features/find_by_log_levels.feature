@@ -13,22 +13,22 @@ Feature: Finding log entries at various log levels
     """
     
   Scenario: Count of messages at a specified log level or higher
-    When Indy parses the log file for log severity INFO and higher
-    Then I expect Indy to find 4 log entries
+    When searching the log for the log severity INFO and higher
+    Then I expect to have found 4 log entries
   
 
   Scenario: Count of messages at a specified log level or higher
-    When Indy parses the log file for log severity DEBUG and higher
-    Then I expect Indy to find 6 log entries
+    When searching the log for the log severity DEBUG and higher
+    Then I expect to have found 6 log entries
 
     
   Scenario: Count of messages at a specified log level or lower
-    When Indy parses the log file for log severity INFO and lower
-    Then I expect Indy to find 4 log entries
+    When searching the log for the log severity INFO and lower
+    Then I expect to have found 4 log entries
 
   
   Scenario: Particular message at a specified log level or higher
-    When Indy parses the log file for log severity INFO and higher
+    When searching the log for the log severity INFO and higher
     Then I expect the first entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
