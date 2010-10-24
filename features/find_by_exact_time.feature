@@ -1,5 +1,5 @@
 Feature: Finding log messages at a particular time
-  As an Indy user I am able to create an instance and find all logs at a particular time.
+  As an Indy user I am able to create an instance and find all logs at an exact time.
 
   Background:
     Given the following log:
@@ -9,24 +9,24 @@ Feature: Finding log messages at a particular time
     """
     
     
-  Scenario: Count of messages at specified time
-    When Indy parses the log file
-    Then I expect Indy to find 1 log entry at 2000-09-07 14:07:41,508
+  Scenario: Count of entries at the specified time
+    When Indy parses the log file for the time 2000-09-07 14:07:41,508 
+    Then I expect to have found 1 log entry 
     
     
-  Scenario: Particular message at the specified time
-    When Indy parses the log file
-    Then I expect the last 2000-09-07 14:07:41,508 entry to be:
+  Scenario: Particular entry at the specified time
+    When Indy parses the log file for the time 2000-09-07 14:07:41,508 
+    Then I expect the last entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
     """
 
     
-  Scenario: No messages at the specified time
-    When Indy parses the log file
-    Then I expect Indy to find no log entries at 2000-09-07 14:07:41,507
+  Scenario: No entries at the specified time
+    When Indy parses the log file for the time 2000-09-07 14:07:40,401 
+    Then I expect Indy to have found no log entries
     
     
-  Scenario: No particular messages at the specified time
-    When Indy parses the log file
-    Then I expect the last 2000-09-07-14:07:41,507 to be nil
+  Scenario: No particular entries at the specified time
+    When Indy parses the log file for the time 2000-09-07 14:07:40,401
+    Then I expect there not to be any entries

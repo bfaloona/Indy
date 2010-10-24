@@ -9,24 +9,24 @@ Feature: Finding log messages by message
     """
 
     
-  Scenario: Count of entries that match a particular message
-    When Indy parses the log file
-    Then I expect Indy to find 1 log entry that matched the message 'Entering'
+  Scenario: Count of entries that partially match a given message
+    When Indy parses the log file for matches of the message 'Entering'
+    Then I expect to have found 1 log entry
     
     
-  Scenario: Particular log entry that matches a particular message
-    When Indy parses the log file
-    Then I expect the first entry that matches the message 'Entering' to be:
+  Scenario: Particular entry that partially match a given message
+    When Indy parses the log file for matches of the message 'Entering'
+    Then I expect the first entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
     """
     
     
-  Scenario: No entries when no messages match
-    When Indy parses the log file
-    Then I expect Indy to find no log entries that match the message 'Opening'
+  Scenario: No entries when no entries partially match the message 
+    When Indy parses the log file for matches of the message 'Opening'
+    Then I expect to have found 0 log entries
 
     
-  Scenario: No particular entries when no messages match
-    When Indy parses the log file
-    Then I expect the last entry that matches the message 'Opening' to be nil
+  Scenario: No particular entries when no entries partially match the message
+    When Indy parses the log file for matches of the message 'Opening'
+    Then I expect there not to be any entries

@@ -1,35 +1,39 @@
-Feature: Finding log messages at log levels
-  As an Indy user I am able to create an instance and find all logs at the various standard log levels.
+Feature: Finding log entries at various log levels
+  As an Indy user I am able to create an instance and find all logs at or above the log level.
 
   Background:
     Given the following log:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
-    2000-09-07 14:07:41,529 [main] INFO  MyApp - Exiting application.
+    2000-09-07 14:07:42,608 [main] DEBUG MyApp - Focusing application.
+    2000-09-07 14:07:43,778 [main] DEBUG MyApp - Blurring application.
+    2000-09-07 14:07:44,778 [main] WARN MyApp - Low on Memory.
+    2000-09-07 14:07:45,778 [main] ERROR MyApp - Out of Memory.
+    2000-09-07 14:07:46,529 [main] INFO  MyApp - Exiting application.
     """
     
-  Scenario: Count of messages at specified log level
-    When Indy parses the log file
-    Then I expect Indy to find 2 INFO log entries
-    
+  Scenario: Count of messages at a specified log level or higher
+    When Indy parses the log file for log severity INFO and higher
+    Then I expect Indy to find 4 log entries
   
-  Scenario: Particular message at the specified log level
-    When Indy parses the log file
-    Then I expect the last INFO entry to be:
+
+  Scenario: Count of messages at a specified log level or higher
+    When Indy parses the log file for log severity DEBUG and higher
+    Then I expect Indy to find 6 log entries
+
+    
+  Scenario: Count of messages at a specified log level or lower
+    When Indy parses the log file for log severity INFO and lower
+    Then I expect Indy to find 4 log entries
+
+  
+  Scenario: Particular message at a specified log level or higher
+    When Indy parses the log file for log severity INFO and higher
+    Then I expect the first entry to be:
     """
     2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
     """
-    And I expect the last INFO entry to be:
+    And I expect the last entry to be:
     """
     2000-09-07 14:07:41,529 [main] INFO  MyApp - Exiting application.
     """
-    
-    
-  Scenario: No messages at the specified log level
-    When Indy parses the log file
-    Then I expect Indy to find no DEBUG log entries
-    
-    
-  Scenario: No particular messages at the specified log level
-    When Indy parses the log file
-    Then I expect the last DEBUG log entry to be nil
