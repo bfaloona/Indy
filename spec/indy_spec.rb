@@ -63,12 +63,22 @@ describe Indy do
 
     end
 
-    context :for do
+    context "method" do
 
-      it "should be a method" do
-        @indy.should respond_to(:for)
+      [:for, :search, :like ].each do |method|
+        it "#{method} should exist" do
+          @indy.should respond_to(method)
+        end
+
+        it "#{method} should accept a hash of search criteria" do
+          lambda { @indy.send(method,:severity => "INFO") }.should_not raise_error
+        end
+
+        it "#{method} should return a set of results" do
+          @indy.send(method,:severity => "DEBUG").should be_kind_of(ResultSet)
+        end
       end
-      
+
     end
 
   end
