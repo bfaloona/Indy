@@ -4,8 +4,8 @@ Feature: Finding log entries exactly matching a message
   Background:
     Given the following log:
     """
-    2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
-    2000-09-07 14:07:41,529 [main] INFO  MyApp - Exiting application.
+    2000-09-07 14:07:41 INFO  MyApp - Entering application.
+    2000-09-07 14:07:41 INFO  MyApp - Exiting application.
     """
 
     
@@ -18,7 +18,7 @@ Feature: Finding log entries exactly matching a message
     When searching the log for the exact match of the message "Entering application."
     Then I expect the first entry to be:
     """
-    2000-09-07 14:07:41,508 [main] INFO  MyApp - Entering application.
+    2000-09-07 14:07:41 INFO  MyApp - Entering application.
     """
     
     

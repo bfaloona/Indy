@@ -4,10 +4,6 @@ describe Indy do
 
   context :initialize do
 
-    it "should accept no arguments without error" do
-      lambda { Indy.new }.should_not raise_error
-    end
-
     # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
     it "should accept a log4r pattern string without error" do
       lambda { Indy.new(:pattern => "%d %i %c - %m") }.should_not raise_error
@@ -32,6 +28,10 @@ describe Indy do
 
     it "should return an instance of Indy" do
       Indy.search("source string").should be_kind_of(Indy)
+    end
+
+    it "the instance should have the source specified" do
+      Indy.search("source string").source.should == "source string"
     end
   end
 
@@ -75,8 +75,35 @@ describe Indy do
         end
 
         it "#{method} should return a set of results" do
-          @indy.send(method,:severity => "DEBUG").should be_kind_of(ResultSet)
+          @indy.send(method,:severity => "DEBUG").should be_kind_of(Array)
         end
+      end
+
+    end
+
+    context "search" do
+
+      it "should call _search with the parameter and value passed to it" do
+
+      end
+
+
+    end
+
+    context "_search when given source, param and value" do
+
+      before(:each) do
+        @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering application.",:application,"MyApp")
+      end
+
+      it "should not return nil" do
+        @results.should_not be_nil
+        @results.should be_kind_of(Array)
+        @results.should_not be_empty
+      end
+
+      it "should return an array of results" do
+        @results.first.application.should == "MyApp"
       end
 
     end
