@@ -1,0 +1,6 @@
+## YAML Template.
+---
+default: -p base
+base: --format rerun --out rerun.txt --format pretty
+autotest: --format pretty --color
+autotest-all: --format pretty --color
