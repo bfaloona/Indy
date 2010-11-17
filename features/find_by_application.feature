@@ -27,5 +27,5 @@ Feature: Finding log entries by application
 
     
   Scenario: No entries for a specific application
-    When searching the log for the application 'MyApp'
+    When searching the log for the application 'YourApp'
     Then I expect to have found no log entries

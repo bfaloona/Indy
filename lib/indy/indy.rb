@@ -35,26 +35,33 @@ class Indy
     results = ResultSet.new
 
     while (criteria = search_criteria.shift)
-      results += _search(source,criteria.first,criteria.last)
+      results += _search(source,criteria.first,criteria.last) {|result,term,value| result if result.send(term) == value }
     end
 
     results
   end
 
   def like(search_criteria)
-    search(search_criteria)
+    results = ResultSet.new
+
+    while (criteria = search_criteria.shift)
+      results += _search(source,criteria.first,criteria.last) {|result,term,value| result if result.send(term) =~ /#{value}/ }
+    end
+
+    results
   end
 
   alias_method :for, :search
 
-  def _search(source,term,value)
-    source.split("\n").collect do |line|
+  def _search(source,term,value,&block)
+    results = source.split("\n").collect do |line|
       if %r{#{DEFAULT_LOG_PATTERN}}.match(line)
         result = Result.new(line,$1, $2, $3, $4) #date_time, severity, application, message
-        result.send(term) == value ? result : nil
+        block_given? ? block.call(result,term,value) : nil
       end
     end
+    
+    results.compact
   end
-
 
 end

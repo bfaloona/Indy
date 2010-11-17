@@ -33,7 +33,7 @@ Transform /^(\d+)$/ do |number|
 end
 
 Then /^I expect to have found (no|\d+) log entr(?:y|ies)$/ do |count|
-  @results.size == count
+  @results.size.should == count
 end
 
 Transform /^first$/ do |order|
@@ -42,10 +42,11 @@ end
 Transform /^last$/ do |order|
   -1
 end
+
 Transform /^(\d+)(?:st|nd|rd|th)$/ do |order|
   order.to_i - 1
 end
 
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
-  @results[position].to_s.should == expected
+  @results[position].line.should == expected
 end

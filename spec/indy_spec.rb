@@ -93,7 +93,7 @@ describe Indy do
     context "_search when given source, param and value" do
 
       before(:each) do
-        @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering application.",:application,"MyApp")
+        @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering application.",:application,"MyApp") {|result,term,value| result if result.send(term) == value }
       end
 
       it "should not return nil" do
