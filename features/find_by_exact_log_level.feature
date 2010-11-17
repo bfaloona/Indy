@@ -7,7 +7,7 @@ Feature: Finding log entries at an exact log level
     2000-09-07 14:07:41 INFO  MyApp - Entering application.
     2000-09-07 14:07:42 DEBUG MyApp - Focusing application.
     2000-09-07 14:07:43 DEBUG MyApp - Blurring application.
-    2000-09-07 14:07:44 WARN MyApp - Low on Memory.
+    2000-09-07 14:07:44 WARN  MyApp - Low on Memory.
     2000-09-07 14:07:45 ERROR MyApp - Out of Memory.
     2000-09-07 14:07:46 INFO  MyApp - Exiting application.
     """

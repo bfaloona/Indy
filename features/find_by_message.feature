@@ -20,7 +20,18 @@ Feature: Finding log messages by message
     """
     2000-09-07 14:07:41 INFO  MyApp - Entering application.
     """
-    
+
+  Scenario: Two entries that partially match a given message
+    When searching the log for matches of the message "application"
+    Then I expect the first entry to be:
+    """
+    2000-09-07 14:07:41 INFO  MyApp - Entering application.
+    """
+    Then I expect the last entry to be:
+    """
+    2000-09-07 14:07:41 INFO  MyApp - Exiting application.
+    """
+
     
   Scenario: No entries when no entries partially match the message 
     When searching the log for matches of the message "Opening"

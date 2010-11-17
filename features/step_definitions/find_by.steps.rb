@@ -7,9 +7,12 @@ When /^searching the log for the log severity (\w+)$/ do |severity|
   @results = Indy.search(@log_source).with(:default).for(:severity => severity)
 end
 
-When /^searching the log for the log severity (\w+) and (higher|lower)$/ do |severity,direction|
-  pending "Define method for passing the severity level to Indy"
-  @results = Indy.search(@log_source).with(:default).for(:severity => severity)
+When /^searching the log for the log severity (\w+) and lower$/ do |severity|
+  @results = Indy.search(@log_source).with(:default).severity(severity,:equal_and_below)
+end
+
+When /^searching the log for the log severity (\w+) and higher$/ do |severity|
+  @results = Indy.search(@log_source).with(:default).severity(severity,:equal_and_above)
 end
 
 When /^searching the log for the exact match of the message "([^"]+)"$/ do |message|
