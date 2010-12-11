@@ -93,7 +93,7 @@ describe Indy do
     context "_search when given source, param and value" do
 
       before(:each) do
-        @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering application.",[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result.application == "MyApp" }
+        @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
       end
 
       it "should not return nil" do
@@ -103,7 +103,7 @@ describe Indy do
       end
 
       it "should return an array of results" do
-        @results.first.application.should == "MyApp"
+        @results.first[:application].should == "MyApp"
       end
 
     end
