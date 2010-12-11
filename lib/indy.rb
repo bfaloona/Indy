@@ -3,4 +3,3 @@ $:.unshift(File.dirname(__FILE__)) unless
 
 require 'indy/indy'
 require 'indy/result_set'
-require 'indy/result'

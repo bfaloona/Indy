@@ -11,6 +11,15 @@ class Indy
   MESSAGE = ".+"
   DEFAULT_LOG_PATTERN = "^(#{DATE_TIME})\\s+(#{SEVERITY_PATTERN})\\s+(#{APPLICATION})\\s+-\\s+(#{MESSAGE})$"
   DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
+  
+  #
+  # Initialize Indy.
+  #
+  # @example
+  #
+  #  Indy.new(:source => LOG_FILE)
+  #  Indy.new(:source => LOG_FILE,:pattern => [LOG_REGEX_PATTERN,:time,:application,:message]
+  #
   def initialize(args)
     @source = @pattern = nil
 
@@ -67,12 +76,18 @@ class Indy
 
     results
   end
+  
+  alias_method :for, :search
 
   #
   # Search the source and make a regular expression comparison
   #
   # @param [Hash] search_criteria the field to search for as the key and the
   #        value to compare against the other log messages
+  #
+  # @example For all applications that end with Service
+  #
+  #  Indy.search(LOG_FILE).like(:application => '(.+)Service')
   #
   def like(search_criteria)
     results = ResultSet.new
@@ -83,6 +98,8 @@ class Indy
 
     results
   end
+  
+  alias_method :matching, :like
 
   #
   # Search the source for the specific severity
@@ -92,23 +109,31 @@ class Indy
   # @param [Symbol] direction by default search at the severity level, but you
   #        can specify :equal, :equal_and_above, and :equal_and_below
   #
-  def severity(severity,direction=:equal)
+  # @example INFO and more severe
+  #   
+  #  Indy.search(LOG_FILE).severity('INFO',:equal_and_above)
+  #
+  # @example Custom Level and Below
+  #
+  #  Indy.search(LOG_FILE).with([CUSTOM_PATTERN,time,severity,message]).severity(:yellow,:equal_and_below,[:green,:yellow,:orange,:red])
+  #  Indy.search(LOG_FILE).with([CUSTOM_PATTERN,time,severity,message]).matching(:severity => '(GREEN|YELLOW)')
+  #
+  def severity(severity,direction = :equal,scale = SEVERITY)
     severity = severity.to_s.downcase.to_sym
 
     case direction
     when :equal
       severity = [severity]
     when :equal_and_above
-      severity = SEVERITY[SEVERITY.index(severity)..-1]
+      severity = scale[scale.index(severity)..-1]
     when :equal_and_below
-      severity = SEVERITY[0..SEVERITY.index(severity)]
+      severity = scale[0..scale.index(severity)]
     end
 
     ResultSet.new + _search {|result| OpenStruct.new(result) if severity.include?(result[:severity].downcase.to_sym) }
 
   end
 
-  alias_method :for, :search
 
   #
   # Search the specified source and yield to the block the line that was found
@@ -116,7 +141,7 @@ class Indy
   #
   # This method is suppose to be used internally.
   #
-  def _search(source=@source,pattern_array=@pattern,&block)
+  def _search(source = @source,pattern_array = @pattern,&block)
     regexp, *fields = pattern_array.dup
 
     results = source.split("\n").collect do |line|

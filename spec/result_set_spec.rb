@@ -1,4 +1,4 @@
-require 'lib/indy.rb'
+require "#{File.dirname(__FILE__)}/helper"
 
 describe ResultSet do
 
