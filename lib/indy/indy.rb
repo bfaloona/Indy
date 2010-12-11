@@ -62,7 +62,7 @@ class Indy
     results = ResultSet.new
 
     while (criteria = search_criteria.shift)
-      results += _search(@source,@pattern) {|result| result if result.send(criteria.first) == criteria.last }
+      results += _search {|result| OpenStruct.new(result) if result[criteria.first] == criteria.last }
     end
 
     results
@@ -78,7 +78,7 @@ class Indy
     results = ResultSet.new
 
     while (criteria = search_criteria.shift)
-      results += _search(@source,@pattern) {|result| result if result.send(criteria.first) =~ /#{criteria.last}/ }
+      results += _search {|result| OpenStruct.new(result) if result[criteria.first] =~ /#{criteria.last}/ }
     end
 
     results
@@ -104,7 +104,7 @@ class Indy
       severity = SEVERITY[0..SEVERITY.index(severity)]
     end
 
-    ResultSet.new + _search(@source,@pattern) {|result| result if severity.include?(result.severity.downcase.to_sym) }
+    ResultSet.new + _search {|result| OpenStruct.new(result) if severity.include?(result[:severity].downcase.to_sym) }
 
   end
 
@@ -116,7 +116,7 @@ class Indy
   #
   # This method is suppose to be used internally.
   #
-  def _search(source,pattern_array,&block)
+  def _search(source=@source,pattern_array=@pattern,&block)
     regexp, *fields = pattern_array.dup
 
     results = source.split("\n").collect do |line|
@@ -126,8 +126,8 @@ class Indy
         values.length.should == fields.length
 
         hash = Hash[ *fields.zip( values ).flatten ]
-        result = OpenStruct.new( {:line => line}.merge(hash) )
-        block_given? ? block.call(result) : nil
+        hash[:line] = line
+        block_given? ? block.call(hash) : nil
       end
     end
 
