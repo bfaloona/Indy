@@ -1,3 +1,4 @@
+@time
 Feature: Finding log messages at a particular time
   As an Indy user I am able to create an instance and find all logs at an exact time.
 

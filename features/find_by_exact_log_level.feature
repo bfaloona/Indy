@@ -1,3 +1,4 @@
+@log_level
 Feature: Finding log entries at an exact log level
   As an Indy user I am able to create an instance and find all logs at the various standard log levels.
 

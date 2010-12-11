@@ -1,3 +1,4 @@
+@message
 Feature: Finding log messages by message
   As an Indy user I am able to create an instance and find all logs related to a particular message or portion of a message.
 

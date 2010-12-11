@@ -1,3 +1,4 @@
+@message
 Feature: Finding log entries exactly matching a message
   As an Indy user I am able to create an instance and find all logs that exactly match a message.
 
