@@ -1,4 +1,4 @@
-
+require 'ostruct'
 
 class Indy
 
@@ -10,7 +10,7 @@ class Indy
   APPLICATION = "\\w+"
   MESSAGE = ".+"
   DEFAULT_LOG_PATTERN = "^(#{DATE_TIME})\\s+(#{SEVERITY_PATTERN})\\s+(#{APPLICATION})\\s+-\\s+(#{MESSAGE})$"
-
+  DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
   def initialize(args)
     @source = @pattern = nil
 
@@ -30,7 +30,7 @@ class Indy
     #   Indy.search("apache.log").for(:severity => "INFO")
     #
     def search(source)
-      Indy.new(:source => source, :pattern => DEFAULT_LOG_PATTERN)
+      Indy.new(:source => source, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
     end
 
   end
@@ -39,11 +39,12 @@ class Indy
   # Specify the log pattern to use as the comparison against each line within
   # the log file that has been specified.
   #
-  # @param [String] log_pattern a string representation of the regular expression
+  # @param [Array] pattern_array an Array with the regular expression as the first element
+  #        followed by list of fields in the log entry
   #        to use for comparison against each log line.
   #
-  def with(log_pattern=:default)
-    @pattern = log_pattern == :default ? DEFAULT_LOG_PATTERN : log_pattern
+  def with(pattern_array = :default)
+    @pattern = pattern_array == :default ? [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten : pattern_array
     self
   end
 
@@ -111,10 +112,17 @@ class Indy
   #
   # This method is suppose to be used internally.
   #
-  def _search(source,pattern,&block)
+  def _search(source,pattern_array,&block)
+    regexp, *fields = pattern_array.dup
+
     results = source.split("\n").collect do |line|
-      if /#{pattern}/.match(line)
-        result = Result.new(line,$1, $2, $3, $4) #date_time, severity, application, message
+      if /#{regexp}/.match(line)
+        values = /#{regexp}/.match(line).captures
+        
+        values.length.should == fields.length
+
+        hash = Hash[ *fields.zip( values ).flatten ]
+        result = OpenStruct.new( {:line => line}.merge(hash) )
         block_given? ? block.call(result) : nil
       end
     end
