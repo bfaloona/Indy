@@ -1,1 +1,1 @@
-require_relative '../../../lib/indy'
+require "#{File.dirname(__FILE__)}/../../../lib/indy"
