@@ -32,6 +32,11 @@ When /^searching the log for:$/ do |fields|
   @results = Indy.search(@log_source).for(fields.hashes.first)
 end
 
+When /^searching the log for entries like:$/ do |fields|
+  fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
+  @results = Indy.search(@log_source).like(fields.hashes.first)
+end
+
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
   @results[position].line.should == expected
 end
