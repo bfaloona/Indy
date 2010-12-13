@@ -1,1 +1,1 @@
-require 'lib/indy.rb'
+require_relative '../../../lib/indy'

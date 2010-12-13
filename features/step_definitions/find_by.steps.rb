@@ -27,27 +27,9 @@ When /^searching the log for the time (.+)$/ do |time|
   @results = Indy.search(@log_source).with(:default).for(:time => time)
 end
 
-Transform /^no$/ do |no|
-  0
-end
-
-Transform /^(\d+)$/ do |number|
-  number.to_i
-end
-
-Then /^I expect to have found (no|\d+) log entr(?:y|ies)$/ do |count|
-  @results.size.should == count
-end
-
-Transform /^first$/ do |order|
-  0
-end
-Transform /^last$/ do |order|
-  -1
-end
-
-Transform /^(\d+)(?:st|nd|rd|th)$/ do |order|
-  order.to_i - 1
+When /^searching the log for:$/ do |fields|
+  fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
+  @results = Indy.search(@log_source).for(fields.hashes.first)
 end
 
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
