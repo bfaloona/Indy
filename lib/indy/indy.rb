@@ -92,8 +92,8 @@ class Indy
   def like(search_criteria)
     results = ResultSet.new
 
-    while (criteria = search_criteria.shift)
-      results += _search {|result| OpenStruct.new(result) if result[criteria.first] =~ /#{criteria.last}/ }
+    results += _search do |result|
+      OpenStruct.new(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
     end
 
     results
