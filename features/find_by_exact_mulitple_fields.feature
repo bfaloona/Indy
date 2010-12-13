@@ -1,5 +1,5 @@
 @application @message @log_level @time
-Feature: Finding log entries by two types of fields
+Feature: Finding log entries that exactly match multiple fields
   As an Indy user I am able to create an instance and find all logs related to a particular application.
 
   Background:
@@ -13,14 +13,14 @@ Feature: Finding log entries by two types of fields
     2000-09-07 14:07:46 INFO  MyApp - Exiting application.
     """
     
-  Scenario: Count of entries that match the application and log level
+  Scenario: Count of entries that exactly match the application and log level
     When searching the log for:
       | application | severity |
       | MyApp       | DEBUG    |
     Then I expect to have found 2 log entries
     
     
-  Scenario: Particular entry that match a message and and a log level
+  Scenario: Particular entry that exactly match a message and and a log level
     When searching the log for:
       | Message        | severity |
       | Out of Memory. | ERROR    |
@@ -31,7 +31,7 @@ Feature: Finding log entries by two types of fields
     """
 
 
-  Scenario: No entries for when looking at a matching time but not message
+  Scenario: No entries for when looking at a matching time but not exact message
     When searching the log for:
       | time                | message               |
       | 2000-09-07 14:07:46 | Focusing application. |
