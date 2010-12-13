@@ -1,0 +1,4 @@
+=== 0.1.0 / 2010-12-13
+
+* Search by exact match or regular expression
+* Search with custom pattern
