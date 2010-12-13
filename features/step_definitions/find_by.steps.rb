@@ -1,40 +1,44 @@
 
 When /^searching the log for the application '([^']+)'$/ do |name|
-  @results = Indy.search(@log_source).with(:default).for(:application => name)
+  @results = @indy.for(:application => name)
 end
 
 When /^searching the log for the log severity (\w+)$/ do |severity|
-  @results = Indy.search(@log_source).with(:default).for(:severity => severity)
+  @results = @indy.for(:severity => severity)
 end
 
 When /^searching the log for the log severity (\w+) and lower$/ do |severity|
-  @results = Indy.search(@log_source).with(:default).severity(severity,:equal_and_below)
+  @results = @indy.severity(severity,:equal_and_below)
 end
 
 When /^searching the log for the log severity (\w+) and higher$/ do |severity|
-  @results = Indy.search(@log_source).with(:default).severity(severity,:equal_and_above)
+  @results = @indy.severity(severity,:equal_and_above)
 end
 
 When /^searching the log for the exact match of the message "([^"]+)"$/ do |message|
-  @results = Indy.search(@log_source).with(:default).for(:message => message)
+  @results = @indy.for(:message => message)
 end
 
 When /^searching the log for matches of the message "([^"]+)"$/ do |message|
-  @results = Indy.search(@log_source).with(:default).like(:message => message)
+  @results = @indy.like(:message => message)
 end
 
 When /^searching the log for the time (.+)$/ do |time|
-  @results = Indy.search(@log_source).with(:default).for(:time => time)
+  @results = @indy.for(:time => time)
 end
 
 When /^searching the log for:$/ do |fields|
   fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
-  @results = Indy.search(@log_source).for(fields.hashes.first)
+  @results = @indy.search(fields.hashes.first)
 end
 
 When /^searching the log for entries like:$/ do |fields|
   fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
-  @results = Indy.search(@log_source).like(fields.hashes.first)
+  @results = @indy.matching(fields.hashes.first)
+end
+
+When /^searching the log for the exact match of custom field ([^"]+)\s*"([^"]+)"$/ do |field,value|
+  @results = @indy.search(field.strip.gsub(/\s/,'_').to_sym => value)
 end
 
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
