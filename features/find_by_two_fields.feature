@@ -22,9 +22,10 @@ Feature: Finding log entries by two types of fields
     
   Scenario: Particular entry that match a message and and a log level
     When searching the log for:
-      | Message | severity |
-      | Memory  | ERROR    |
-    Then I expect the first entry to be:
+      | Message        | severity |
+      | Out of Memory. | ERROR    |
+    Then I expect to have found 1 log entry  
+    And I expect the first entry to be:
     """
     2000-09-07 14:07:45 ERROR MyApp - Out of Memory.
     """
