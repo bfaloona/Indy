@@ -1,6 +1,6 @@
 
 Given /^the following log:$/ do |string|
-  @indy = Indy.search(string)
+  @indy = Indy::Indy.search(string)
 end
 
 And /^the custom pattern \(([^\)]+)\):$/ do |fields,pattern|

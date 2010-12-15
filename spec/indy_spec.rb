@@ -67,7 +67,7 @@ module Indy
 
       context "method" do
 
-        [:for, :search, :like ].each do |method|
+        [:for, :search, :like, :matching].each do |method|
           it "#{method} should exist" do
             @indy.should respond_to(method)
           end
