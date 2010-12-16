@@ -33,7 +33,7 @@ module Indy
       end
 
       it "the instance should have the source specified" do
-        Indy.search("source string").source.should == "source string"
+        Indy.search("source string").source.should_not be_nil
       end
     end
 
@@ -83,19 +83,10 @@ module Indy
 
       end
 
-      context "search" do
-
-        it "should call _search with the parameter and value passed to it" do
-
-        end
-
-
-      end
-
       context "_search when given source, param and value" do
 
         before(:each) do
-          @results = @indy._search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
+          @results = @indy._search(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."),[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
         end
 
         it "should not return nil" do

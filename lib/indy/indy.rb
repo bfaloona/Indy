@@ -48,6 +48,10 @@ module Indy
 
     end
 
+    def source=(specified_source)
+      @source = StringIO.new(specified_source) if specified_source.is_a?(String)
+    end
+
     #
     # Specify the log pattern to use as the comparison against each line within
     # the log file that has been specified.
@@ -144,18 +148,19 @@ module Indy
     # with the given log pattern
     #
     # This method is suppose to be used internally.
+    # @param [IO] source is a Ruby IO object
     #
     def _search(source = @source,pattern_array = @pattern,&block)
       regexp, *fields = pattern_array.dup
 
-      results = source.split("\n").collect do |line|
+      results = source.each_line.collect do |line|
         if /#{regexp}/.match(line)
           values = /#{regexp}/.match(line).captures
 
           values.length.should == fields.length
 
           hash = Hash[ *fields.zip( values ).flatten ]
-          hash[:line] = line
+          hash[:line] = line.strip
           block_given? ? block.call(hash) : nil
         end
       end
