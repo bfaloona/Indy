@@ -35,6 +35,61 @@ module Indy
       it "the instance should have the source specified" do
         Indy.search("source string").source.should_not be_nil
       end
+
+      context "for a String" do
+
+        context "treat it first like a connection string" do
+
+          it "should attempt open the connection" do
+            IO.should_receive(:popen).with("connection string")
+            Indy.search("connection string")
+          end
+
+          it "should not throw an error for an invalid connection string" do
+            lambda { Indy.search("connection string") }.should_not raise_error
+          end
+
+          it "should return an IO object upon a successful connection" do
+            IO.should_receive(:popen).with("connection string").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+            Indy.search("connection string").for(:application => 'MyApp').length.should == 1
+          end
+
+        end
+
+        context "treat it second like a file" do
+
+          it "should attempt to open the file" do
+            IO.should_receive(:popen).with("possible_file.ext").ordered
+            IO.should_receive(:open).with("possible_file.ext").ordered
+            Indy.search("possible_file.ext")
+          end
+
+          it "should not throw an error for an invalid file" do
+            lambda { Indy.search("possible_file.ext") }.should_not raise_error
+          end
+
+          it "should return an IO object when there is a file" do
+            IO.should_receive(:open).with("file_exists.ext").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+            Indy.search("file_exists.ext").for(:application => 'MyApp').length.should == 1
+          end
+
+        end
+
+        context "treat it finally like a string" do
+
+          it "should attempt to treat it as a string" do
+            expecting_string = mock("String With Expectation")
+            expecting_string.should_receive(:to_s).and_return("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
+
+            IO.should_receive(:popen).with(expecting_string).ordered
+            IO.should_receive(:open).with(expecting_string).ordered
+
+            Indy.search(expecting_string).for(:application => 'MyApp').length.should == 1
+          end
+
+        end
+      end
+
     end
 
     context "instance" do

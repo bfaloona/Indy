@@ -49,7 +49,12 @@ module Indy
     end
 
     def source=(specified_source)
-      @source = StringIO.new(specified_source) if specified_source.is_a?(String)
+
+      possible_source = try_as_connection(specified_source)
+      possible_source = try_as_file(specified_source) unless possible_source
+      possible_source = StringIO.new(specified_source.to_s) unless possible_source
+
+      @source = possible_source
     end
 
     #
@@ -166,6 +171,33 @@ module Indy
       end
 
       results.compact
+    end
+
+
+    #
+    # Try opening the string as a process, returning an IO object
+    #
+    def try_as_connection(connection_string)
+
+      begin
+        IO.popen(connection_string)
+      rescue
+        nil
+      end
+
+    end
+
+    #
+    # Try opening the string as a file, returning an File IO Object
+    #
+    def try_as_file(filename)
+
+      begin
+        IO.open(filename)
+      rescue
+        nil
+      end
+
     end
 
   end
