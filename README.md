@@ -44,7 +44,7 @@ Indy currently requires that the log data already be loaded.
 
 **2. Specify your Pattern**
 
-The default search pattern resembles something might find:
+The default search pattern resembles something you might find:
 
     YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
 
@@ -55,7 +55,7 @@ The default search pattern resembles something might find:
 
 * Custom Log Pattern
 
-The default pattern is obviously not strong enough for you so you should brew your own.
+If the default pattern is obviously not strong enough for you, brew your own.
 To do so, specify a pattern and each of the match with their symbolic name.
 
     # HH:MM:SS SEVERITY APPLICATION#METHOD - MESSAGE
