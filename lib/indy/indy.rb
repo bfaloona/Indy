@@ -158,7 +158,7 @@ module Indy
     def _search(source = @source,pattern_array = @pattern,&block)
       regexp, *fields = pattern_array.dup
 
-      results = source.each_line.collect do |line|
+      results = source.each.collect do |line|
         if /#{regexp}/.match(line)
           values = /#{regexp}/.match(line).captures
 
@@ -193,7 +193,7 @@ module Indy
     def try_as_file(filename)
 
       begin
-        IO.open(filename)
+        File.open(filename)
       rescue
         nil
       end

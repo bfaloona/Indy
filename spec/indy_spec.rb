@@ -38,6 +38,8 @@ module Indy
 
       context "for a String" do
 
+        let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }
+
         context "treat it first like a connection string" do
 
           it "should attempt open the connection" do
@@ -52,6 +54,10 @@ module Indy
           it "should return an IO object upon a successful connection" do
             IO.should_receive(:popen).with("connection string").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
             Indy.search("connection string").for(:application => 'MyApp').length.should == 1
+          end
+
+          it "should handle a real command" do
+            Indy.search("cat #{log_file}").for(:application => 'MyApp').length.should == 2
           end
 
         end
@@ -71,6 +77,10 @@ module Indy
           it "should return an IO object when there is a file" do
             IO.should_receive(:open).with("file_exists.ext").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
             Indy.search("file_exists.ext").for(:application => 'MyApp').length.should == 1
+          end
+          
+          it "should handle a real file" do
+            Indy.search(log_file).for(:application => 'MyApp').length.should == 2
           end
 
         end
