@@ -40,20 +40,20 @@ module Indy
 
         let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }
 
-        context "treat it first like a connection string" do
+        context "treat it first like a command" do
 
-          it "should attempt open the connection" do
-            IO.should_receive(:popen).with("connection string")
-            Indy.search("connection string")
+          it "should attempt open the command" do
+            IO.should_receive(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
+            Indy.search('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
           end
 
-          it "should not throw an error for an invalid connection string" do
-            lambda { Indy.search("connection string") }.should_not raise_error
+          it "should not throw an error for an invalid command" do
+            lambda { Indy.search("an invalid command") }.should_not raise_error
           end
 
-          it "should return an IO object upon a successful connection" do
-            IO.should_receive(:popen).with("connection string").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
-            Indy.search("connection string").for(:application => 'MyApp').length.should == 1
+          it "should return an IO object upon a successful command" do
+            IO.should_receive(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+            Indy.search("a command").for(:application => 'MyApp').length.should == 1
           end
 
           it "should handle a real command" do

@@ -26,7 +26,7 @@ Indy currently requires that the log data already be loaded.
 
 ## 1. Specify your Source**
 
-### As a process
+### As a process or command
 
     Indy::Indy.search('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO')
 
@@ -96,7 +96,7 @@ LICENSE
 
 (The MIT License)
 
-Copyright (c) 2010 FIX
+Copyright (c) 2010 Franklin Webber
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

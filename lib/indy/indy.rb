@@ -50,7 +50,7 @@ module Indy
 
     def source=(specified_source)
 
-      possible_source = try_as_connection(specified_source)
+      possible_source = try_as_command(specified_source)
       possible_source = try_as_file(specified_source) unless possible_source
       possible_source = StringIO.new(specified_source.to_s) unless possible_source
 
@@ -175,16 +175,17 @@ module Indy
 
 
     #
-    # Try opening the string as a process, returning an IO object
+    # Try opening the string as a command string, returning an IO object
     #
-    def try_as_connection(connection_string)
+    def try_as_command(command_string)
 
       begin
-        IO.popen(connection_string)
+        io = IO.popen(command_string)
+        return nil if io.eof?
       rescue
         nil
       end
-
+      io
     end
 
     #
