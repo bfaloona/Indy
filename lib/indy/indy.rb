@@ -166,6 +166,7 @@ module Indy
 
           hash = Hash[ *fields.zip( values ).flatten ]
           hash[:line] = line.strip
+          hash[:_time] = _parse_date( hash )
           block_given? ? block.call(hash) : nil
         end
       end
@@ -173,6 +174,27 @@ module Indy
       results.compact
     end
 
+    #
+    # Return the date/time field
+    #
+    def _time_field
+      @time_field ||= ( @pattern.include?(:time) ? :time : ( @pattern.include?(:date) ? :date : 0 ) )
+    end
+    
+    #
+    # Return a valid DateTime object for the log line
+    #
+    def _parse_date(line_hash)
+      return nil if _time_field == 0
+
+      begin        
+        DateTime.parse(line_hash[ _time_field ])
+      rescue ArgumentError
+        @time_field = 0
+        return nil
+      end
+
+    end
 
     #
     # Try opening the string as a command string, returning an IO object
