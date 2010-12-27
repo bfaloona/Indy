@@ -25,47 +25,30 @@ module Indy
       end
 
       it "should accept a string parameter" do
-        Indy.search("String Log")
+        lambda{ Indy.search("String Log") }.should_not raise_error
+      end
+
+      it "should accept a :cmd symbol and a command string parameter" do
+        lambda{ Indy.search(:cmd, "ls") }.should_not raise_error
       end
 
       it "should return an instance of Indy" do
         Indy.search("source string").should be_kind_of(Indy)
+        Indy.search(:cmd, "ls").should be_kind_of(Indy)
       end
 
       it "the instance should have the source specified" do
         Indy.search("source string").source.should_not be_nil
+        Indy.search(:cmd, "ls").source.should_not be_nil
       end
 
       context "for a String" do
 
         let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }
 
-        context "treat it first like a command" do
-
-          it "should attempt open the command" do
-            IO.should_receive(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
-            Indy.search('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
-          end
-
-          it "should not throw an error for an invalid command" do
-            lambda { Indy.search("an invalid command") }.should_not raise_error
-          end
-
-          it "should return an IO object upon a successful command" do
-            IO.should_receive(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
-            Indy.search("a command").for(:application => 'MyApp').length.should == 1
-          end
-
-          it "should handle a real command" do
-            Indy.search("cat #{log_file}").for(:application => 'MyApp').length.should == 2
-          end
-
-        end
-
-        context "treat it second like a file" do
+        context "treat it first like a file" do
 
           it "should attempt to open the file" do
-            IO.should_receive(:popen).with("possible_file.ext").ordered
             IO.should_receive(:open).with("possible_file.ext").ordered
             Indy.search("possible_file.ext")
           end
@@ -85,19 +68,43 @@ module Indy
 
         end
 
-        context "treat it finally like a string" do
+        context "treat it second like a string" do
 
           it "should attempt to treat it as a string" do
             expecting_string = mock("String With Expectation")
             expecting_string.should_receive(:to_s).and_return("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
 
-            IO.should_receive(:popen).with(expecting_string).ordered
             IO.should_receive(:open).with(expecting_string).ordered
 
             Indy.search(expecting_string).for(:application => 'MyApp').length.should == 1
           end
 
         end
+
+
+        context "treat it optionally like a command" do
+
+          it "should attempt open the command" do
+            IO.stub!(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
+            Indy.search(:cmd, 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
+          end
+
+          it "should not throw an error for an invalid command" do
+            IO.stub!(:popen).with('an invalid command').and_return('')
+            lambda { Indy.search(:cmd, "an invalid command") }.should_not raise_error
+          end
+
+          it "should return an IO object upon a successful command" do
+            IO.stub!(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+            Indy.search(:cmd, "a command").for(:application => 'MyApp').length.should == 1
+          end
+
+          it "should handle a real command" do
+            Indy.search(:cmd, "cat #{log_file}").for(:application => 'MyApp').length.should == 2
+          end
+
+        end
+
       end
 
     end

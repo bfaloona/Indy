@@ -24,11 +24,11 @@ Indy currently requires that the log data already be loaded.
 
     require 'indy'
 
-## 1. Specify your Source**
+## 1. Specify your Source
 
 ### As a process or command
 
-    Indy::Indy.search('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO')
+    Indy::Indy.search(:cmd, 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO')
 
 ### As a file
 

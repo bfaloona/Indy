@@ -41,19 +41,21 @@ module Indy
       # @example
       #
       #   Indy.search("apache.log").for(:severity => "INFO")
+      #   Indy.search(:cmd, "cat apache.log").for(:severity => "INFO")
       #
-      def search(source)
+      def search(*source)
         Indy.new(:source => source, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
       end
 
     end
 
     def source=(specified_source)
-
-      possible_source = try_as_command(specified_source)
-      possible_source = try_as_file(specified_source) unless possible_source
-      possible_source = StringIO.new(specified_source.to_s) unless possible_source
-
+      if specified_source.first == :cmd
+        possible_source = try_as_command(specified_source.last)
+      else
+        possible_source = try_as_file(specified_source.last) unless possible_source
+        possible_source = StringIO.new(specified_source.last.to_s) unless possible_source
+      end
       @source = possible_source
     end
 
