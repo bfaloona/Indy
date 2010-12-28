@@ -153,6 +153,19 @@ module Indy
 
     end
 
+    def last(portion, method)
+      raise "unsuported" unless portion == :half
+      raise "unsuported" unless method == :time
+
+
+      all_results = ResultSet.new + _search {|result1| OpenStruct.new(result1) }
+      begin_time = all_results.first._time
+      end_time = all_results.last._time
+      time_span = end_time - begin_time
+      mid_time = begin_time + (time_span / 2)
+
+      all_results.select {|entry| entry._time > mid_time}
+    end
 
     #
     # Search the specified source and yield to the block the line that was found
@@ -168,7 +181,7 @@ module Indy
         if /#{regexp}/.match(line)
           values = /#{regexp}/.match(line).captures
 
-          values.length.should == fields.length
+          raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == fields.length
 
           hash = Hash[ *fields.zip( values ).flatten ]
           hash[:line] = line.strip

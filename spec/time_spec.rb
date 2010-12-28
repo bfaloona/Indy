@@ -73,15 +73,21 @@ module Indy
                       "2000-09-07 14:08:40 INFO  MyApp - Exiting APPLICATION.",
                       "2000-09-07 14:09:00 INFO  MyApp - Entering APPLICATION.",
                       "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error.",
+                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error2.",
+                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error3.",
+                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error4.",
+                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error5.",
+                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error6.",
                       "2000-09-08 14:02:02 INFO  MyApp - Exiting APPLICATION.",
                       "2000-09-09 14:05:00 INFO  MyApp - Entering APPLICATION.",
                       "2000-09-09 14:06:31 WARN  SomeOtherApp - Encountered Error.",
+                      "2000-09-09 14:06:32 WARN  SomeOtherApp - Another Encountered Error.",
                       "2000-09-10 14:07:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
         @log = Indy.search(log_string)
       end
 
       it "can be used to partition log" do
-        @log.last(:half).by(:time).length.should == 3
+        @log.last(:half, :time).length.should == 4
       end
 
       it "can be used filter to a completely relative time range" do
