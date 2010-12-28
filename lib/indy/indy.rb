@@ -50,12 +50,16 @@ module Indy
     end
 
     def source=(specified_source)
-      if specified_source.first == :cmd
-        possible_source = try_as_command(specified_source.last)
-      else
-        possible_source = try_as_file(specified_source.last) unless possible_source
-        possible_source = StringIO.new(specified_source.last.to_s) unless possible_source
+      cmd = (specified_source.first == :cmd) rescue nil
+      specified_source = specified_source.last if specified_source.kind_of? Array
+
+      if cmd
+        possible_source = try_as_command(specified_source)
+      else        
+        possible_source = try_as_file(specified_source) unless possible_source
+        possible_source = StringIO.new(specified_source.to_s) unless possible_source
       end
+
       @source = possible_source
     end
 
