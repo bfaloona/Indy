@@ -153,9 +153,15 @@ module Indy
 
     end
 
-    def last(portion, method)
+    def first(portion, method, do_last=false)
+      last(portion, method, false)
+    end
+    
+    def last(portion, method, do_last=true)
       raise "unsuported" unless portion == :half
       raise "unsuported" unless method == :time
+
+      return ResultSet.new if _time_field == 0
 
 
       all_results = ResultSet.new + _search {|result1| OpenStruct.new(result1) }
@@ -164,7 +170,10 @@ module Indy
       time_span = end_time - begin_time
       mid_time = begin_time + (time_span / 2)
 
-      all_results.select {|entry| entry._time > mid_time}
+      all_results.select do |entry|
+        do_last ? entry._time > mid_time : entry._time < mid_time
+      end
+      
     end
 
     #

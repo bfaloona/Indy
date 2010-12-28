@@ -41,6 +41,19 @@ When /^searching the log for the exact match of custom field ([^"]+)\s*"([^"]+)"
   @results = @indy.search(field.strip.gsub(/\s/,'_').to_sym => value)
 end
 
+When /^searching the log for entries in the (\w+ \w+), by (.+)$/ do |portion, method|
+  method = method.intern
+  case portion
+  when /(second|last) half/
+    @results = @indy.last(:half, method)
+  when 'first half'
+    @results = @indy.first(:half, method)
+  else
+    pending
+  end
+end
+
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
   @results[position].line.should == expected
 end
+

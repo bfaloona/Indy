@@ -18,9 +18,49 @@ module Indy
 
     end
 
+    context 'partitioning' do
+
+      before(:all) do
+        @indy = Indy.new(:source => 'string', :pattern => [:foo])
+      end
+
+      context :last do
+
+        it "should be an instance method" do
+          @indy.should respond_to(:last)
+        end
+
+        it "should accept two symbol parameters" do
+          lambda{ @indy.last(:half, :time) }.should_not raise_error
+        end
+
+        it "should not accept arbitrary symbols" do
+          lambda{ @indy.last(:foo, :bar) }.should raise_error
+        end
+
+      end
+
+      context :first do
+
+        it "should be an instance method" do
+          @indy.should respond_to(:first)
+        end
+
+        it "should accept two symbol parameters" do
+          lambda{ @indy.first(:half, :time) }.should_not raise_error
+        end
+
+        it "should not accept arbitrary symbols" do
+          lambda{ @indy.first(:foo, :bar) }.should raise_error
+        end
+
+      end
+
+    end
+
     context :search do
 
-      it "should be a method" do
+      it "should be a class method" do
         Indy.should respond_to(:search)
       end
 
