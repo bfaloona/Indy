@@ -23,10 +23,6 @@ When /^searching the log for matches of the message "([^"]+)"$/ do |message|
   @results = @indy.like(:message => message)
 end
 
-When /^searching the log for the time (.+)$/ do |time|
-  @results = @indy.for(:time => time)
-end
-
 When /^searching the log for:$/ do |fields|
   fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
   @results = @indy.search(fields.hashes.first)
