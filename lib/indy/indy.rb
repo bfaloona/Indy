@@ -39,24 +39,37 @@ module Indy
       # Create a new instance of Indy with the source specified.  This allows for
       # a more fluent creation that moves into the execution.
       #
+      # @param [String,Hash] source An filename or string. Use a Hash to specify a command string.
+      #
       # @example
       #
       #   Indy.search("apache.log").for(:severity => "INFO")
-      #   Indy.search(:cmd, "cat apache.log").for(:severity => "INFO")
+      #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").for(:all)
+      #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
       #
-      def search(*source)
+      def search(source)
         Indy.new(:source => source, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
       end
 
     end
 
+    #
+    # Sets the source for the Indy instance.
+    #
+    # @param [String,Hash] source A filename or string. Use a Hash to specify a command string.
+    #
+    # @example
+    #
+    #   source("apache.log")
+    #   source(:cmd => "cat apache.log")
+    #   source("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.")
+    #
     def source=(specified_source)
-      cmd = (specified_source.first == :cmd) rescue nil
-      specified_source = specified_source.last if specified_source.kind_of? Array
+      cmd = specified_source[:cmd] rescue nil
 
       if cmd
-        possible_source = try_as_command(specified_source)
-      else        
+        possible_source = try_as_command(cmd)
+      else
         possible_source = try_as_file(specified_source) unless possible_source
         possible_source = StringIO.new(specified_source.to_s) unless possible_source
       end
@@ -127,6 +140,57 @@ module Indy
 
     alias_method :matching, :like
 
+
+    #
+    # After scopes the eventual search to all entries after to this point.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages after specified date
+    #
+    #   Indy.search(LOG_FILE).after(:time => time).for(:all)
+    #
+    def after(scope_criteria)
+      if scope_criteria[:time]
+        @time_boundary = scope_criteria[:time]
+        @direction = :after
+      end
+
+      self
+    end
+
+    #
+    # Before scopes the eventual search to all entries prior to this point.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages before specified date
+    #
+    #   Indy.search(LOG_FILE).before(:time => time).for(:all)
+    #
+    def before(scope_criteria)
+
+      self
+    end
+
+    #
+    # Within scopes the eventual search to all entries between two points.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages within the specified dates
+    #
+    #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).for(:all)
+    #
+    def within(scope_criteria)
+
+      self
+    end
+
+
     #
     # Search the source for the specific severity
     #
@@ -158,30 +222,6 @@ module Indy
 
       ResultSet.new + _search {|result| OpenStruct.new(result) if severity.include?(result[:severity].downcase.to_sym) }
 
-    end
-
-    #
-    # given a set of log entries, determine the time boundaries and span
-    #
-    def time_boundaries(log_entries)
-      begin_time = log_entries.first._time
-      end_time = log_entries.last._time
-      time_span = end_time - begin_time
-      [begin_time, end_time, time_span]
-    end
-    #
-    # Before scopes the eventual search to all entries prior to this point.
-    #
-    # @param [Hash] scope_criteria the field to scope for as the key and the
-    #        value to compare against the other log messages
-    #
-    # @example For all messages before specified date
-    #
-    #   Indy.search(LOG_FILE).before(:time => time).for(:all)
-    #
-    def before(scope_criteria)
-
-      self
     end
 
     #
@@ -227,42 +267,12 @@ module Indy
 
     end
 
-    #
-    # After scopes the eventual search to all entries after to this point.
-    #
-    # @param [Hash] scope_criteria the field to scope for as the key and the
-    #        value to compare against the other log messages
-    #
-    # @example For all messages after specified date
-    #
-    #   Indy.search(LOG_FILE).after(:time => time).for(:all)
-    #
-    def after(scope_criteria)
-      
-      self
-    end
-
-    #
-    # Within scopes the eventual search to all entries between two points.
-    #
-    # @param [Hash] scope_criteria the field to scope for as the key and the
-    #        value to compare against the other log messages
-    #
-    # @example For all messages within the specified dates
-    #
-    #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).for(:all)
-    #
-    def within(scope_criteria)
-
-      self
-    end
-
-    def first
+    def first_new
       source.first
     end
 
-    def last
-
+    def last_new
+      source.last 
     end
 
     #
@@ -289,6 +299,16 @@ module Indy
       end
 
       results.compact
+    end
+
+    #
+    # given a set of log entries, determine the time boundaries and span
+    #
+    def time_boundaries(log_entries)
+      begin_time = log_entries.first._time
+      end_time = log_entries.last._time
+      time_span = end_time - begin_time
+      [begin_time, end_time, time_span]
     end
 
     #
