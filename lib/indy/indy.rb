@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'active_support'
 
 module Indy
 
@@ -153,27 +154,57 @@ module Indy
 
     end
 
-    def first(portion, method, do_last=false)
+    #
+    # given a set of log entries, determine the time boundaries and span
+    #
+    def time_boundaries(log_entries)
+      begin_time = log_entries.first._time
+      end_time = log_entries.last._time
+      time_span = end_time - begin_time
+      [begin_time, end_time, time_span]
+    end
+
+    #
+    # first( :half, :time )
+    # first( "5 minutes" )
+    #
+    def first(portion, method=nil, do_last=false)
       last(portion, method, false)
     end
     
-    def last(portion, method, do_last=true)
-      raise "unsuported" unless portion == :half
-      raise "unsuported" unless method == :time
+    #
+    # last(:half, :time)
+    # last( "2 minutes" )
+    #
+    def last(portion, method=nil, do_last=true)
 
-      return ResultSet.new if _time_field == 0
+      if portion.kind_of? Symbol and method.kind_of? Symbol
+        raise "unsuported" unless portion == :half
+        raise "unsuported" unless method == :time
 
+        return ResultSet.new if _time_field == 0
 
-      all_results = ResultSet.new + _search {|result1| OpenStruct.new(result1) }
-      begin_time = all_results.first._time
-      end_time = all_results.last._time
-      time_span = end_time - begin_time
-      mid_time = begin_time + (time_span / 2)
+        all_results = ResultSet.new + _search {|result| OpenStruct.new(result) }
+        begin_time, end_time, time_span = time_boundaries(all_results)
+        mid_time = begin_time + (time_span / 2)
 
-      all_results.select do |entry|
-        do_last ? entry._time > mid_time : entry._time < mid_time
+        all_results.select do |entry|
+          do_last ? entry._time > mid_time : entry._time < mid_time
+        end
+
+      elsif portion.kind_of? String and !method
+
+        all_results = ResultSet.new + _search {|result| OpenStruct.new(result) }
+        begin_time, end_time, time_span = time_boundaries(all_results)
+        quantity, units = portion.match(/(\d+) (.+)/).captures
+        raise "unsupported" unless units.match(/minutes?/)
+        portion_seconds = quantity.to_i.send(units.intern)
+        boundry_time = do_last ? end_time - portion_seconds : begin_time + portion_seconds
+        all_results.select do |entry|
+          do_last ? entry._time > boundry_time : entry._time < boundry_time
+        end
       end
-      
+
     end
 
     #

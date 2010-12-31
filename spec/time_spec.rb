@@ -68,7 +68,7 @@ module Indy
 
     context "time of log entries" do
 
-      before(:all) do
+      before(:each) do
         log_string = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
                       "2000-09-07 14:08:40 INFO  MyApp - Exiting APPLICATION.",
                       "2000-09-07 14:09:00 INFO  MyApp - Entering APPLICATION.",
@@ -91,7 +91,7 @@ module Indy
       end
 
       it "can be used filter to a completely relative time range" do
-        @log.first("1 minute").length.should == 1
+        @log.first("2 minutes").length.should == 3
       end
 
       it "can be used to filter to a partially relative time range" do
