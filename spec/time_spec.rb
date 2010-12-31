@@ -94,13 +94,6 @@ module Indy
         @log.first("2 minutes").length.should == 3
       end
 
-      it "can be used to filter to a partially relative time range" do
-        @log.starting("September 8, 2000").at("Noon").for("1 day").length.should == 1
-      end
-      it "can be used to filter to an absolute time range" do
-        @log.starting("September 8, 2000").at("Noon").until("9/9/2000").at("9 pm").length.should == 3
-      end
-
     end
 
   end
