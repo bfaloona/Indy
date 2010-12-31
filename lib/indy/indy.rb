@@ -84,16 +84,22 @@ module Indy
     #
     # Search the source and make an == comparison
     #
-    # @param [Hash] search_criteria the field to search for as the key and the
-    #        value to compare against the other log messages
+    # @param [Hash,Symbol] search_criteria the field to search for as the key and the
+    #        value to compare against the other log messages.  This function also
+    #        supports symbol :all to return all messages
     #
     def search(search_criteria)
       results = ResultSet.new
 
-      results += _search do |result|
-        OpenStruct.new(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+      case
+      when search_criteria.is_a?(Enumerable)
+        results += _search do |result|
+          OpenStruct.new(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        end
+      when search_criteria == :all
+        results += _search {|result| OpenStruct.new(result) }
       end
-
+      
       results
     end
 
@@ -130,7 +136,7 @@ module Indy
     #        can specify :equal, :equal_and_above, and :equal_and_below
     #
     # @example INFO and more severe
-    #   
+    #
     #  Indy.search(LOG_FILE).severity('INFO',:equal_and_above)
     #
     # @example Custom Level and Below
@@ -162,6 +168,20 @@ module Indy
       end_time = log_entries.last._time
       time_span = end_time - begin_time
       [begin_time, end_time, time_span]
+    end
+    #
+    # Before scopes the eventual search to all entries prior to this point.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages before specified date
+    #
+    #   Indy.search(LOG_FILE).before(:time => time).for(:all)
+    #
+    def before(scope_criteria)
+
+      self
     end
 
     #
@@ -208,6 +228,44 @@ module Indy
     end
 
     #
+    # After scopes the eventual search to all entries after to this point.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages after specified date
+    #
+    #   Indy.search(LOG_FILE).after(:time => time).for(:all)
+    #
+    def after(scope_criteria)
+      
+      self
+    end
+
+    #
+    # Within scopes the eventual search to all entries between two points.
+    #
+    # @param [Hash] scope_criteria the field to scope for as the key and the
+    #        value to compare against the other log messages
+    #
+    # @example For all messages within the specified dates
+    #
+    #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).for(:all)
+    #
+    def within(scope_criteria)
+
+      self
+    end
+
+    def first
+      source.first
+    end
+
+    def last
+
+    end
+
+    #
     # Search the specified source and yield to the block the line that was found
     # with the given log pattern
     #
@@ -246,7 +304,7 @@ module Indy
     def _parse_date(line_hash)
       return nil if _time_field == 0
 
-      begin        
+      begin
         DateTime.parse(line_hash[ _time_field ])
       rescue ArgumentError
         @time_field = 0
