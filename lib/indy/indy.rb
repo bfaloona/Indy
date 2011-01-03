@@ -153,8 +153,7 @@ module Indy
     #
     def after(scope_criteria)
       if scope_criteria[:time]
-        @time_boundary = scope_criteria[:time]
-        @direction = :after
+        @start_time = DateTime.parse(scope_criteria[:time])
       end
 
       self
@@ -171,6 +170,9 @@ module Indy
     #   Indy.search(LOG_FILE).before(:time => time).for(:all)
     #
     def before(scope_criteria)
+      if scope_criteria[:time]
+        @end_time = DateTime.parse(scope_criteria[:time])
+      end
 
       self
     end
@@ -186,6 +188,9 @@ module Indy
     #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).for(:all)
     #
     def within(scope_criteria)
+      if scope_criteria[:time]
+        @start_time, @end_time = scope_criteria[:time]
+      end
 
       self
     end
@@ -284,6 +289,8 @@ module Indy
     #
     def _search(source = @source,pattern_array = @pattern,&block)
       regexp, *fields = pattern_array.dup
+      start_time = @start_time || DateTime.now - 200_000
+      end_time = @end_time || DateTime.now + 200_000
 
       results = source.each.collect do |line|
         if /#{regexp}/.match(line)
@@ -292,8 +299,10 @@ module Indy
           raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == fields.length
 
           hash = Hash[ *fields.zip( values ).flatten ]
+
           hash[:line] = line.strip
           hash[:_time] = _parse_date( hash )
+          next if hash[:_time] >= end_time or hash[:_time] <= start_time
           block_given? ? block.call(hash) : nil
         end
       end
