@@ -14,21 +14,21 @@ Feature: Finding log messages around a particular time
       """
 
   Scenario: Count of entries for a time span around a specified time
-    When searching the log for all entries 30 minutes around the time 2000-09-07 14:27:43
+    When searching the log for all entries 31 minutes around the time 2000-09-07 14:27:43
     Then I expect to have found 3 log entries
 
   Scenario: Count of entries for a time span before a specified time
-    When searching the log for all entries 10 minutes before the time 2000-09-07 14:27:43
+    When searching the log for all entries 11 minutes before the time 2000-09-07 14:27:43
     Then I expect to have found 1 log entries
 
   Scenario: Count of entries for a time span after a specified time
-    When searching the log for all entries 30 minutes after the time 2000-09-07 14:27:43
-    Then I expect to have found 2 log entries
+    When searching the log for all entries 31 minutes after the time 2000-09-07 14:27:43
+    Then I expect to have found 3 log entries
 
 Scenario: Count of entries for a time span before and including a specified time
-    When searching the log for all entries 10 minutes before and including the time 2000-09-07 14:47:43
+    When searching the log for all entries 11 minutes before and including the time 2000-09-07 14:47:43
     Then I expect to have found 2 log entries
 
   Scenario: Count of entries for a time span after and including a specified time
-    When searching the log for all entries 30 minutes after and including the time 2000-09-07 14:17:43
+    When searching the log for all entries 31 minutes after and including the time 2000-09-07 14:17:43
     Then I expect to have found 3 log entries
