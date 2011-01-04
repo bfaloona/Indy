@@ -14,15 +14,13 @@ Feature: Finding log messages before a particular time
     """
 
 
-  Scenario: Count of entries after a specifed time
+  Scenario: Count of entries before a specifed time
     When searching the log for all entries before the time 2000-09-07 14:07:44
     Then I expect to have found 3 log entries
 
-
-  Scenario: Count of entries before a specifed time
-    When searching the log for all entries before the time 2000-09-07 14:07:50
-    Then I expect to have found 6 log entries
-
+  Scenario: Count of entries before and including a specifed time
+    When searching the log for all entries before and including the time 2000-09-07 14:07:44
+    Then I expect to have found 4 log entries
 
   Scenario: Particular entry before the specified time
     When searching the log for all entries before the time 2000-09-07 14:07:43
@@ -30,7 +28,6 @@ Feature: Finding log messages before a particular time
     """
     2000-09-07 14:07:42 DEBUG MyApp - Focusing application.
     """
-
 
   Scenario: No entries before the specified time
     When searching the log for all entries before the time 2000-09-07 14:07:40

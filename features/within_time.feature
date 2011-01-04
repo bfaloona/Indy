@@ -18,6 +18,10 @@ Feature: Finding log messages within a particular time
     When searching the log for all entries between the time 2000-09-07 14:07:44 and 2000-09-07 14:07:46
     Then I expect to have found 1 log entries
 
+  Scenario: Count of entries between and including the specified times
+    When searching the log for all entries between and including the times 2000-09-07 14:07:44 and 2000-09-07 14:07:46
+    Then I expect to have found 3 log entries
+
 
   Scenario: Count of entries between the specified times
     When searching the log for all entries between the time 2000-09-07 14:07:40 and 2000-09-07 14:07:50

@@ -3,27 +3,27 @@ When /^searching the log for the time (.+)$/ do |time|
   @results = @indy.for(:time => time)
 end
 
-When /^searching the log for all entries after the time (.+)$/ do |time|
-  @results = @indy.after(:time => time).for(:all)
+When /^searching the log for all entries after( and including)? the time (.+)$/ do |inclusive,time|
+  @results = @indy.after(:time => time, :inclusive => inclusive).for(:all)
 end
 
-When /^searching the log for all entries before the time (.+)$/ do |time|
-  @results = @indy.before(:time => time).for(:all)
+When /^searching the log for all entries before( and including)? the time (.+)$/ do |inclusive,time|
+  @results = @indy.before(:time => time, :inclusive => inclusive).for(:all)
 end
 
-When /^searching the log for all entries between the time (.+) and (.+)$/ do |start,stop|
-  @results = @indy.within(:time => [start,stop]).for(:all)
+When /^searching the log for all entries between( and including)? the times? (.+) and (.+)$/ do |inclusive,start,stop|
+  @results = @indy.within(:time => [start,stop], :inclusive => inclusive).for(:all)
 end
 
-When /^searching the log for all entries (\d+) minutes around the time (.+)$/ do |time_span,time|
-  @results = @indy.around(:time => time, :span => time_span).for(:all)
+When /^searching the log for all entries (\d+) minutes around( and including)? the time (.+)$/ do |time_span,inclusive,time|
+  @results = @indy.around(:time => time, :span => time_span, :inclusive => inclusive).for(:all)
 end
 
-When /^searching the log for all entries (\d+) minutes after the time (.+)$/ do |time_span,time|
-  @results = @indy.after(:time => time, :span => time_span).for(:all)
+When /^searching the log for all entries (\d+) minutes after( and including)? the time (.+)$/ do |time_span,inclusive,time|
+  @results = @indy.after(:time => time, :span => time_span, :inclusive => inclusive).for(:all)
 end
 
-When /^searching the log for all entries (\d+) minutes before the time (.+)$/ do |time_span,time|
-  @results = @indy.before(:time => time, :span => time_span).for(:all)
+When /^searching the log for all entries (\d+) minutes before( and including)? the time (.+)$/ do |time_span,inclusive,time|
+  @results = @indy.before(:time => time, :span => time_span, :inclusive => inclusive).for(:all)
 end
 

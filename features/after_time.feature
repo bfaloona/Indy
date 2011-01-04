@@ -18,6 +18,10 @@ Feature: Finding log messages after a particular time
     When searching the log for all entries after the time 2000-09-07 14:07:44
     Then I expect to have found 2 log entries
 
+  Scenario: Count of entries after and including a specified time
+    When searching the log for all entries after and including the time 2000-09-07 14:07:44
+    Then I expect to have found 3 log entries
+
 
   Scenario: Count of entries after a specified time
     When searching the log for all entries after the time 2000-09-07 14:07:40
