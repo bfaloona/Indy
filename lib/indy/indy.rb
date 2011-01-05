@@ -332,15 +332,20 @@ module Indy
           raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == fields.length
 
           hash = Hash[ *fields.zip( values ).flatten ]
-
           hash[:line] = line.strip
-          hash[:_time] = _parse_date( hash )
 
-          if @inclusive
-            next if hash[:_time] > end_time or hash[:_time] < start_time
-          else
-            next if hash[:_time] >= end_time or hash[:_time] <= start_time
+          if _time_field != 0
+
+            hash[:_time] = _parse_date( hash )
+
+            if @inclusive
+              next if hash[:_time] > end_time or hash[:_time] < start_time
+            else
+              next if hash[:_time] >= end_time or hash[:_time] <= start_time
+            end
+
           end
+
           block_given? ? block.call(hash) : nil
         end
       end
