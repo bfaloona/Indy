@@ -154,7 +154,7 @@ module Indy
     def after(scope_criteria)
       if scope_criteria[:time]
         time = DateTime.parse(scope_criteria[:time])
-        @inclusive = ( scope_criteria[:inclusive] ? true : false )
+        @inclusive = scope_criteria[:inclusive] || false
 
         if scope_criteria[:span]
           span = (scope_criteria[:span].to_i * 60).seconds
@@ -181,11 +181,11 @@ module Indy
     def before(scope_criteria)
       if scope_criteria[:time]
         time = DateTime.parse(scope_criteria[:time])
-        @inclusive = ( scope_criteria[:inclusive] ? true : false )
+        @inclusive = scope_criteria[:inclusive] || false
 
         if scope_criteria[:span]
           span = (scope_criteria[:span].to_i * 60).seconds
-          within(:time => [time - span, time])
+          within(:time => [time - span, time], :inclusive => scope_criteria[:inclusive])
         else
           @end_time = time
         end
@@ -199,7 +199,7 @@ module Indy
         time = DateTime.parse(scope_criteria[:time])
 
         # does @inclusive add any real value to the #around method?
-        @inclusive = ( scope_criteria[:inclusive] ? true : false )
+        @inclusive = scope_criteria[:inclusive] || false
 
         half_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
         within(:time => [time - half_span, time + half_span])
@@ -222,7 +222,7 @@ module Indy
     def within(scope_criteria)
       if scope_criteria[:time]
         @start_time, @end_time = scope_criteria[:time]
-        @inclusive = ( scope_criteria[:inclusive] ? true : false )
+        @inclusive = scope_criteria[:inclusive] || false
       end
 
       self
@@ -335,6 +335,7 @@ module Indy
 
           hash[:line] = line.strip
           hash[:_time] = _parse_date( hash )
+
           if @inclusive
             next if hash[:_time] > end_time or hash[:_time] < start_time
           else
