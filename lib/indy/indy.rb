@@ -1,5 +1,5 @@
 require 'ostruct'
-require 'active_support'
+require 'active_support/core_ext'
 
 module Indy
 
@@ -31,6 +31,9 @@ module Indy
       while (arg = args.shift) do
         send("#{arg.first}=",arg.last)
       end
+
+      @time_field = ( @pattern[1..-1].include?(:time) ? :time : nil ) if @pattern
+
     end
 
     class << self
@@ -77,6 +80,7 @@ module Indy
       @source = possible_source
     end
 
+
     #
     # Specify the log pattern to use as the comparison against each line within
     # the log file that has been specified.
@@ -91,6 +95,7 @@ module Indy
     #
     def with(pattern_array = :default)
       @pattern = pattern_array == :default ? [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten : pattern_array
+      @time_field = @pattern[1..-1].include?(:time) ? :time : nil
       self
     end
 
@@ -280,7 +285,7 @@ module Indy
         raise "unsuported" unless portion == :half
         raise "unsuported" unless method == :time
 
-        return ResultSet.new if _time_field == 0
+        return ResultSet.new unless @time_field
 
         all_results = ResultSet.new + _search {|result| OpenStruct.new(result) }
         begin_time, end_time, time_span = time_boundaries(all_results)
@@ -322,8 +327,11 @@ module Indy
     #
     def _search(source = @source,pattern_array = @pattern,&block)
       regexp, *fields = pattern_array.dup
-      start_time = @start_time || DateTime.now - 200_000
-      end_time = @end_time || DateTime.now + 200_000
+
+      if @start_time || @end_time
+        start_time = @start_time || DateTime.now - 200_000
+        end_time = @end_time || DateTime.now + 200_000
+      end
 
       results = source.each.collect do |line|
         if /#{regexp}/.match(line)
@@ -334,16 +342,16 @@ module Indy
           hash = Hash[ *fields.zip( values ).flatten ]
           hash[:line] = line.strip
 
-          if _time_field != 0
+          if @time_field && @start_time
 
-            hash[:_time] = _parse_date( hash )
-
-            if @inclusive
-              next if hash[:_time] > end_time or hash[:_time] < start_time
-            else
-              next if hash[:_time] >= end_time or hash[:_time] <= start_time
+            if ( hash[:_time] = _parse_date( hash ) ) != nil
+              if @inclusive
+                next if hash[:_time] > end_time or hash[:_time] < start_time
+              else
+                next if hash[:_time] >= end_time or hash[:_time] <= start_time
+              end
             end
-
+            
           end
 
           block_given? ? block.call(hash) : nil
@@ -362,25 +370,17 @@ module Indy
       time_span = end_time - begin_time
       [begin_time, end_time, time_span]
     end
-
-    #
-    # Return the date/time field
-    #
-    def _time_field
-      @time_field ||= ( @pattern.include?(:time) ? :time : ( @pattern.include?(:date) ? :date : 0 ) )
-    end
-    
+   
     #
     # Return a valid DateTime object for the log line
     #
     def _parse_date(line_hash)
-      return nil if _time_field == 0
+      return nil unless @time_field
 
       begin
-        DateTime.parse(line_hash[ _time_field ])
+        DateTime.parse(line_hash[ @time_field ])
       rescue ArgumentError
-        @time_field = 0
-        return nil
+        @time_field = nil
       end
 
     end

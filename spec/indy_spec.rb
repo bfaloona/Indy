@@ -8,12 +8,12 @@ module Indy
 
       # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
       it "should accept a log4r pattern string without error" do
-        lambda { Indy.new(:pattern => "%d %i %c - %m") }.should_not raise_error
+        lambda { Indy.new(:pattern => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
       end
 
       # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
       it "should accept a log4j pattern string without error" do
-        lambda { Indy.new(:pattern => "%d [%M] %p %C{1} - %m")}
+        lambda { Indy.new(:pattern => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message])}
       end
 
     end
@@ -21,7 +21,7 @@ module Indy
     context 'partitioning' do
 
       before(:all) do
-        @indy = Indy.new(:source => 'string', :pattern => [:foo])
+        @indy = Indy.new(:source => '1/2/2002 string', :pattern => ["(\w) (\w)", :time, :foo])
       end
 
       context :last do
@@ -164,16 +164,16 @@ module Indy
 
         # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
         it "should accept a log4r pattern string without error" do
-          lambda { @indy.with("%d %i %c - %m") }.should_not raise_error
+          lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
         end
 
         # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
         it "should accept a log4j pattern string without error" do
-          lambda { @indy.with("%d [%M] %p %C{1} - %m")}.should_not raise_error
+          lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message])}.should_not raise_error
         end
 
         it "should return itself" do
-          @indy.with("log pattern").should == @indy
+          @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).should == @indy
         end
 
       end
