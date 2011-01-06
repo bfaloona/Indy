@@ -10,10 +10,6 @@ module Indy
         @indy = Indy.search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
       end
       
-      it "#_time_field should return :time" do
-        @indy._time_field.should == :time
-      end
-      
       it "should parse a standard date" do
         line_hash = {:time => "2000-09-07 14:07:41", :message => "Entering APPLICATION"}
         @indy._parse_date(line_hash).class.should == DateTime
@@ -25,15 +21,11 @@ module Indy
 
       before(:all) do
         pattern = "(\w+) (\d{4}-\d{2}-\d{2}) (\w+) - (.*)"
-        @indy = Indy.new(:source => "INFO 2000-09-07 MyApp - Entering APPLICATION.", :pattern => [pattern, :severity, :date, :application, :message])
-      end
-
-      it "#_time_field should return :date" do
-        @indy._time_field.should == :date
+        @indy = Indy.new(:source => "INFO 2000-09-07 MyApp - Entering APPLICATION.", :pattern => [pattern, :severity, :time, :application, :message])
       end
 
       it "should parse a non-standard date" do
-        line_hash = {:date => "2000/09/07", :message => "Entering APPLICATION"}
+        line_hash = {:time => "2000/09/07", :message => "Entering APPLICATION"}
         @indy._parse_date(line_hash).class.should == DateTime
       end
 
