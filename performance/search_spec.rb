@@ -4,23 +4,30 @@ module Indy
 
   describe "Search Performance" do
 
-    subject { """
-      2000-09-07 14:07:41 INFO  MyApp - Entering application.
-      2000-09-07 14:07:42 DEBUG MyApp - Focusing application.
-      2000-09-07 14:07:43 DEBUG MyApp - Blurring application.
-      2000-09-07 14:07:44 WARN  MyApp - Low on Memory.
-      2000-09-07 14:07:45 ERROR MyApp - Out of Memory.
-      2000-09-07 14:07:46 INFO  MyApp - Exiting application.
-      """ }
 
-      context :_search do
+    context "with a small data set" do
 
-        profile :file => STDOUT, :printer => :flat  do
-          
-          it "should perform well for the data set" do
-            Indy.search(subject).for(:severity => 'INFO')
-          end
-        
+      longer_subject = [
+        "2000-09-07 14:07:41 INFO  MyApp - Entering application.\n",
+        "2000-09-07 14:07:42 DEBUG MyApp - Focusing application.\n",
+        "2000-09-07 14:07:43 DEBUG MyApp - Blurring application.\n",
+        "2000-09-07 14:07:44 WARN  MyApp - Low on Memory.\n",
+        "2000-09-07 14:07:45 ERROR MyApp - Out of Memory.\n",
+        "2000-09-07 14:07:46 INFO  MyApp - Exiting application.\n"
+      ].collect {|line| line * 70 }.join
+
+      profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
+
+        it "should perform well using #for(:all)" do
+          Indy.search(longer_subject.dup).for(:all)
+        end
+
+        it "should perform well using #for(:field => 'value')" do
+          Indy.search(longer_subject.dup).for(:severity => 'INFO')
+        end
+
+        it "should perform well using #time()" do
+          Indy.search(longer_subject.dup).after(:time => "2000-09-07 14:07:45").for(:all)
         end
 
       end
@@ -28,3 +35,4 @@ module Indy
     end
 
   end
+end
