@@ -16,6 +16,9 @@ module Indy
     MESSAGE = ".+"
     DEFAULT_LOG_PATTERN = "^(#{DATE_TIME})\\s+(#{SEVERITY_PATTERN})\\s+(#{APPLICATION})\\s+-\\s+(#{MESSAGE})$"
     DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
+    FOREVER_AGO = DateTime.now - 200_000
+    FOREVER = DateTime.now + 200_000
+
 
     #
     # Initialize Indy.
@@ -268,57 +271,6 @@ module Indy
     end
 
     #
-    # first( :half, :time )
-    # first( "5 minutes" )
-    #
-    def first(portion, method=nil, do_last=false)
-      last(portion, method, false)
-    end
-    
-    #
-    # last(:half, :time)
-    # last( "2 minutes" )
-    #
-    def last(portion, method=nil, do_last=true)
-
-      if portion.kind_of? Symbol and method.kind_of? Symbol
-        raise "unsuported" unless portion == :half
-        raise "unsuported" unless method == :time
-
-        return ResultSet.new unless @time_field
-
-        all_results = ResultSet.new + _search {|result| OpenStruct.new(result) }
-        begin_time, end_time, time_span = time_boundaries(all_results)
-        mid_time = begin_time + (time_span / 2)
-
-        all_results.select do |entry|
-          do_last ? entry._time > mid_time : entry._time < mid_time
-        end
-
-      elsif portion.kind_of? String and !method
-
-        all_results = ResultSet.new + _search {|result| OpenStruct.new(result) }
-        begin_time, end_time, time_span = time_boundaries(all_results)
-        quantity, units = portion.match(/(\d+) (.+)/).captures
-        raise "unsupported" unless units.match(/minutes?/)
-        portion_seconds = quantity.to_i.send(units.intern)
-        boundry_time = do_last ? end_time - portion_seconds : begin_time + portion_seconds
-        all_results.select do |entry|
-          do_last ? entry._time > boundry_time : entry._time < boundry_time
-        end
-      end
-
-    end
-
-    def first_new
-      source.first
-    end
-
-    def last_new
-      source.last
-    end
-
-    #
     # Search the specified source and yield to the block the line that was found
     # with the given log pattern
     #
@@ -326,51 +278,53 @@ module Indy
     # @param [IO] source is a Ruby IO object
     #
     def _search(source = @source,pattern_array = @pattern,&block)
-      regexp, *fields = pattern_array.dup
 
       if @start_time || @end_time
-        start_time = @start_time || DateTime.now - 200_000
-        end_time = @end_time || DateTime.now + 200_000
+        @start_time = @start_time || FOREVER_AGO
+        @end_time = @end_time || FOREVER
       end
 
       results = source.each.collect do |line|
-        if /#{regexp}/.match(line)
-          values = /#{regexp}/.match(line).captures
 
-          raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == fields.length
+        hash = parse_line(line, pattern_array)
 
-          hash = Hash[ *fields.zip( values ).flatten ]
-          hash[:line] = line.strip
+        if @time_field && @start_time
+          hash[:_time] = _parse_date( hash )
 
-          if @time_field && @start_time
-
-            if ( hash[:_time] = _parse_date( hash ) ) != nil
-              if @inclusive
-                next if hash[:_time] > end_time or hash[:_time] < start_time
-              else
-                next if hash[:_time] >= end_time or hash[:_time] <= start_time
-              end
+          if hash[:_time]
+            if @inclusive
+              next if hash[:_time] > @end_time or hash[:_time] < @start_time
+            else
+              next if hash[:_time] >= @end_time or hash[:_time] <= @start_time
             end
-            
           end
 
-          block_given? ? block.call(hash) : nil
         end
+
+        block_given? ? block.call(hash) : nil
       end
 
       results.compact
     end
 
     #
-    # given a set of log entries, determine the time boundaries and span
+    # Return a hash of field=>value pairs for the log line
     #
-    def time_boundaries(log_entries)
-      begin_time = log_entries.first._time
-      end_time = log_entries.last._time
-      time_span = end_time - begin_time
-      [begin_time, end_time, time_span]
+    def parse_line( line, pattern_array = @pattern)
+      regexp, *fields = pattern_array
+
+      if /#{regexp}/.match(line)
+        values = /#{regexp}/.match(line).captures
+        raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == fields.length
+
+        hash = Hash[ *fields.zip( values ).flatten ]
+        hash[:line] = line.strip
+
+        hash
+      end
     end
-   
+
+
     #
     # Return a valid DateTime object for the log line
     #
@@ -378,7 +332,7 @@ module Indy
       return nil unless @time_field
 
       begin
-        DateTime.parse(line_hash[ @time_field ])
+        DateTime.parse(line_hash[ @time_field ]) if @time_field
       rescue ArgumentError
         @time_field = nil
       end
