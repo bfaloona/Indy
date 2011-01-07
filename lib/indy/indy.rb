@@ -289,15 +289,9 @@ module Indy
         hash = parse_line(line, pattern_array)
 
         if @time_field && @start_time
-          hash[:_time] = _parse_date( hash )
 
-          if hash[:_time]
-            if @inclusive
-              next if hash[:_time] > @end_time or hash[:_time] < @start_time
-            else
-              next if hash[:_time] >= @end_time or hash[:_time] <= @start_time
-            end
-          end
+          set_time(hash)
+          next unless inside_time_window?(hash)
 
         end
 
@@ -324,6 +318,26 @@ module Indy
       end
     end
 
+    #
+    # Set the time in the hash
+    #
+    def set_time(hash)
+      hash[:_time] = _parse_date( hash )
+    end
+    #
+    # Evaluate time condition
+    #
+    def inside_time_window?( line_hash )
+
+      if line_hash[:_time]
+        if @inclusive
+          true unless line_hash[:_time] > @end_time or line_hash[:_time] < @start_time
+        else
+          true unless line_hash[:_time] >= @end_time or line_hash[:_time] <= @start_time
+        end
+      end
+
+    end
 
     #
     # Return a valid DateTime object for the log line
