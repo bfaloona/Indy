@@ -18,40 +18,26 @@ module Indy
 
     end
 
-    context 'partitioning' do
+    context 'instance' do
 
       before(:all) do
-        @indy = Indy.new(:source => '1/2/2002 string', :pattern => ["(\w) (\w)", :time, :foo])
+        @indy = Indy.new(:source => '1/2/2002 string', :pattern => ['([^\s]+) (\w+)', :time, :message])
       end
 
-      context :last do
+      context "method" do
 
-        it "should be an instance method" do
-          @indy.should respond_to(:last)
+        it "parse_line() should exist" do
+          @indy.should respond_to(:parse_line)
         end
 
-        it "should accept two symbol parameters" do
-          lambda{ @indy.last(:half, :time) }.should_not raise_error
+        it "parse_line() should return a hash" do
+          @indy.parse_line("1/2/2002 string").class.should == Hash
         end
 
-        it "should not accept arbitrary symbols" do
-          lambda{ @indy.last(:foo, :bar) }.should raise_error
-        end
-
-      end
-
-      context :first do
-
-        it "should be an instance method" do
-          @indy.should respond_to(:first)
-        end
-
-        it "should accept two symbol parameters" do
-          lambda{ @indy.first(:half, :time) }.should_not raise_error
-        end
-
-        it "should not accept arbitrary symbols" do
-          lambda{ @indy.first(:foo, :bar) }.should raise_error
+        it "parse_line() should return :time and :message" do
+          hash = @indy.parse_line("1/2/2002 string")
+          hash[:time] == "1/2/2002"
+          hash[:message] == "string"
         end
 
       end
@@ -153,45 +139,38 @@ module Indy
     context "instance" do
 
       before(:each) do
-        @indy = Indy.search("source string")
+        @indy = Indy.search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
       end
 
-      context :with do
-
-        it "should be a method" do
-          @indy.should respond_to(:with)
-        end
-
-        # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
-        it "should accept a log4r pattern string without error" do
-          lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
-        end
-
-        # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
-        it "should accept a log4j pattern string without error" do
-          lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message])}.should_not raise_error
-        end
-
-        it "should return itself" do
-          @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).should == @indy
-        end
-
+      it "with() should be a method" do
+        @indy.should respond_to(:with)
       end
 
-      context "method" do
+      # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
+      it "with() should accept a log4r pattern string without error" do
+        lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
+      end
 
-        [:for, :search, :like, :matching].each do |method|
-          it "#{method} should exist" do
-            @indy.should respond_to(method)
-          end
+      # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
+      it "with() should accept a log4j pattern string without error" do
+        lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message])}.should_not raise_error
+      end
 
-          it "#{method} should accept a hash of search criteria" do
-            lambda { @indy.send(method,:severity => "INFO") }.should_not raise_error
-          end
+      it "should return itself" do
+        @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).should == @indy
+      end
 
-          it "#{method} should return a set of results" do
-            @indy.send(method,:severity => "DEBUG").should be_kind_of(Array)
-          end
+      [:for, :search, :like, :matching].each do |method|
+        it "#{method}() should exist" do
+          @indy.should respond_to(method)
+        end
+
+        it "#{method}() should accept a hash of search criteria" do
+          lambda { @indy.send(method,:severity => "INFO") }.should_not raise_error
+        end
+
+        it "#{method}() should return a set of results" do
+          @indy.send(method,:severity => "DEBUG").should be_kind_of(Array)
         end
 
       end

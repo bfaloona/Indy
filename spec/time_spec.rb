@@ -37,19 +37,21 @@ module Indy
         log_string = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
                       "2000-09-07 14:08:41 INFO  MyApp - Exiting APPLICATION.",
                       "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
-        @result = Indy.search(log_string).for(:application => 'MyApp')
+        @search_result = Indy.search(log_string).for(:application => 'MyApp')
+        @time_search_result = Indy.search(log_string).before(:time => "2100-09-07").for(:application => 'MyApp')
       end
 
-      it "should be an attribute" do
-        @result.first._time.class.should == DateTime
+      it "should not exist as an attribute when unless performing a time search" do
+        @search_result.first._time.class.should == NilClass
+        @time_search_result.first._time.class.should == DateTime
       end
 
       it "should be accurate" do
-        @result.first._time.to_s.should == "2000-09-07T14:07:41+00:00"        
+        @time_search_result.first._time.to_s.should == "2000-09-07T14:07:41+00:00"
       end
 
       it "should allow for time range calculations" do
-        time_span = @result.last._time - @result.first._time
+        time_span = @time_search_result.last._time - @time_search_result.first._time
         hours,minutes,seconds,frac = Date.day_fraction_to_time( time_span )
         hours.should == 0
         minutes.should == 3
@@ -57,36 +59,6 @@ module Indy
       end
        
     end
-
-    context "time of log entries" do
-
-      before(:each) do
-        log_string = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
-                      "2000-09-07 14:08:40 INFO  MyApp - Exiting APPLICATION.",
-                      "2000-09-07 14:09:00 INFO  MyApp - Entering APPLICATION.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error2.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error3.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error4.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error5.",
-                      "2000-09-07 14:10:31 WARN  SomeOtherApp - Encountered Error6.",
-                      "2000-09-08 14:02:02 INFO  MyApp - Exiting APPLICATION.",
-                      "2000-09-09 14:05:00 INFO  MyApp - Entering APPLICATION.",
-                      "2000-09-09 14:06:31 WARN  SomeOtherApp - Encountered Error.",
-                      "2000-09-09 14:06:32 WARN  SomeOtherApp - Another Encountered Error.",
-                      "2000-09-10 14:07:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
-        @log = Indy.search(log_string)
-      end
-
-      it "can be used to partition log" do
-        @log.last(:half, :time).length.should == 4
-      end
-
-      it "can be used filter to a completely relative time range" do
-        @log.first("2 minutes").length.should == 3
-      end
-
-    end
-
+    
   end
 end
