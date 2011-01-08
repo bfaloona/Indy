@@ -289,12 +289,12 @@ module Indy
         hash = parse_line(line, pattern_array)
 
         if @time_field && @start_time
-
           set_time(hash)
           next unless inside_time_window?(hash)
-
         end
 
+        next unless hash
+        
         block_given? ? block.call(hash) : nil
       end
 
@@ -322,7 +322,7 @@ module Indy
     # Set the time in the hash
     #
     def set_time(hash)
-      hash[:_time] = parse_date( hash )
+      hash[:_time] = parse_date( hash ) if hash
     end
 
     #
@@ -330,7 +330,7 @@ module Indy
     #
     def inside_time_window?( line_hash )
 
-      if line_hash[:_time]
+      if line_hash && line_hash[:_time]
         if @inclusive
           true unless line_hash[:_time] > @end_time or line_hash[:_time] < @start_time
         else
