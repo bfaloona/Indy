@@ -274,7 +274,7 @@ module Indy
     # Search the specified source and yield to the block the line that was found
     # with the given log pattern
     #
-    # This method is suppose to be used internally.
+    # This method is supposed to be used internally.
     # @param [IO] source is a Ruby IO object
     #
     def _search(source = @source,pattern_array = @pattern,&block)
@@ -283,6 +283,8 @@ module Indy
         @start_time = @start_time || FOREVER_AGO
         @end_time = @end_time || FOREVER
       end
+
+      source.rewind
 
       results = source.each.collect do |line|
 

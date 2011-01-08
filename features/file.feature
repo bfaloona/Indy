@@ -11,7 +11,13 @@ Feature: Finding log entries in a file
   Scenario: Count of entries for a specific application
     When searching the log for the application 'MyApp'
     Then I expect to have found 2 log entries
-    
+
+  Scenario: Multiple searches each begin at top of file
+    When searching the log for the application 'MyApp'
+    Then I expect to have found 2 log entries
+    When searching the log for the application 'MyApp'
+    Then I expect to have found 2 log entries
+
     
   Scenario: Particular entry for a specific application
     When searching the log for the application 'MyApp'
