@@ -322,8 +322,9 @@ module Indy
     # Set the time in the hash
     #
     def set_time(hash)
-      hash[:_time] = _parse_date( hash )
+      hash[:_time] = parse_date( hash )
     end
+
     #
     # Evaluate time condition
     #
@@ -342,7 +343,7 @@ module Indy
     #
     # Return a valid DateTime object for the log line
     #
-    def _parse_date(line_hash)
+    def parse_date(line_hash)
       return nil unless @time_field
 
       begin

@@ -12,7 +12,7 @@ module Indy
       
       it "should parse a standard date" do
         line_hash = {:time => "2000-09-07 14:07:41", :message => "Entering APPLICATION"}
-        @indy._parse_date(line_hash).class.should == DateTime
+        @indy.parse_date(line_hash).class.should == DateTime
       end
 
     end
@@ -26,7 +26,7 @@ module Indy
 
       it "should parse a non-standard date" do
         line_hash = {:time => "2000/09/07", :message => "Entering APPLICATION"}
-        @indy._parse_date(line_hash).class.should == DateTime
+        @indy.parse_date(line_hash).class.should == DateTime
       end
 
     end
