@@ -16,6 +16,13 @@ module Indy
         lambda { Indy.new(:pattern => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message])}
       end
 
+      it "should not raise error with non-conforming data" do
+        @indy = Indy.new(:source => " \nfoobar\n\n baz", :pattern => ['([^\s]+) (\w+)', :time, :message])
+        lambda{ @indy.for(:all) }.should_not raise_error
+      end
+
+
+
     end
 
     context 'instance' do
@@ -139,7 +146,8 @@ module Indy
     context "instance" do
 
       before(:each) do
-        @indy = Indy.search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
+        log = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n \n2000-09-07 14:07:41 INFO  MyApp  Entering APPLICATION.\n2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"
+        @indy = Indy.search(log)
       end
 
       it "with() should be a method" do

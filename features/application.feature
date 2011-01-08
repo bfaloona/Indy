@@ -6,6 +6,7 @@ Feature: Finding log entries by application
     Given the following log:
     """
     2000-09-07 14:07:41 INFO  MyApp - Entering application.
+
     2000-09-07 14:07:41 INFO  MyApp - Exiting application.
     """
 
