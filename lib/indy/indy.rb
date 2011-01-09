@@ -30,6 +30,7 @@ module Indy
     #
     def initialize(args)
       @source = @pattern = nil
+      @source_info = Hash.new
 
       while (arg = args.shift) do
         send("#{arg.first}=",arg.last)
@@ -71,13 +72,22 @@ module Indy
     #   source("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.")
     #
     def source=(specified_source)
+
       cmd = specified_source[:cmd] rescue nil
 
       if cmd
         possible_source = try_as_command(cmd)
+        @source_info[:cmd] = specified_source[:cmd]
       else
+
         possible_source = try_as_file(specified_source) unless possible_source
-        possible_source = StringIO.new(specified_source.to_s) unless possible_source
+
+        if possible_source
+          @source_info[:file] = specified_source
+        else
+          possible_source = StringIO.new(specified_source.to_s)
+          @source_info[:string] = specified_source
+        end
       end
 
       @source = possible_source
@@ -284,9 +294,14 @@ module Indy
         @end_time = @end_time || FOREVER
       end
 
-      source.rewind
+      if @source_info[:cmd]
+        actual_source = try_as_command(@source_info[:cmd])
+      else
+        source.rewind
+        actual_source = source.dup
+      end
 
-      results = source.each.collect do |line|
+      results = actual_source.each.collect do |line|
 
         hash = parse_line(line, pattern_array)
 
@@ -299,6 +314,7 @@ module Indy
         
         block_given? ? block.call(hash) : nil
       end
+
 
       results.compact
     end
