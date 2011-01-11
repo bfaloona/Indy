@@ -21,3 +21,8 @@ end
 Transform /^(\d+)(?:st|nd|rd|th)$/ do |order|
   order.to_i - 1
 end
+
+# When searching the log for all entries after and including the time 2000-09-07 14:07:44
+Transform /^ and including$/ do |inclusive|
+  true
+end
