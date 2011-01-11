@@ -1,4 +1,4 @@
 
 Before do
-  extend Indy
+  # extend Indy
 end
