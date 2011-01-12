@@ -168,7 +168,7 @@ class Indy
   #
   def after(scope_criteria)
     if scope_criteria[:time]
-      time = DateTime.parse(scope_criteria[:time])
+      time = parse_date(scope_criteria[:time])
       @inclusive = scope_criteria[:inclusive] || false
 
       if scope_criteria[:span]
@@ -195,7 +195,7 @@ class Indy
   #
   def before(scope_criteria)
     if scope_criteria[:time]
-      time = DateTime.parse(scope_criteria[:time])
+      time = parse_date(scope_criteria[:time])
       @inclusive = scope_criteria[:inclusive] || false
 
       if scope_criteria[:span]
@@ -211,7 +211,7 @@ class Indy
 
   def around(scope_criteria)
     if scope_criteria[:time]
-      time = DateTime.parse(scope_criteria[:time])
+      time = parse_date(scope_criteria[:time])
 
       # does @inclusive add any real value to the #around method?
       @inclusive = scope_criteria[:inclusive] || false
@@ -358,19 +358,29 @@ class Indy
   #
   # Return a valid DateTime object for the log line
   #
-  def parse_date(line_hash)
+  def parse_date(param)
     return nil unless @time_field
 
+    time_string = param[@time_field] ? param[@time_field] : param
+    
     begin
-      if @time_format
-        DateTime.strptime(line_hash[@time_field], @time_format)
-      else
-        DateTime.parse(line_hash[ @time_field ]) if @time_field
+      # Attempt the appropriate parse method
+      date = @time_format ? DateTime.strptime(time_string, @time_format) : DateTime.parse(time_string)
+    rescue
+      begin
+        # If possible, fall back to simple parse method
+        if @time_format
+          date = DateTime.parse(time_string)
+        else
+          puts 'parse_date rescue + !@time_format'
+          date = @time_field = nil
+        end
+      rescue ArgumentError
+        puts "parse_date alt rescue (#{time_string}) + @time_format"
+        date = @time_field = nil
       end
-    rescue ArgumentError
-      @time_field = nil
     end
-
+    date
   end
 
   #

@@ -31,11 +31,19 @@ describe Indy do
 
   context "explicit time format" do
 
-    it "should parse an US style date when given a time format" do
+    before(:each) do
       pattern = "^([^\s]+) (.*)$"
-      @indy = Indy.new(:time_format => '%m-%d-%Y', :source => "1-13-2002 message", :pattern => [pattern, :time, :message])
+      @indy = Indy.new(:time_format => '%m-%d-%Y', :source => "1-13-2002 message\n1-14-2002 another message\n1-15-2002 another message", :pattern => [pattern, :time, :message])
+    end
+
+    it "should parse a US style date when given a time format" do
       line_hash = {:time => '1-13-2002', :message => 'message'}
       @indy.parse_date(line_hash).class.should == DateTime
+    end
+
+    it "should accept standard time format searches even while using an explicit log time format" do
+      @indy.after(:time => 'Jan 13 2002').for(:all).count.should == 2
+      @indy.after(:time => 'Jan 14 2002').for(:all).last._time.mday.should == 15
     end
 
   end
