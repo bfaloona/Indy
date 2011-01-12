@@ -19,6 +19,11 @@ describe Indy do
       lambda{ @indy.for(:all) }.should_not raise_error
     end
 
+    it "should accept time_format parameter" do
+      @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :pattern => ['^([^\s]+) (\w+)$', :time, :message])
+      lambda{ @indy.for(:all) }.should_not raise_error
+      @indy.instance_variable_get(:@time_format).should == '%d-%m-%Y'
+    end
 
 
   end

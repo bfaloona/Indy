@@ -29,12 +29,23 @@ describe Indy do
 
   end
 
+  context "explicit time format" do
+
+    it "should parse an US style date when given a time format" do
+      pattern = "^([^\s]+) (.*)$"
+      @indy = Indy.new(:time_format => '%m-%d-%Y', :source => "1-13-2002 message", :pattern => [pattern, :time, :message])
+      line_hash = {:time => '1-13-2002', :message => 'message'}
+      @indy.parse_date(line_hash).class.should == DateTime
+    end
+
+  end
+
   context "built-in _time field" do
 
     before(:all) do
       log_string = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
-                    "2000-09-07 14:08:41 INFO  MyApp - Exiting APPLICATION.",
-                    "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
+        "2000-09-07 14:08:41 INFO  MyApp - Exiting APPLICATION.",
+        "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
       @search_result = Indy.search(log_string).for(:application => 'MyApp')
       @time_search_result = Indy.search(log_string).before(:time => "2100-09-07").for(:application => 'MyApp')
     end

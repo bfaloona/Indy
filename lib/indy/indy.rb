@@ -4,7 +4,7 @@ require 'active_support/core_ext'
 class Indy
 
   VERSION = "0.1.0"
-  attr_accessor :source, :pattern
+  attr_accessor :source, :pattern, :time_format
 
   DATE_TIME = "\\d{4}.\\d{2}.\\d{2}\s+\\d{2}.\\d{2}.\\d{2}" #"%Y-%m-%d %H:%M:%S"
   SEVERITY = [:trace,:debug,:info,:warn,:error,:fatal]
@@ -362,7 +362,11 @@ class Indy
     return nil unless @time_field
 
     begin
-      DateTime.parse(line_hash[ @time_field ]) if @time_field
+      if @time_format
+        DateTime.strptime(line_hash[@time_field], @time_format)
+      else
+        DateTime.parse(line_hash[ @time_field ]) if @time_field
+      end
     rescue ArgumentError
       @time_field = nil
     end
