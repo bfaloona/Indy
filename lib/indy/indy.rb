@@ -3,7 +3,7 @@ require 'active_support/core_ext'
 
 class Indy
 
-  VERSION = "0.1.0"
+  VERSION = "0.1.1"
 
   #
   # string, file, or command that provides the log
