@@ -18,21 +18,19 @@ To install Indy use the following command:
 Usage
 -----
 
-## 0. Require Indy
-
-Indy currently requires that the log data already be loaded. 
+## Require Indy
 
     require 'indy'
 
-## 1. Specify your Source
+## Specify your Source
 
 ### As a process or command
 
-    Indy.search( {:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO'} )
+    Indy.search( {:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "'} ).for(:severity => 'INFO')
 
 ### As a file
 
-    Indy.search('output.log').for(:application => 'MyApp')
+    Indy.search('logpath/output.log').for(:application => 'MyApp')
 
 ### As a string
 
@@ -42,7 +40,7 @@ Indy currently requires that the log data already be loaded.
 
     Indy.search(log_string).for(:message => 'Entering application')
 
-## 2. Specify your Pattern
+## Specify your Pattern
 
 The default search pattern resembles something you might find:
 
@@ -63,7 +61,14 @@ To do so, specify a pattern and each of the match with their symbolic name.
 
     Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
 
-## 3. Match Criteria
+### Explicit Time Format
+
+By default, Indy tries to guess your time format (courtesy of DateTime#parse). If you supply an explicit time format, it will use DateTime#strptime, as well as try to guess.
+
+    # 12-31-2011 23:59:59
+    Indy.new(:time_format => '%m-%d-%Y %H:%M:%S', :source => LOG_FILE).for(:all)
+
+## Match Criteria
 
 ### Exact Match
 
@@ -75,6 +80,13 @@ To do so, specify a pattern and each of the match with their symbolic name.
     Indy.search(source).for(:message => 'Entering Application', :application => 'MyApp')
     Indy.search(source).for(:severity => 'INFO', :application => 'MyApp')
 
+### Time Scope
+
+    Indy.search(source).after(:time => '2011-01-13 13:40:00').for(:all)
+    Indy.search(source).before(:time => '2010-12-31 23:59:59').for(:all)
+    Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 2).for(:all) # 2 minutes around New Year's Eve
+    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).for(:severity => 'ERROR', :application => 'MyApp')
+
 ### Partial Match
 
     Indy.search(source).like(:message => 'Memory')
@@ -83,7 +95,7 @@ To do so, specify a pattern and each of the match with their symbolic name.
 
     Indy.search(source).like(:severity => '(?:INFO|DEBUG)', :message => 'Memory')
 
-## 4. Process the Results
+## Process the Results
 
     entries = Indy.search(source).for(:message => 'Entering Application')
 

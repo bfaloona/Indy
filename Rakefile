@@ -63,5 +63,6 @@ end
 
 
 YARD::Rake::CitydocTask.new do |t|
-  t.files   = ['features/**/*', 'lib/**/*.rb']   # optional
+  t.files   = ['features/**/*', 'lib/**/*.rb']
+  t.options = ['--private']
 end
