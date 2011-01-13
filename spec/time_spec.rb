@@ -10,7 +10,7 @@ describe Indy do
 
     it "should parse a standard date" do
       line_hash = {:time => "2000-09-07 14:07:41", :message => "Entering APPLICATION"}
-      @indy.parse_date(line_hash).class.should == DateTime
+      @indy.send(:parse_date, line_hash).class.should == DateTime
     end
 
   end
@@ -24,7 +24,7 @@ describe Indy do
 
     it "should parse a non-standard date" do
       line_hash = {:time => "2000/09/07", :message => "Entering APPLICATION"}
-      @indy.parse_date(line_hash).class.should == DateTime
+      @indy.send(:parse_date, line_hash).class.should == DateTime
     end
 
   end
@@ -38,7 +38,7 @@ describe Indy do
 
     it "should parse a US style date when given a time format" do
       line_hash = {:time => '1-13-2002', :message => 'message'}
-      @indy.parse_date(line_hash).class.should == DateTime
+      @indy.send(:parse_date, line_hash).class.should == DateTime
     end
 
     it "should accept standard time format searches even while using an explicit log time format" do

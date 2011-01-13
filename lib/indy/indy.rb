@@ -4,15 +4,20 @@ require 'active_support/core_ext'
 class Indy
 
   VERSION = "0.1.0"
-  attr_accessor :source, :pattern, :time_format
+
+  attr_accessor :source       # string, file, or command that provides the log
+  attr_accessor :pattern      # Array: regexp string with capture groups, followed by log field names
+  attr_accessor :time_format  # format string for explicit date/time format (optional)
 
   DATE_TIME = "\\d{4}.\\d{2}.\\d{2}\s+\\d{2}.\\d{2}.\\d{2}" #"%Y-%m-%d %H:%M:%S"
   SEVERITY = [:trace,:debug,:info,:warn,:error,:fatal]
   SEVERITY_PATTERN = "(?:#{SEVERITY.map{|s| s.to_s.upcase}.join("|")})"
   APPLICATION = "\\w+"
   MESSAGE = ".+"
+
   DEFAULT_LOG_PATTERN = "^(#{DATE_TIME})\\s+(#{SEVERITY_PATTERN})\\s+(#{APPLICATION})\\s+-\\s+(#{MESSAGE})$"
   DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
+
   FOREVER_AGO = DateTime.now - 200_000
   FOREVER = DateTime.now + 200_000
 
@@ -22,8 +27,11 @@ class Indy
   #
   # @example
   #
-  #  Indy.new(:source => LOG_FILE)
-  #  Indy.new(:source => LOG_FILE,:pattern => [LOG_REGEX_PATTERN,:time,:application,:message]
+  #  Indy.new(:source => LOG_FILENAME)
+  #  Indy.new(:source => LOG_CONTENTS_STRING)
+  #  Indy.new(:source => {:cmd => LOG_COMMAND_STRING})
+  #  Indy.new(:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
+  #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
   #
   def initialize(args)
     @source = @pattern = nil
@@ -57,38 +65,6 @@ class Indy
 
   end
 
-  #
-  # Sets the source for the Indy instance.
-  #
-  # @param [String,Hash] source A filename or string. Use a Hash to specify a command string.
-  #
-  # @example
-  #
-  #   source("apache.log")
-  #   source(:cmd => "cat apache.log")
-  #   source("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.")
-  #
-  def source=(specified_source)
-
-    cmd = specified_source[:cmd] rescue nil
-
-    if cmd
-      possible_source = try_as_command(cmd)
-      @source_info[:cmd] = specified_source[:cmd]
-    else
-
-      possible_source = try_as_file(specified_source) unless possible_source
-
-      if possible_source
-        @source_info[:file] = specified_source
-      else
-        possible_source = StringIO.new(specified_source.to_s)
-        @source_info[:string] = specified_source
-      end
-    end
-
-    @source = possible_source
-  end
 
 
   #
@@ -277,6 +253,41 @@ class Indy
 
   end
 
+  private
+
+    #
+  # Sets the source for the Indy instance.
+  #
+  # @param [String,Hash] source A filename or string. Use a Hash to specify a command string.
+  #
+  # @example
+  #
+  #   source("apache.log")
+  #   source(:cmd => "cat apache.log")
+  #   source("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.")
+  #
+  def source=(specified_source)
+
+    cmd = specified_source[:cmd] rescue nil
+
+    if cmd
+      possible_source = try_as_command(cmd)
+      @source_info[:cmd] = specified_source[:cmd]
+    else
+
+      possible_source = try_as_file(specified_source) unless possible_source
+
+      if possible_source
+        @source_info[:file] = specified_source
+      else
+        possible_source = StringIO.new(specified_source.to_s)
+        @source_info[:string] = specified_source
+      end
+    end
+
+    @source = possible_source
+  end
+
   #
   # Search the specified source and yield to the block the line that was found
   # with the given log pattern
@@ -319,6 +330,10 @@ class Indy
   #
   # Return a hash of field=>value pairs for the log line
   #
+  # @param [String] line The log line
+  # @param [Array] pattern_array The match regexp string, followed by log fields
+  #   see Class method search
+  #
   def parse_line( line, pattern_array = @pattern)
     regexp, *fields = pattern_array
 
@@ -334,14 +349,18 @@ class Indy
   end
 
   #
-  # Set the time in the hash
+  # Set the :_time value in the hash
+  #
+  # @param [Hash] hash The log line hash to modify
   #
   def set_time(hash)
     hash[:_time] = parse_date( hash ) if hash
   end
 
   #
-  # Evaluate time condition
+  # Evaluate if a log line satisfies the configured time conditions
+  #
+  # @param [Hash] line_hash The log line hash to be evaluated
   #
   def inside_time_window?( line_hash )
 
@@ -356,7 +375,9 @@ class Indy
   end
 
   #
-  # Return a valid DateTime object for the log line
+  # Return a valid DateTime object for the log line or string
+  #
+  # @param [String, Hash] param The log line hash, or string to be evaluated
   #
   def parse_date(param)
     return nil unless @time_field
@@ -368,15 +389,13 @@ class Indy
       date = @time_format ? DateTime.strptime(time_string, @time_format) : DateTime.parse(time_string)
     rescue
       begin
-        # If possible, fall back to simple parse method
+        # If appropriate, fall back to simple parse method
         if @time_format
           date = DateTime.parse(time_string)
         else
-          puts 'parse_date rescue + !@time_format'
           date = @time_field = nil
         end
       rescue ArgumentError
-        puts "parse_date alt rescue (#{time_string}) + @time_format"
         date = @time_field = nil
       end
     end
@@ -385,6 +404,8 @@ class Indy
 
   #
   # Try opening the string as a command string, returning an IO object
+  #
+  # @param [String] command_string string of command that will return log contents
   #
   def try_as_command(command_string)
 
@@ -399,6 +420,8 @@ class Indy
 
   #
   # Try opening the string as a file, returning an File IO Object
+  #
+  # @param [String] filename path to log file
   #
   def try_as_file(filename)
 

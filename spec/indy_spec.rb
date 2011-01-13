@@ -36,16 +36,16 @@ describe Indy do
 
     context "method" do
 
-      it "parse_line() should exist" do
-        @indy.should respond_to(:parse_line)
-      end
+#      it "parse_line() should exist" do
+#        @indy.should respond_to(:parse_line)
+#      end
 
       it "parse_line() should return a hash" do
-        @indy.parse_line("1/2/2002 string").class.should == Hash
+        @indy.send(:parse_line, "1/2/2002 string").class.should == Hash
       end
 
       it "parse_line() should return :time and :message" do
-        hash = @indy.parse_line("1/2/2002 string")
+        hash = @indy.send(:parse_line, "1/2/2002 string")
         hash[:time] == "1/2/2002"
         hash[:message] == "string"
       end
@@ -189,7 +189,7 @@ describe Indy do
     context "_search when given source, param and value" do
 
       before(:each) do
-        @results = @indy._search(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."),[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
+        @results = @indy.send(:_search, StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."),[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
       end
 
       it "should not return nil" do

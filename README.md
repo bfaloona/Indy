@@ -28,11 +28,11 @@ Indy currently requires that the log data already be loaded.
 
 ### As a process or command
 
-    Indy::Indy.search(:cmd, 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO')
+    Indy.search( {:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "').for(:severity => 'INFO'} )
 
 ### As a file
 
-    Indy::Indy.search('output.log').for(:application => 'MyApp')
+    Indy.search('output.log').for(:application => 'MyApp')
 
 ### As a string
 
@@ -40,7 +40,7 @@ Indy currently requires that the log data already be loaded.
         2000-09-07 14:07:41 INFO  MyApp - Entering application.
         2000-09-07 14:07:41 INFO  MyApp - Exiting application. }
 
-    Indy::Indy.search(log_string).for(:message => 'Entering application')
+    Indy.search(log_string).for(:message => 'Entering application')
 
 ## 2. Specify your Pattern
 
@@ -50,8 +50,8 @@ The default search pattern resembles something you might find:
 
 ### Default Log Pattern
   
-   Indy::Indy.search(source).for(:severity => 'INFO')
-   Indy::Indy.search(source).for(:application => 'MyApp', :severity => 'DEBUG')
+   Indy.search(source).for(:severity => 'INFO')
+   Indy.search(source).for(:application => 'MyApp', :severity => 'DEBUG')
 
 ### Custom Log Pattern
 
@@ -61,33 +61,33 @@ To do so, specify a pattern and each of the match with their symbolic name.
     # HH:MM:SS SEVERITY APPLICATION#METHOD - MESSAGE
     custom_pattern = "^(\d{2}:\d{2}:\d{2})\s*(INFO|DEBUG|WARN|ERROR)\s*([^#]+)#([^\s]+)\s*-\s*(.+)$"
 
-    Indy::Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
+    Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
 
 ## 3. Match Criteria
 
 ### Exact Match
 
-    Indy::Indy.search(source).for(:message => 'Entering Application')
-    Indy::Indy.search(source).for(:severity => 'INFO')
+    Indy.search(source).for(:message => 'Entering Application')
+    Indy.search(source).for(:severity => 'INFO')
 
 ### Exact Match with multiple parameters
 
-    Indy::Indy.search(source).for(:message => 'Entering Application', :application => 'MyApp')
-    Indy::Indy.search(source).for(:severity => 'INFO', :application => 'MyApp')
+    Indy.search(source).for(:message => 'Entering Application', :application => 'MyApp')
+    Indy.search(source).for(:severity => 'INFO', :application => 'MyApp')
 
 ### Partial Match
 
-    Indy::Indy.search(source).like(:message => 'Memory')
+    Indy.search(source).like(:message => 'Memory')
 
 ### Partial Match with multiple parameters
 
-    Indy::Indy.search(source).like(:severity => '(?:INFO|DEBUG)', :message => 'Memory')
+    Indy.search(source).like(:severity => '(?:INFO|DEBUG)', :message => 'Memory')
 
 ## 4. Process the Results
 
-    entries = Indy::Indy.search(source).for(:message => 'Entering Application')
+    entries = Indy.search(source).for(:message => 'Entering Application')
 
-    Indy::Indy.search(source).for(:message => 'Entering Application').each do |entry|
+    Indy.search(source).for(:message => 'Entering Application').each do |entry|
         puts entry
     end
 

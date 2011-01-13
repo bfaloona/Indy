@@ -2,6 +2,8 @@ require 'rake'
 require 'rspec/core'
 require 'rspec/core/rake_task'
 require "cucumber/rake/task"
+require "yard"
+require "city"
 
 desc 'Default: run tests'
 task :default => :test
@@ -57,4 +59,9 @@ RSpec::Core::RakeTask.new(:coverage) do |t|
   t.pattern = "./spec/**/*_spec.rb" # don't need this, it's default.
   t.rcov = true
   t.rcov_opts = ['--exclude', 'spec', '--exclude', 'gems', '-T']
+end
+
+
+YARD::Rake::CitydocTask.new do |t|
+  t.files   = ['features/**/*', 'lib/**/*.rb']   # optional
 end
