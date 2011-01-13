@@ -34,8 +34,11 @@ Gem::Specification.new do |s|
   s.summary     = "Log Search Tool"
   s.email       = 'franklin.webber@gmail.com'
   s.homepage    = "http://github.com/burtlo/Indy"
+  s.license     = 'MIT'
 
   s.platform    = Gem::Platform::RUBY
+  s.required_ruby_version = '>= 1.8.7'
+  s.add_dependency('activesupport', '>= 2.3.5')
 
   changes = Indy.show_version_changes(::Indy::VERSION)
 

@@ -1,3 +1,10 @@
+=== 0.1.1 / 2011-01-13
+
+* Scope search by time (after, before, around, or within)
+* Explicit format string can be provided to parse non-standard log times
+* Reopen (or rewind) source for each #search
+* Source parameter creates an IO object (StringIO, File, or Process)
+
 === 0.1.0 / 2010-12-13
 
 * Search by exact match or regular expression

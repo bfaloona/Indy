@@ -5,9 +5,21 @@ class Indy
 
   VERSION = "0.1.0"
 
-  attr_accessor :source       # string, file, or command that provides the log
-  attr_accessor :pattern      # Array: regexp string with capture groups, followed by log field names
-  attr_accessor :time_format  # format string for explicit date/time format (optional)
+  #
+  # string, file, or command that provides the log
+  #
+  attr_accessor :source
+
+  #
+  # array with regexp string and capture groups followed by log field
+  # name symbols. :time field is required to use time scoping
+  #
+  attr_accessor :pattern
+
+  #
+  # format string for explicit date/time format (optional)
+  #
+  attr_accessor :time_format
 
   DATE_TIME = "\\d{4}.\\d{2}.\\d{2}\s+\\d{2}.\\d{2}.\\d{2}" #"%Y-%m-%d %H:%M:%S"
   SEVERITY = [:trace,:debug,:info,:warn,:error,:fatal]
@@ -41,26 +53,41 @@ class Indy
       send("#{arg.first}=",arg.last)
     end
 
-    @time_field = ( @pattern[1..-1].include?(:time) ? :time : nil ) if @pattern
+    @pattern = @pattern || [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten
+    @time_field = ( @pattern[1..-1].include?(:time) ? :time : nil )
 
   end
 
   class << self
 
     #
-    # Create a new instance of Indy with the source specified.  This allows for
-    # a more fluent creation that moves into the execution.
+    # Create a new instance of Indy with @source, or multiple, parameters
+    # specified.  This allows for a more fluent creation that moves 
+    # into the execution.
     #
-    # @param [String,Hash] source An filename or string. Use a Hash to specify a command string.
+    # @param [String,Hash] params To specify @source, provide a filename or
+    #   log contents as a string. To specify a command, use a :cmd => STRING hash.
+    #   Alternately, a Hash with a :source key (amoung others) can be used to
+    #   provide multiple initialization parameters.
     #
     # @example
-    #
     #   Indy.search("apache.log").for(:severity => "INFO")
+    #   
+    # @example
     #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").for(:all)
+    #
+    # @example
     #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
     #
-    def search(source)
-      Indy.new(:source => source, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
+    # @example
+    #   Indy.search(:source => {:cmd => "cat apache.log"}, :pattern => LOG_PATTERN, :time_format => MY_TIME_FORMAT).for(:all)
+    #
+    def search(params)
+      if params.respond_to?(:keys) && params[:source]
+        Indy.new(params)
+      else
+        Indy.new(:source => params, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
+      end
     end
 
   end
@@ -255,7 +282,7 @@ class Indy
 
   private
 
-    #
+  #
   # Sets the source for the Indy instance.
   #
   # @param [String,Hash] source A filename or string. Use a Hash to specify a command string.

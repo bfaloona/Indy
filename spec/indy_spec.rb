@@ -25,6 +25,14 @@ describe Indy do
       @indy.instance_variable_get(:@time_format).should == '%d-%m-%Y'
     end
 
+    it "should accept an initialization hash passed to #search" do
+      hash = {:time_format => '%d-%m-%Y',
+        :source => "1-13-2000 yes",
+        :pattern => ['^([^\s]+) (\w+)$', :time, :message]}
+      lambda{ @indy = Indy.search( hash ) }.should_not raise_error
+      @indy.for(:all).count.should == 1
+    end
+
 
   end
 
@@ -35,10 +43,6 @@ describe Indy do
     end
 
     context "method" do
-
-#      it "parse_line() should exist" do
-#        @indy.should respond_to(:parse_line)
-#      end
 
       it "parse_line() should return a hash" do
         @indy.send(:parse_line, "1/2/2002 string").class.should == Hash

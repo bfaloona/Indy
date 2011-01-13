@@ -65,6 +65,8 @@ To do so, specify a pattern and each of the match with their symbolic name.
 
 By default, Indy tries to guess your time format (courtesy of DateTime#parse). If you supply an explicit time format, it will use DateTime#strptime, as well as try to guess.
 
+This is required when log data uses a non-standard date format, e.g.: U.S. format 12-31-2000
+
     # 12-31-2011 23:59:59
     Indy.new(:time_format => '%m-%d-%Y %H:%M:%S', :source => LOG_FILE).for(:all)
 
