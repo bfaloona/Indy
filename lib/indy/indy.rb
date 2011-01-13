@@ -410,23 +410,14 @@ class Indy
     return nil unless @time_field
 
     time_string = param[@time_field] ? param[@time_field] : param
-    
+
     begin
       # Attempt the appropriate parse method
-      date = @time_format ? DateTime.strptime(time_string, @time_format) : DateTime.parse(time_string)
+      @time_format ? DateTime.strptime(time_string, @time_format) : DateTime.parse(time_string)
     rescue
-      begin
-        # If appropriate, fall back to simple parse method
-        if @time_format
-          date = DateTime.parse(time_string)
-        else
-          date = @time_field = nil
-        end
-      rescue ArgumentError
-        date = @time_field = nil
-      end
+      # If appropriate, fall back to simple parse method
+      DateTime.parse(time_string) if @time_format rescue nil
     end
-    date
   end
 
   #
