@@ -13,6 +13,22 @@ describe Indy do
       @indy.send(:parse_date, line_hash).class.should == DateTime
     end
 
+    it "should parse dates when log includes non-conforming data" do
+      logdata = [ "12-03-2000 message1",
+                  "13-03-2000 message2",
+                  "14-03-2000 ",
+                  " message4",
+                  "a14-03-2000 message5",
+                  "14-03-2000 message6\n\n\n\n",
+                  "15-03-2000 message7",
+                  "16-03-2000 message8\r\n",
+                  "17-03-2000 message9"].join("\n")
+      @indy = Indy.new(:source => logdata, :pattern => ['^(\d[^\s]+\d) (.+)$', :time, :message])
+      @indy.after(:time => '13-03-2000')
+      @indy.for(:all).count.should == 4
+    end
+
+
   end
 
   context "non-default time handling" do
