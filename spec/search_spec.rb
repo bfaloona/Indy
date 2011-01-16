@@ -103,15 +103,12 @@ describe Indy do
     it "should execute cmd on each successive search" do
       @indy.for(:application => 'MyApp').length.should == 2
       @indy.for(:severity => 'INFO').length.should == 3
-      @indy.for(:application => 'MyApp').length.should == 2
-    end
 
-    it "should execute cmd on each successive search" do
-      @file.write("\n2000-09-07 14:10:55 INFO  MyApp - really really Exiting APPLICATION.\n")
+      @file.write("\n2000-09-07 14:10:55 DEBUG MyApp - really really Exiting APPLICATION.\n")
       @file.flush
+
       @indy.for(:application => 'MyApp').length.should == 3
-      @indy.for(:severity => 'INFO').length.should == 4
-      @indy.for(:application => 'MyApp').length.should == 3
+      @indy.for(:severity => 'INFO').length.should == 3
     end
 
 

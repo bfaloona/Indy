@@ -188,7 +188,7 @@ describe Indy do
 
     end
 
-    context "_search when given source, param and value" do
+    context "_search" do
 
       before(:each) do
         @results = @indy.send(:_search) {|result| result if result[:application] == "MyApp" }
