@@ -7,14 +7,6 @@ When /^searching the log for the log severity (\w+)$/ do |severity|
   @results = @indy.for(:severity => severity)
 end
 
-When /^searching the log for the log severity (\w+) and lower$/ do |severity|
-  @results = @indy.severity(severity,:equal_and_below)
-end
-
-When /^searching the log for the log severity (\w+) and higher$/ do |severity|
-  @results = @indy.severity(severity,:equal_and_above)
-end
-
 When /^searching the log for the exact match of the message "([^"]+)"$/ do |message|
   @results = @indy.for(:message => message)
 end
@@ -25,7 +17,7 @@ end
 
 When /^searching the log for:$/ do |fields|
   fields.map_headers! {|header| header.is_a?(Symbol) ? header : header.downcase.gsub(/\s/,'_').to_sym }
-  @results = @indy.search(fields.hashes.first)
+  @results = @indy.for(fields.hashes.first)
 end
 
 When /^searching the log for entries like:$/ do |fields|
@@ -34,7 +26,7 @@ When /^searching the log for entries like:$/ do |fields|
 end
 
 When /^searching the log for the exact match of custom field ([^"]+)\s*"([^"]+)"$/ do |field,value|
-  @results = @indy.search(field.strip.gsub(/\s/,'_').to_sym => value)
+  @results = @indy.for(field.strip.gsub(/\s/,'_').to_sym => value)
 end
 
 When /^searching the log for entries in the (\w+ \w+), by (.+)$/ do |portion, method|

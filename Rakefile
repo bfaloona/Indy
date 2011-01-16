@@ -17,6 +17,7 @@ end
 desc "Run performance specs"
 RSpec::Core::RakeTask.new(:perf) do |t|
   t.pattern = "./performance/**/*_spec.rb"
+  t.rspec_opts = ['-f d']
 end
 
 desc "Run features"

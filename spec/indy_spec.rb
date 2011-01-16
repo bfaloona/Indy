@@ -89,16 +89,17 @@ describe Indy do
       context "treat it first like a file" do
 
         it "should attempt to open the file" do
-          IO.should_receive(:open).with("possible_file.ext").ordered
+          File.should_receive(:exist?).with("possible_file.ext").ordered
           Indy.search("possible_file.ext")
         end
 
-        it "should not throw an error for an invalid file" do
+        it "should not throw an error for a non-existent file" do
           lambda { Indy.search("possible_file.ext") }.should_not raise_error
         end
 
         it "should return an IO object when there is a file" do
-          IO.should_receive(:open).with("file_exists.ext").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+          File.should_receive(:exist?).with("file_exists.ext").and_return( true )
+          File.should_receive(:open).and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
           Indy.search("file_exists.ext").for(:application => 'MyApp').length.should == 1
         end
 
@@ -111,13 +112,10 @@ describe Indy do
       context "treat it second like a string" do
 
         it "should attempt to treat it as a string" do
-          expecting_string = mock("String With Expectation")
-          expecting_string.should_receive(:[])
-          expecting_string.should_receive(:to_s).and_return("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.")
-
-          IO.should_receive(:open).with(expecting_string).ordered
-
-          Indy.search(expecting_string).for(:application => 'MyApp').length.should == 1
+          string = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."
+          string_io = StringIO.new(string)
+          StringIO.should_receive(:new).with(string).ordered.and_return(string_io)
+          Indy.search(string).for(:application => 'MyApp').length.should == 1
         end
 
       end
@@ -175,7 +173,7 @@ describe Indy do
       @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).should == @indy
     end
 
-    [:for, :search, :like, :matching].each do |method|
+    [:for, :like, :matching].each do |method|
       it "#{method}() should exist" do
         @indy.should respond_to(method)
       end
@@ -193,7 +191,7 @@ describe Indy do
     context "_search when given source, param and value" do
 
       before(:each) do
-        @results = @indy.send(:_search, StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."),[Indy::DEFAULT_LOG_PATTERN, Indy::DEFAULT_LOG_FIELDS].flatten) {|result| result if result[:application] == "MyApp" }
+        @results = @indy.send(:_search) {|result| result if result[:application] == "MyApp" }
       end
 
       it "should not return nil" do
