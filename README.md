@@ -57,7 +57,7 @@ If the default pattern is obviously not strong enough for you, brew your own.
 To do so, specify a pattern and each of the match with their symbolic name.
 
     # HH:MM:SS SEVERITY APPLICATION#METHOD - MESSAGE
-    custom_pattern = "^(\d{2}:\d{2}:\d{2})\s*(INFO|DEBUG|WARN|ERROR)\s*([^#]+)#([^\s]+)\s*-\s*(.+)$"
+    custom_pattern = /^(\d{2}:\d{2}:\d{2})\s*(INFO|DEBUG|WARN|ERROR)\s*([^#]+)#([^\s]+)\s*-\s*(.+)$/
 
     Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
 
@@ -111,10 +111,15 @@ This is required when log data uses a non-standard date format, e.g.: U.S. forma
 
 ## Process the Results
 
+    A ResultSet (Array) is returned by #for, #like, #after, etc.
+
     entries = Indy.search(source).for(:message => 'Entering Application')
 
     Indy.search(source).for(:message => 'Entering Application').each do |entry|
-        puts entry
+
+      # each log line entry returned is an OpenStruct object
+      puts "[#{entry.time}] #{entry.message}: #{entry.application}"
+
     end
 
 LICENSE

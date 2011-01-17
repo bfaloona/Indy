@@ -95,7 +95,7 @@ class Indy
   #
   # @example Log formatted as - HH:MM:SS Message
   #
-  #  Indy.search(LOG_FILE).with("^(\\d{2}.\\d{2}.\\d{2})\s*(.+)$",:time,:message)
+  #  Indy.search(LOG_FILE).with(/^(\d{2}.\d{2}.\d{2})\s*(.+)$/,:time,:message)
   #
   def with(pattern_array = :default)
     @pattern = pattern_array == :default ? DEFAULT_LOG_PATTERN : pattern_array
