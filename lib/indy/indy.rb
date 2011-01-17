@@ -21,15 +21,6 @@ class Indy
   #
   attr_accessor :time_format
 
-  DATE_TIME = "\\d{4}.\\d{2}.\\d{2}\s+\\d{2}.\\d{2}.\\d{2}" #"%Y-%m-%d %H:%M:%S"
-  SEVERITY = [:trace,:debug,:info,:warn,:error,:fatal]
-  SEVERITY_PATTERN = "(?:#{SEVERITY.map{|s| s.to_s.upcase}.join("|")})"
-  APPLICATION = "\\w+"
-  MESSAGE = ".+"
-
-  DEFAULT_LOG_PATTERN = "^(#{DATE_TIME})\\s+(#{SEVERITY_PATTERN})\\s+(#{APPLICATION})\\s+-\\s+(#{MESSAGE})$"
-  DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
-
   FOREVER_AGO = DateTime.now - 200_000
   FOREVER = DateTime.now + 200_000
 
@@ -53,7 +44,7 @@ class Indy
       send("#{arg.first}=",arg.last)
     end
 
-    @pattern = @pattern || [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten
+    @pattern = @pattern || DEFAULT_LOG_PATTERN
     @time_field = ( @pattern[1..-1].include?(:time) ? :time : nil )
 
   end
@@ -86,7 +77,7 @@ class Indy
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
-        Indy.new(:source => params, :pattern => [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten)
+        Indy.new(:source => params, :pattern => DEFAULT_LOG_PATTERN)
       end
     end
 
@@ -107,7 +98,7 @@ class Indy
   #  Indy.search(LOG_FILE).with("^(\\d{2}.\\d{2}.\\d{2})\s*(.+)$",:time,:message)
   #
   def with(pattern_array = :default)
-    @pattern = pattern_array == :default ? [DEFAULT_LOG_PATTERN,DEFAULT_LOG_FIELDS].flatten : pattern_array
+    @pattern = pattern_array == :default ? DEFAULT_LOG_PATTERN : pattern_array
     @time_field = @pattern[1..-1].include?(:time) ? :time : nil
     self
   end

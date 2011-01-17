@@ -61,6 +61,18 @@ To do so, specify a pattern and each of the match with their symbolic name.
 
     Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
 
+### Predefined Log Patterns
+
+Several log formats have been predefined for ease of configuration. See indy/patterns.rb
+
+    # Indy::COMMON_LOG_PATTERN
+    # Indy::COMBINED_LOG_PATTERN
+    # Indy::LOG4R_DEFAULT_PATTERN
+    #
+    # Example (Log4r)
+    #  INFO mylog: This is a message with level INFO
+    Indy.new(:source => 'logfile.txt', :pattern => Indy::LOG4R_DEFAULT_PATTERN).for(:application => 'mylog')
+
 ### Explicit Time Format
 
 By default, Indy tries to guess your time format (courtesy of DateTime#parse). If you supply an explicit time format, it will use DateTime#strptime, as well as try to guess.

@@ -159,18 +159,20 @@ describe Indy do
       @indy.should respond_to(:with)
     end
 
-    # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
-    it "with() should accept a log4r pattern string without error" do
-      lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
+    it "with() should accept the log4r default pattern const without error" do
+      lambda { @indy.with(Indy::LOG4R_DEFAULT_PATTERN) }.should_not raise_error
     end
 
-    # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
-    it "with() should accept a log4j pattern string without error" do
-      lambda { @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message])}.should_not raise_error
+    it "with() should accept :default without error" do
+      lambda { @indy.with(:default) }.should_not raise_error
+    end
+
+    it "with() should accept no params without error" do
+      lambda { @indy.with() }.should_not raise_error
     end
 
     it "should return itself" do
-      @indy.with(["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).should == @indy
+      @indy.with(:default).should == @indy
     end
 
     [:for, :like, :matching].each do |method|
