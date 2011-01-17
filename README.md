@@ -4,7 +4,7 @@ Indy: A Log Archaeology Tool
 Synopsis
 --------
 
-Log files are often searched for particular strings but it does not often treat the logs themselves as data structures.  Indy attempts to deliver logs with more powerful features by allowing the ability: to collect segments of a log from particular time; find a particular event; or monitor/reflect on a log to see if a particular event occurred (or not occurred).
+Log files are often searched for particular strings but it does not often treat the logs themselves as data structures.  Indy attempts to deliver logs with more powerful features by allowing the ability to collect segments of a log from particular time; find a particular event; or monitor/reflect on a log to see if a particular event occurred (or not occurred).
 
 Installation
 ------------
