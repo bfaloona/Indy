@@ -98,6 +98,13 @@ describe Indy do
 
     it "should return 2 records" do
       @indy.for(:application => 'MyApp').length.should == 2
+      results = @indy.for(:application => 'MyApp')
+      results.last.time.should == '2000-09-07 14:10:55'
+      results.last.severity.should == 'INFO'
+      results.last.application.should == 'MyApp'
+      results.last.message.should == 'Exiting APPLICATION.'
+      results.last._time.class.should_not be_nil
+
     end
 
     it "should execute cmd on each successive search" do

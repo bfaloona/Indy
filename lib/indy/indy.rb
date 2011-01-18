@@ -102,6 +102,16 @@ class Indy
     @time_field = @pattern[1..-1].include?(:time) ? :time : nil
     self
   end
+  
+  def create_struct( line_hash )
+    params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
+    Struct::Line.new( *params )
+  end
+
+  def define_struct
+    fields = (@pattern[1..-1] +  [:_time, :line]).sort_by{|e|e.to_s}
+    Struct.new( "Line", *fields )
+  end
 
   #
   # Search the source and make an == comparison
@@ -113,13 +123,16 @@ class Indy
   def for(search_criteria)
     results = ResultSet.new
 
+    define_struct
+
     case search_criteria
     when Enumerable
       results += _search do |result|
-        OpenStruct.new(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
       end
+
     when :all
-      results += _search {|result| OpenStruct.new(result) }
+      results += _search {|result| create_struct(result) }
     end
 
     results
@@ -138,9 +151,10 @@ class Indy
     #
     def like(search_criteria)
       results = ResultSet.new
+      define_struct
 
       results += _search do |result|
-        OpenStruct.new(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
+        create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
       end
 
       results
@@ -278,6 +292,8 @@ class Indy
         if time_search
           set_time(hash)
           next unless inside_time_window?(hash)
+        else
+          hash[:_time] = nil if hash
         end
         next unless hash
 
