@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.name        = 'indy'
   s.version     = ::Indy::VERSION
   s.authors     = ["Franklin Webber","Brandon Faloona"]
-  s.description = %{ Indy is a log archelogy tool that allows you to interact with log data like an object while you search by fields and/or time.}
+  s.description = %{ Indy is a log archelogy tool explore logs like objects and search by field and/or time.}
   s.summary     = "Log Search Tool"
   s.email       = 'franklin.webber@gmail.com'
   s.homepage    = "http://github.com/burtlo/Indy"
@@ -41,6 +41,8 @@ Gem::Specification.new do |s|
   s.add_dependency('activesupport', '>= 2.3.5')
 
   s.add_development_dependency('cucumber', '>= 0.9.2')
+  s.add_development_dependency('yard', '>= 0.6.4')
+  s.add_development_dependency('cucumber-in-the-city', '>= 1.7.7')
   s.add_development_dependency('rspec', '>= 2.4.0')
   s.add_development_dependency('rspec-mocks', '>= 2.4.0')
   s.add_development_dependency('rspec-prof', '>= 0.0.3')
