@@ -2,7 +2,7 @@ require "#{File.dirname(__FILE__)}/helper"
 
 describe Indy do
 
-  context :initialize do
+  context ':initialize' do
 
     # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
     it "should accept a log4r pattern string without error" do
@@ -58,7 +58,7 @@ describe Indy do
 
   end
 
-  context :search do
+  context ':search' do
 
     it "should be a class method" do
       Indy.should respond_to(:search)
@@ -148,10 +148,23 @@ describe Indy do
 
   end
 
-  context "instance" do
+  context "bad data" do
 
     before(:each) do
       log = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n \n2000-09-07 14:07:41 INFO  MyApp  Entering APPLICATION.\n2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"
+      @indy = Indy.search(log)
+    end
+
+    it "should find all 3 rows" do
+      @indy.for(:all).count.should == 3
+    end
+
+  end
+
+  context "instance" do
+
+    before(:each) do
+      log = "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION."
       @indy = Indy.search(log)
     end
 
@@ -165,6 +178,10 @@ describe Indy do
 
     it "with() should accept :default without error" do
       lambda { @indy.with(:default) }.should_not raise_error
+    end
+
+    it "with() should use default log pattern when passed :default" do
+      @indy.with(:default).for(:all).count.should == 3
     end
 
     it "with() should accept no params without error" do
