@@ -15,19 +15,91 @@ describe Indy do
 
     it "should parse dates when log includes non-conforming data" do
       logdata = [ "12-03-2000 message1",
-                  "13-03-2000 message2",
-                  "14-03-2000 ",
-                  " message4",
-                  "a14-03-2000 message5",
-                  "14-03-2000 message6\n\n\n\n",
-                  "15-03-2000 message7",
-                  "16-03-2000 message8\r\n",
-                  "17-03-2000 message9"].join("\n")
+        "13-03-2000 message2",
+        "14-03-2000 ",
+        " message4",
+        "a14-03-2000 message5",
+        "14-03-2000 message6\n\n\n\n",
+        "15-03-2000 message7",
+        "16-03-2000 message8\r\n",
+        "17-03-2000 message9"].join("\n")
       @indy = Indy.new(:source => logdata, :pattern => ['^(\d[^\s]+\d) (.+)$', :time, :message])
       @indy.after(:time => '13-03-2000')
       @indy.for(:all).count.should == 4
     end
 
+  end
+
+  context "search time scope" do
+
+    before(:each) do
+      @indy = Indy.search(
+        [ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
+          "2000-09-07 14:07:42 INFO  MyApp - Initializing APPLICATION.",
+          "2000-09-07 14:07:43 INFO  MyApp - Configuring APPLICATION.",
+          "2000-09-07 14:07:44 INFO  MyApp - Running APPLICATION.",
+          "2000-09-07 14:07:45 INFO  MyApp - Exiting APPLICATION."
+        ].join("\n") )
+    end
+
+    context "after method" do
+
+      it "should find entries" do
+        @indy.after(:time => '2000-09-07 14:07:42').for(:all).count.should == 3
+      end
+
+      it "should find 0 entries with a time that is past the log" do
+        @indy.after(:time => '2000-09-07 14:07:46').for(:all).count.should == 0
+      end
+
+      it "should find all entries with a time that is before the log" do
+        @indy.after(:time => '2000-09-07 14:07:40').for(:all).count.should == 5
+      end
+
+      it "should find entries using inclusive" do
+        @indy.after(:time => '2000-09-07 14:07:42', :inclusive => true).for(:all).count.should == 4
+      end
+
+    end
+
+    context "before method" do
+
+      it "should find entries" do
+        @indy.before(:time => '2000-09-07 14:07:44').for(:all).count.should == 3
+      end
+
+      it "should find 0 entries with a time that is before the log" do
+        @indy.before(:time => '2000-09-07 14:07:40').for(:all).count.should == 0
+      end
+
+      it "should find all entries with a time that is after the log" do
+        @indy.before(:time => '2000-09-07 14:07:47').for(:all).count.should == 5
+      end
+
+      it "should find entries using inclusive" do
+        @indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).for(:all).count.should == 4
+      end
+
+    end
+
+  end
+
+  context "multiple time scope methods on the same instance" do
+
+    before(:all) do
+      @indy = Indy.search(
+        [ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
+          "2000-09-07 14:07:42 INFO  MyApp - Initializing APPLICATION.",
+          "2000-09-07 14:07:43 INFO  MyApp - Configuring APPLICATION.",
+          "2000-09-07 14:07:44 INFO  MyApp - Running APPLICATION.",
+          "2000-09-07 14:07:45 INFO  MyApp - Exiting APPLICATION."
+        ].join("\n") )
+    end
+
+    it "should find the correct entries" do
+      @indy.after(:time => '2000-09-07 14:07:42').for(:all).count.should == 3
+      @indy.before(:time => '2000-09-07 14:07:43').for(:all).count.should == 2
+    end
 
   end
 
