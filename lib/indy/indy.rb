@@ -356,8 +356,10 @@ class Indy
   #
   def parse_line( line )
 
-    if /#{@log_regexp}/.match(line)
-      values = /#{@log_regexp}/.match(line).captures
+    match_data = /#{@log_regexp}/.match(line)
+
+    if match_data
+      values = match_data.captures
       raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
 
       hash = Hash[ *@log_fields.zip( values ).flatten ]
