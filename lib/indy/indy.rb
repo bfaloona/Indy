@@ -296,7 +296,7 @@ class Indy
     time_search = use_time_criteria?
 
     source_io = open_source
-    results = source_io.each.collect do |line|
+    results = source_io.collect do |line|
 
       hash = parse_line(line)
 

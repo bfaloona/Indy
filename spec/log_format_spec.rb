@@ -43,13 +43,13 @@ describe Indy do
       it "#{format[:name]} should work" do
         indy = Indy.new(:source => format[:source], :pattern => [format[:regexp],format[:fields]].flatten)
         result = indy.for(format[:test_field] => 'louie')
-        result.count.should == 1
+        result.length.should == 1
       end
 
       it "#{format[:name]} @pattern can be set to the Indy::LogFormat const" do
         indy = Indy.new(:source => format[:source], :pattern => eval('Indy::' + format[:name].upcase))
         result = indy.for(format[:test_field] => 'louie')
-        result.count.should == 1
+        result.length.should == 1
 
       end
     end

@@ -30,7 +30,7 @@ describe Indy do
         :source => "1-13-2000 yes",
         :pattern => ['^([^\s]+) (\w+)$', :time, :message]}
       lambda{ @indy = Indy.search( hash ) }.should_not raise_error
-      @indy.for(:all).count.should == 1
+      @indy.for(:all).length.should == 1
     end
 
 
@@ -156,7 +156,7 @@ describe Indy do
     end
 
     it "should find all 3 rows" do
-      @indy.for(:all).count.should == 3
+      @indy.for(:all).length.should == 3
     end
 
   end
@@ -181,7 +181,7 @@ describe Indy do
     end
 
     it "with() should use default log pattern when passed :default" do
-      @indy.with(:default).for(:all).count.should == 3
+      @indy.with(:default).for(:all).length.should == 3
     end
 
     it "with() should accept no params without error" do
