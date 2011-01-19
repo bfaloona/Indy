@@ -30,14 +30,14 @@ Gem::Specification.new do |s|
   s.name        = 'indy'
   s.version     = ::Indy::VERSION
   s.authors     = ["Franklin Webber","Brandon Faloona"]
-  s.description = %{ Indy is a log archelogy tool explore logs like objects and search by field and/or time.}
-  s.summary     = "Log Search Tool"
+  s.description = %{ Indy is a log archelogy library that treats logs like data structures. Search fixed format or custom logs by field and/or time. }
+  s.summary     = "Log Search Library"
   s.email       = 'franklin.webber@gmail.com'
   s.homepage    = "http://github.com/burtlo/Indy"
   s.license     = 'MIT'
 
   s.platform    = Gem::Platform::RUBY
-  s.required_ruby_version = '>= 1.8.7'
+  s.required_ruby_version = '>= 1.8.5'
   s.add_dependency('activesupport', '>= 2.3.5')
 
   s.add_development_dependency('cucumber', '>= 0.9.2')

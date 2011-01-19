@@ -3,7 +3,7 @@ require 'active_support/core_ext'
 
 class Indy
 
-  VERSION = "0.1.3"
+  VERSION = "0.1.4"
 
   #
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
