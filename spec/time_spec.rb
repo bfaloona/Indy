@@ -44,8 +44,8 @@ describe Indy do
 
     context "after method" do
 
-      it "should find entries" do
-        @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
+      it "should find the correct entries" do
+        @indy.after(:time => '2000-09-07 14:07:42').for(:all).count.should == 3
       end
 
       it "should find 0 entries with a time that is past the log" do
@@ -64,8 +64,8 @@ describe Indy do
 
     context "before method" do
 
-      it "should find entries" do
-        @indy.before(:time => '2000-09-07 14:07:44').for(:all).length.should == 3
+      it "should find the correct entries" do
+        @indy.before(:time => '2000-09-07 14:07:44').for(:all).count.should == 3
       end
 
       it "should find 0 entries with a time that is before the log" do
@@ -80,6 +80,50 @@ describe Indy do
         @indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).for(:all).length.should == 4
       end
 
+    end
+
+    context "within method" do
+
+      it "should find the correct entries" do
+        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43']).for(:all).count.should == 1
+      end
+
+      it "should find the correct entries using inclusive" do
+        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43'], :inclusive => true).for(:all).count.should == 3
+      end
+
+    end
+
+  end
+
+  context "search time scopes with span" do
+
+    before(:each) do
+      @indy = Indy.search(
+        [ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
+          "2000-09-07 14:08:41 INFO  MyApp - Initializing APPLICATION.",
+          "2000-09-07 14:09:41 INFO  MyApp - Configuring APPLICATION.",
+          "2000-09-07 14:10:50 INFO  MyApp - Running APPLICATION.",
+          "2000-09-07 14:11:42 INFO  MyApp - Exiting APPLICATION.",
+          "2000-09-07 14:12:15 INFO  MyApp - Exiting APPLICATION."
+        ].join("\n") )
+    end
+
+    it "using after should find the correct entries" do
+      @indy.after(:time => '2000-09-07 14:07:42', :span => 1).for(:all).count.should == 1
+    end
+
+    it "using before should find the correct entries" do
+      @indy.before(:time => '2000-09-07 14:12:00', :span => 4).for(:all).count.should == 4
+    end
+
+    it "using around should find the correct entries" do
+      puts @indy.around(:time => '2000-09-07 14:11:00', :span => 2).inspect
+      @indy.for(:all).count.should == 3
+    end
+
+    it "using after and inclusive should find the correct entries" do
+      @indy.after(:time => '2000-09-07 14:07:41', :span => 1, :inclusive => true).for(:all).count.should == 1
     end
 
   end
