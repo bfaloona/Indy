@@ -486,7 +486,12 @@ class Indy
   # Return a time or datetime object way in the past
   #
   def forever_ago
-    @time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
+    begin
+      @time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
+    rescue
+      # Windows Ruby Time can't handle dates prior to 1969
+      @time_format ? DateTime.new(-4712) : Time.at(0)
+    end
   end
 
 
