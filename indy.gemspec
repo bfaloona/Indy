@@ -62,9 +62,12 @@ Gem::Specification.new do |s|
 
   }
 
-  s.rubygems_version   = "1.3.7"
-  s.files            = `git ls-files`.split("\n")
-  s.extra_rdoc_files = ["README.md", "History.txt"]
-  s.rdoc_options     = ["--charset=UTF-8"]
-  s.require_path     = "lib"
+  #  exclusions          = [File.join("performance", "large.log")]
+  #  s.files             = `git ls-files`.split("\n") - exclusions
+
+  s.rubygems_version  = "1.3.7"
+  s.files             = `git ls-files`.split("\n")
+  s.extra_rdoc_files  = ["README.md", "History.txt"]
+  s.rdoc_options      = ["--charset=UTF-8"]
+  s.require_path      = "lib"
 end
