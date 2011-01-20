@@ -23,8 +23,28 @@ describe "Search Performance" do
         @indy.like(:message => 'filesystem')
       end
 
-      it "should profile code using #time()" do
-        @indy.after(:time => "12-29-2010 12:11:33").for(:all)
+      it "should profile code using #after()" do
+        @indy.after(:time => "29-12-2010 12:11:32").for(:all)
+      end
+
+    end
+
+  end
+
+  context "with a 10000 line log file" do
+
+    large_file = "#{File.dirname(__FILE__)}/large.log"
+    before(:all) do
+      @indy = Indy.new(
+        :source => large_file,
+        :pattern => [/^\[([^\|]+)\|([^\]]+)\] (.*)$/,:severity, :time, :message],
+        :time_format => '%d-%m-%Y %H:%M:%S')
+    end
+
+    profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
+
+      it "should profile code using #after() and an explicit @time_format" do
+        @indy.after(:time => "29-12-2010 12:11:32").for(:all)
       end
 
     end
