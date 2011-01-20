@@ -10,7 +10,7 @@ describe Indy do
 
     it "should parse a standard date" do
       line_hash = {:time => "2000-09-07 14:07:41", :message => "Entering APPLICATION"}
-      @indy.send(:parse_date, line_hash).class.should == DateTime
+      @indy.send(:parse_date, line_hash).class.should == Time
     end
 
     it "should parse dates when log includes non-conforming data" do
@@ -156,7 +156,7 @@ describe Indy do
 
     it "should parse a non-standard date" do
       line_hash = {:time => "2000/09/07", :message => "Entering APPLICATION"}
-      @indy.send(:parse_date, line_hash).class.should == DateTime
+      @indy.send(:parse_date, line_hash).class.should == Time
     end
 
   end
@@ -168,9 +168,11 @@ describe Indy do
       @indy = Indy.new(:time_format => '%m-%d-%Y', :source => "1-13-2002 message\n1-14-2002 another message\n1-15-2002 another message", :pattern => [pattern, :time, :message])
     end
 
-    it "should parse a US style date when given a time format" do
+    it "should parse a US style date when given a time format by using DateTime" do
       line_hash = {:time => '1-13-2002', :message => 'message'}
-      @indy.send(:parse_date, line_hash).class.should == DateTime
+      time = @indy.send(:parse_date, line_hash)
+      time.class.should == DateTime
+      time.day.should == 13
     end
 
     it "should accept standard time format searches even while using an explicit log time format" do
@@ -187,24 +189,21 @@ describe Indy do
         "2000-09-07 14:08:41 INFO  MyApp - Exiting APPLICATION.",
         "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
       @search_result = Indy.search(log_string).for(:application => 'MyApp')
-      @time_search_result = Indy.search(log_string).before(:time => "2100-09-07").for(:application => 'MyApp')
+      @time_search_result = Indy.search(log_string).before(:time => "2020-09-07").for(:application => 'MyApp')
     end
 
     it "should not exist as an attribute when unless performing a time search" do
       @search_result.first._time.class.should == NilClass
-      @time_search_result.first._time.class.should == DateTime
+      @time_search_result.first._time.class.should == Time
     end
 
     it "should be accurate" do
-      @time_search_result.first._time.to_s.should == "2000-09-07T14:07:41+00:00"
+      @time_search_result.first._time.to_s.should == "Thu Sep 07 14:07:41 -0700 2000"
     end
 
     it "should allow for time range calculations" do
-      time_span = @time_search_result.last._time - @time_search_result.first._time
-      hours,minutes,seconds,frac = Date.day_fraction_to_time( time_span )
-      hours.should == 0
-      minutes.should == 3
-      seconds.should == 14
+      seconds = @time_search_result.last._time - @time_search_result.first._time
+      seconds.should == 194
     end
 
   end

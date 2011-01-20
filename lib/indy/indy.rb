@@ -20,10 +20,6 @@ class Indy
   #
   attr_accessor :time_format
 
-  FOREVER_AGO = DateTime.now - 200_000
-  FOREVER = DateTime.now + 200_000
-
-
   #
   # Initialize Indy.
   #
@@ -230,7 +226,8 @@ class Indy
   #
   def within(scope_criteria)
     if scope_criteria[:time]
-      @start_time, @end_time = scope_criteria[:time]
+      @start_time, @end_time = scope_criteria[:time].collect {|str| parse_date(str) }
+
       @inclusive = scope_criteria[:inclusive] || false
     end
 
@@ -374,8 +371,8 @@ class Indy
   def use_time_criteria?
     if @start_time || @end_time
       # ensure both boundaries are set
-      @start_time = @start_time || FOREVER_AGO
-      @end_time = @end_time || FOREVER
+      @start_time = @start_time || forever_ago
+      @end_time = @end_time || forever
     end
 
     return (@time_field && @start_time && @end_time)
@@ -415,16 +412,26 @@ class Indy
   #
   def parse_date(param)
     return nil unless @time_field
+    return param if param.kind_of? Time or param.kind_of? DateTime
 
     time_string = param[@time_field] ? param[@time_field] : param
 
-    begin
-      # Attempt the appropriate parse method
-      @time_format ? DateTime.strptime(time_string, @time_format) : DateTime.parse(time_string)
-    rescue
-      # If appropriate, fall back to simple parse method
-      DateTime.parse(time_string) if @time_format rescue nil
+    if @time_format
+      begin
+        # Attempt the appropriate parse method
+        DateTime.strptime(time_string, @time_format)
+      rescue
+        # If appropriate, fall back to simple parse method
+        DateTime.parse(time_string) rescue nil
+      end
+    else
+      begin
+        Time.parse(time_string)
+      rescue Exception => e
+        raise "Failed to create time object. The error was: #{e.message}"
+      end
     end
+
   end
 
   #
@@ -467,5 +474,20 @@ class Indy
     params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
     Struct::Line.new( *params )
   end
+
+  #
+  # Return a time or datetime object way in the future
+  #
+  def forever
+    @time_format ? DateTime.new(4712) : Time.at(0x7FFFFFFF)
+  end
+
+  #
+  # Return a time or datetime object way in the past
+  #
+  def forever_ago
+    @time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
+  end
+
 
 end
