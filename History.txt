@@ -1,7 +1,10 @@
-=== 0.1.5 / 2011-01- ???
+=== 0.1.5 / 2011-01-21
 
-* Using time scopes (#after, #within, #before) are faster
-* Explicit format string for time uses the older (and much slower) time scoping code
+* Searching with time scopes (#after, #within, #before) are much faster
+* Dates used in time scopes are limited to 1901 - 2038
+    * The Windows platform limits dates further to 1969 - 2038
+* Explicit format string for time forces the old (slower) time scoping code
+    * However, this removes the harsh limits on date values
 
 === 0.1.4 / 2011-01-19
 
