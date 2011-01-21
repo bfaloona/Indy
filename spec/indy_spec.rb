@@ -82,6 +82,18 @@ describe Indy do
       Indy.search(:cmd => "ls").source.should_not be_nil
     end
 
+    it "the instance should raise an exception when passed an invalid source: Fixnum" do
+      lambda{ Indy.search(9) }.should raise_error Indy::InvalidSource
+    end
+
+    it "the instance should raise an exception when passed an invalid source: nil" do
+      lambda{ Indy.search(nil) }.should raise_error Indy::InvalidSource
+    end
+
+    it "the instance should raise an exception when the arity is incorrect" do
+      lambda{ Indy.search( ) }.should raise_error Indy::InvalidSource
+    end
+
     context "for a String" do
 
       let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }

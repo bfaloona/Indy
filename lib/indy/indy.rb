@@ -2,6 +2,8 @@ require 'active_support/core_ext'
 
 class Indy
 
+  class InvalidSource < Exception;end
+
   VERSION = "0.1.4"
 
   #
@@ -67,7 +69,10 @@ class Indy
     # @example
     #   Indy.search(:source => {:cmd => "cat apache.log"}, :pattern => LOG_PATTERN, :time_format => MY_TIME_FORMAT).for(:all)
     #
-    def search(params)
+    def search(params=nil)
+  
+      raise Indy::InvalidSource if params.nil?
+
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
@@ -250,6 +255,8 @@ class Indy
   #
   def source=(param)
 
+    raise Indy::InvalidSource if param.nil?
+
     cmd = param[:cmd] rescue nil
     @source[:cmd] = param[:cmd] if cmd
 
@@ -257,7 +264,7 @@ class Indy
       File.exist?(param) ? @source[:file] = param : @source[:string] = param
     end
 
-
+    raise Indy::InvalidSource unless @source.values.reject {|value| value.kind_of? String }.empty?
 
   end
 
