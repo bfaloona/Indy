@@ -118,7 +118,7 @@ describe Indy do
     end
 
     it "using around should find the correct entries" do
-      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).count.should == 3
+      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).count.should == 2
     end
 
     it "using after and inclusive should find the correct entries" do
@@ -139,7 +139,7 @@ describe Indy do
         ].join("\n") )
     end
 
-    it "should find the correct entries" do
+    it "should find the correct entries (Bug: https://github.com/burtlo/Indy/issues#issue/3)" do
       @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
       @indy.before(:time => '2000-09-07 14:07:43').for(:all).length.should == 2
     end

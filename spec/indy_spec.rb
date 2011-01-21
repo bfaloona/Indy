@@ -163,7 +163,7 @@ describe Indy do
   context "bad data" do
 
     before(:each) do
-      log = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n \n2000-09-07 14:07:41 INFO  MyApp  Entering APPLICATION.\n2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"
+      log = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n \n2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n bad \n2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"
       @indy = Indy.search(log)
     end
 
@@ -176,7 +176,7 @@ describe Indy do
   context "instance" do
 
     before(:each) do
-      log = "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION."
+      log = "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION."
       @indy = Indy.search(log)
     end
 
