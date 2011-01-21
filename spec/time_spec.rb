@@ -118,8 +118,7 @@ describe Indy do
     end
 
     it "using around should find the correct entries" do
-      puts @indy.around(:time => '2000-09-07 14:11:00', :span => 2).inspect
-      @indy.for(:all).count.should == 3
+      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).count.should == 3
     end
 
     it "using after and inclusive should find the correct entries" do

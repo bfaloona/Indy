@@ -257,6 +257,8 @@ class Indy
       File.exist?(param) ? @source[:file] = param : @source[:string] = param
     end
 
+
+
   end
 
   #
@@ -289,6 +291,7 @@ class Indy
   #
   def _search(&block)
 
+    line_matched = nil
     time_search = use_time_criteria?
 
     source_io = open_source
@@ -296,6 +299,8 @@ class Indy
 
       hash = parse_line(line)
 
+      hash ? (line_matched = true) : next
+      
       if time_search
         set_time(hash)
         next unless inside_time_window?(hash)
@@ -303,10 +308,11 @@ class Indy
         hash[:_time] = nil if hash
       end
 
-      next unless hash
       block_given? ? block.call(hash) : nil
 
     end
+
+    warn "No matching lines found in source: #{source_io.class}" unless line_matched
 
     source_io.close if @source[:file] || @source[:cmd]
 
