@@ -184,16 +184,18 @@ class Indy
   end
 
   #
-  #
+  # Return a Struct::Line for the last valid entry from the source
   #
   def last_entry
     last_entries(1)
   end
 
   #
-  # 
+  # Return an array of Struct::Line entries for the last N valid entries from the source
   #
-  def last_entries(rows)
+  # @param [Fixnum] num the number of rows to retrieve
+  #
+  def last_entries(num)
 
     num_entries = 0
     result = []
@@ -208,7 +210,7 @@ class Indy
       if hash
         num_entries += 1
         result << hash
-        break if num_entries >= rows
+        break if num_entries >= num
       end
     end
 
@@ -216,7 +218,7 @@ class Indy
 
     source_io.close if @source[:file] || @source[:cmd]
 
-    rows == 1 ? create_struct(result.first) : result.collect{|e| create_struct(e)}
+    num == 1 ? create_struct(result.first) : result.collect{|e| create_struct(e)}
   end
 
 
