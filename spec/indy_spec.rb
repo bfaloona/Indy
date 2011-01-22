@@ -1,6 +1,6 @@
 require "#{File.dirname(__FILE__)}/helper"
 
-describe Indy do
+describe 'Indy' do
 
   context ':initialize' do
 
@@ -173,10 +173,29 @@ describe Indy do
 
   end
 
+  context "multiline log entries" do
+
+    before(:each) do
+      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tEven more data"].join("\n")
+      @indy = Indy.search(log)
+    end
+
+    it "should find all 3 rows" do
+      results = @indy.for(:all)
+      results.length.should == 3
+      results.first.message.should match(/Application data.$/)
+    end
+
+  end
+
   context "instance" do
 
     before(:each) do
-      log = "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.\n2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION."
+      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
       @indy = Indy.search(log)
     end
 
@@ -232,6 +251,7 @@ describe Indy do
       end
 
       it "should return an array of results" do
+        @results.length.should == 3
         @results.first[:application].should == "MyApp"
       end
 
