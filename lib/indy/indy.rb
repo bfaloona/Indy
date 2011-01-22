@@ -34,7 +34,7 @@ class Indy
   #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
   #
   def initialize(args)
-    @source = @pattern = @time_format = @log_regexp = @log_fields = nil
+    @source = @pattern = @time_format = @log_regexp = @log_fields = @reverse_rows = nil
     @source = Hash.new
 
     while (arg = args.shift) do
@@ -111,8 +111,6 @@ class Indy
   def for(search_criteria)
     results = ResultSet.new
 
-    define_struct
-
     case search_criteria
     when Enumerable
       results += _search do |result|
@@ -139,7 +137,6 @@ class Indy
   #
   def like(search_criteria)
     results = ResultSet.new
-    define_struct
 
     results += _search do |result|
       create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
@@ -152,7 +149,79 @@ class Indy
 
 
   #
-  # After scopes the eventual search to all entries after to this point.
+  # Last() scopes the eventual search to the last N entries, or last N minutes of entries.
+  #
+  # @param [Fixnum,Hash] scope_criteria the number of rows, or a hash describing
+  #   the amount of time at the last portion of the source
+  #
+  # @example For last 100 entries
+  #
+  #   Indy.search(LOG_FILE).last(100).for(:all)
+  #
+  # @example For last 10 minutes worth of entries
+  #
+  #   Indy.search(LOG_FILE).last(:span => 100).for(:all)
+  #
+  def last(scope_criteria)
+    case scope_criteria
+    when Enumerable
+      raise ArgumentError unless scope_criteria[:span] || scope_criteria[:rows]
+      
+      if scope_criteria[:span]
+        span = (scope_criteria[:span].to_i * 60).seconds
+        starttime = parse_date(last_entry[:_time]) - span
+
+        within(:time => [starttime, forever])
+
+      elsif scope_criteria[:rows]
+        @reverse_rows = scope_criteria[:rows]
+      end
+    else
+      raise ArgumentError, "Invalid parameter: #{scope_criteria.inspect}"
+    end
+
+    self
+  end
+
+  #
+  #
+  #
+  def last_entry
+    last_entries(1)
+  end
+
+  #
+  # 
+  #
+  def last_entries(rows)
+
+    num_entries = 0
+    result = []
+
+    source_io = open_source
+    source_io.reverse_each do |line|
+
+      hash = parse_line(line)
+
+      set_time(hash) if @time_field
+      
+      if hash
+        num_entries += 1
+        result << hash
+        break if num_entries >= rows
+      end
+    end
+
+    warn "No matching lines found in source: #{source_io.class}" if result.empty?
+
+    source_io.close if @source[:file] || @source[:cmd]
+
+    rows == 1 ? create_struct(result.first) : result.collect{|e| create_struct(e)}
+  end
+
+
+  #
+  # After() scopes the eventual search to all entries after to this point.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -178,7 +247,7 @@ class Indy
   end
 
   #
-  # Before scopes the eventual search to all entries prior to this point.
+  # Before() scopes the eventual search to all entries prior to this point.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -220,7 +289,7 @@ class Indy
 
 
   #
-  # Within scopes the eventual search to all entries between two points.
+  # Within() scopes the eventual search to all entries between two points.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -287,6 +356,9 @@ class Indy
     @log_regexp, *@log_fields = @pattern
 
     @time_field = ( @log_fields.include?(:time) ? :time : nil )
+
+    # now that we know the fields
+    define_struct
 
   end
 
