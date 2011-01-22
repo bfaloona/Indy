@@ -73,6 +73,37 @@ Several log formats have been predefined for ease of configuration. See indy/pat
     #  INFO mylog: This is a message with level INFO
     Indy.new(:source => 'logfile.txt', :pattern => Indy::LOG4R_DEFAULT_PATTERN).for(:application => 'mylog')
 
+### Multiline log entries
+
+By default, Indy assumes that log lines are separated by new lines. Any lines that don't match the active pattern are ignored. To enable multiline log entries you must do two things:
+
+1. Use `Indy.new()` and include the `:multiline => true` parameter
+2. Use a log entry regexp that does not use `$` and/or `\n` to define the end of the entry.
+
+#### Multiline Regexp tips
+
+* Use non-greedy matching when needed: `.*?` instead of `.*`
+* Assuming your log entries do not include a unique line ending, you can use a zero-width positive lookahead assertion to verify that each line is followed by the start of a valid log entry, or the end of the string. e.g.: `(?=^foo|\z)`
+
+Check out [Regexp Extensions](http://www.ruby-doc.org/docs/ProgrammingRuby/html/language.html#UN)
+
+Example:
+
+    # Given this log containing two entries:
+    #
+    # INFO MyApp - Multiline message begins here
+    # and ends here
+    # DEBUG MyOtherApp - Single line message
+    
+    severity_string = 'DEBUG|INFO|WARN|ERROR|FATAL'
+
+    # single line regexp would be:
+    #        /^(#{severity_string}) (\w+) - (.*)$/
+
+    regexp = /^(#{severity_string}) (\w+) - (.*?)(?=^#{severity_string}|\z)/
+
+    Indy.new( :multiline => true, :pattern => [regexp, :severity, :application, :message], :source => MY_LOG)
+
 ### Explicit Time Format
 
 By default, Indy tries to guess your time format (courtesy of DateTime#parse). If you supply an explicit time format, it will use DateTime#strptime, as well as try to guess.
