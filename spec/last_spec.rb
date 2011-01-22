@@ -33,15 +33,15 @@ describe 'Indy#last' do
     end
 
     it "should return correct number of rows when passed a number" do
-      @indy.last( 3 ).length.should == 3
+      @indy.last( 3 ).for(:all).length.should == 3
     end
 
     it "should return correct number of rows when passed a span of minutes" do
-      @indy.last( :span => 2).length.should == 3
+      @indy.last( :span => 2).for(:all).length.should == 3
     end
 
     it "should return correct rows when passed a span of minutes" do
-      @indy.last( :span => 3).first.time.should == '2000-09-10 14:08:00'
+      @indy.last( :span => 3).for(:all).first.time.should == '2000-09-10 14:08:00'
     end
 
     
