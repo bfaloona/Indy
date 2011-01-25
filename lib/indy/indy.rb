@@ -23,6 +23,15 @@ class Indy
   attr_accessor :time_format
 
   #
+  # initialization flag required if multiline log entries are allowed
+  #
+  # @example
+  #
+  #  Indy.new(:source => MY_LOG, :pattern => [MY_REGEXP, FIELD1, FIELD2, FIELD3], :multiline => true)
+  #
+  attr_accessor :multiline
+
+  #
   # Initialize Indy.
   #
   # @example
@@ -34,14 +43,14 @@ class Indy
   #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
   #
   def initialize(args)
-    @source = @pattern = @time_format = @log_regexp = @log_fields = @reverse_rows = nil
+    @source = @pattern = @time_format = @log_regexp = @log_fields = @multiline = @reverse_rows = nil
     @source = Hash.new
 
     while (arg = args.shift) do
       send("#{arg.first}=",arg.last)
     end
 
-    update_log_pattern(@pattern)
+    update_log_pattern( @pattern )
 
   end
 
@@ -376,27 +385,43 @@ class Indy
     time_search = use_time_criteria?
 
     source_io = open_source
-    results = source_io.collect do |line|
 
-      hash = parse_line(line)
+    if @multiline
+      results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
 
-      hash ? (line_matched = true) : next
-      
-      if time_search
-        set_time(hash)
-        next unless inside_time_window?(hash)
-      else
-        hash[:_time] = nil if hash
+        hash = parse_line(entry)
+        hash ? (line_matched = true) : next
+
+        if time_search
+          set_time(hash)
+          next unless inside_time_window?(hash)
+        else
+          hash[:_time] = nil if hash
+        end
+
+        block_given? ? block.call(hash) : nil
       end
 
-      block_given? ? block.call(hash) : nil
+    else
+      results = source_io.collect do |line|
+        hash = parse_line(line)
+        hash ? (line_matched = true) : next
+
+        if time_search
+          set_time(hash)
+          next unless inside_time_window?(hash)
+        else
+          hash[:_time] = nil if hash
+        end
+
+        block_given? ? block.call(hash) : nil
+      end
 
     end
 
     warn "No matching lines found in source: #{source_io.class}" unless line_matched
 
-    source_io.close if @source[:file] || @source[:cmd]
-
+    source_io.close if @source[:file] || @source[:cmd]    
     results.compact
   end
 
@@ -439,17 +464,26 @@ class Indy
   #
   def parse_line( line )
 
-    match_data = /#{@log_regexp}/.match(line)
+    if line.kind_of? String
+      match_data = /#{@log_regexp}/.match(line)
+      return nil unless match_data
 
-    if match_data
       values = match_data.captures
-      raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
+      entire_line = line.strip
 
-      hash = Hash[ *@log_fields.zip( values ).flatten ]
-      hash[:line] = line.strip
+    elsif line.kind_of? Enumerable
 
-      hash
+      entire_line = line.shift
+      values = line 
     end
+    
+    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
+
+    hash = Hash[ *@log_fields.zip( values ).flatten ]
+    hash[:line] = entire_line.strip
+
+
+    hash
   end
 
   #

@@ -173,19 +173,27 @@ describe 'Indy' do
 
   end
 
-  context "multiline log entries" do
+  context "multiline log mode" do
 
     before(:each) do
-      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
+      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nfirst Application data.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
-              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tEven more data"].join("\n")
-      @indy = Indy.search(log)
+              "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data."].join("\n")
+      regexp = "^((#{Indy::LogFormats::DEFAULT_DATE_TIME})\\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\\s+-\\s+(.*?)(?=#{Indy::LogFormats::DEFAULT_DATE_TIME}|\z))"
+      @indy = Indy.new(:source => log, :pattern => [regexp, :time,:severity,:application,:message], :multiline => true  )
     end
 
-    it "should find all 3 rows" do
+    it "should find the first row" do
       results = @indy.for(:all)
-      results.length.should == 3
-      results.first.message.should match(/Application data.$/)
+      results.first.message.should match(/first Application data.$/)
+    end
+
+    it "should find the last row" do
+      results = @indy.for(:all)
+      results.first.message.should match(/\tlast Application data.$/)
+      results.length.should == 5
     end
 
   end
