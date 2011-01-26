@@ -181,7 +181,7 @@ describe 'Indy' do
               "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data."].join("\n")
-      regexp = "^((#{Indy::LogFormats::DEFAULT_DATE_TIME})\\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\\s+-\\s+(.*?)(?=#{Indy::LogFormats::DEFAULT_DATE_TIME}|\z))"
+      regexp = "^((#{Indy::LogFormats::DEFAULT_DATE_TIME})\\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\\s+-\\s+(.*?)(?=#{Indy::LogFormats::DEFAULT_DATE_TIME}|\\z))"
       @indy = Indy.new(:source => log, :pattern => [regexp, :time,:severity,:application,:message], :multiline => true  )
     end
 
@@ -192,7 +192,7 @@ describe 'Indy' do
 
     it "should find the last row" do
       results = @indy.for(:all)
-      results.first.message.should match(/\tlast Application data.$/)
+      results.last.message.should match(/\tlast Application data.$/)
       results.length.should == 5
     end
 
