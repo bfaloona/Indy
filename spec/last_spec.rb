@@ -31,13 +31,11 @@ describe 'Indy#last' do
       @indy.last( :span => 2).for(:all).length.should == 3
       @indy.last( :span => 3).for(:all).length.should == 5
       @indy.last( :span => 1_440).for(:all).length.should == 6
-      
     end
 
     it "should return correct rows when passed a span of minutes" do
       @indy.last( :span => 3).for(:all).first.time.should == '2000-09-10 14:08:00'
     end
-
     
   end
 

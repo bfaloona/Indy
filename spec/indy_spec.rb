@@ -178,6 +178,7 @@ describe 'Indy' do
     before(:each) do
       log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nfirst Application data.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              " ",
               "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data."].join("\n")

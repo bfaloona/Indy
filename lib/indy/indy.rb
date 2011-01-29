@@ -43,7 +43,7 @@ class Indy
   #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
   #
   def initialize(args)
-    @source = @pattern = @time_format = @log_regexp = @log_fields = @multiline = @reverse_rows = nil
+    @source = @pattern = @time_format = @log_regexp = @log_fields = @multiline = nil
     @source = Hash.new
 
     while (arg = args.shift) do
@@ -181,9 +181,6 @@ class Indy
         starttime = parse_date(last_entry[:_time]) - span
 
         within(:time => [starttime, forever])
-
-      elsif scope_criteria[:rows]
-        @reverse_rows = scope_criteria[:rows]
       end
     else
       raise ArgumentError, "Invalid parameter: #{scope_criteria.inspect}"
