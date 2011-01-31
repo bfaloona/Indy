@@ -30,5 +30,5 @@ Scenario: Count of entries for a time span before and including a specified time
     Then I expect to have found 2 log entries
 
   Scenario: Count of entries for a time span after and including a specified time
-    When searching the log for all entries 31 minutes after and including the time 2000-09-07 14:17:43
-    Then I expect to have found 3 log entries
+    When searching the log for all entries 30 minutes after and including the time 2000-09-07 14:17:43
+    Then I expect to have found 4 log entries

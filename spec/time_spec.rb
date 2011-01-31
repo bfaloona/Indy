@@ -118,18 +118,18 @@ describe Indy do
     end
 
     it "using around should find the correct entries" do
-      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).length.should == 3
+      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).length.should == 2
     end
 
     it "using after and inclusive should find the correct entries" do
-      @indy.after(:time => '2000-09-07 14:07:41', :span => 1, :inclusive => true).for(:all).length.should == 1
+      @indy.after(:time => '2000-09-07 14:07:41', :span => 2, :inclusive => true).for(:all).length.should == 3
     end
 
   end
 
   context "multiple time scope methods on the same instance" do
 
-    before(:all) do
+    before(:each) do
       @indy = Indy.search(
         [ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
           "2000-09-07 14:07:42 INFO  MyApp - Initializing APPLICATION.",
@@ -139,9 +139,16 @@ describe Indy do
         ].join("\n") )
     end
 
-    it "should find the correct entries (Bug: https://github.com/burtlo/Indy/issues#issue/3)" do
+    # Issue #3 (by design) assumed that the time scope.
+    it "should each add scope criteria to the instance" do
       @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
-      @indy.before(:time => '2000-09-07 14:07:43').for(:all).length.should == 2
+      @indy.before(:time => '2000-09-07 14:07:45').for(:all).length.should == 2
+    end
+
+    it "should specify the entire scope if #reset_scope was called" do
+      @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
+      @indy.reset_scope
+      @indy.before(:time => '2000-09-07 14:07:45').for(:all).length.should == 4
     end
 
   end

@@ -241,7 +241,7 @@ class Indy
   def after(scope_criteria)
     if scope_criteria[:time]
       time = parse_date(scope_criteria[:time])
-      @inclusive = scope_criteria[:inclusive] || false
+      @inclusive = @inclusive || scope_criteria[:inclusive] || nil
 
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
@@ -254,6 +254,14 @@ class Indy
     self
   end
 
+  #
+  # reset_time_scope removes any existing start and end times from the instance
+  # Otherwise consecutive calls retain state
+  #
+  def reset_scope
+    @inclusive = @start_time = @end_time = nil
+  end
+    
   #
   # Before() scopes the eventual search to all entries prior to this point.
   #
@@ -268,7 +276,7 @@ class Indy
   def before(scope_criteria)
     if scope_criteria[:time]
       time = parse_date(scope_criteria[:time])
-      @inclusive = scope_criteria[:inclusive] || false
+      @inclusive = @inclusive || scope_criteria[:inclusive] || nil
 
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
@@ -285,8 +293,8 @@ class Indy
     if scope_criteria[:time]
       time = parse_date(scope_criteria[:time])
 
-      # does @inclusive add any real value to the #around method?
-      @inclusive = scope_criteria[:inclusive] || false
+      @inclusive = nil
+      warn "Ignoring inclusive scope_criteria" if scope_criteria[:inclusive]
 
       half_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
       within(:time => [time - half_span, time + half_span])
@@ -310,7 +318,7 @@ class Indy
     if scope_criteria[:time]
       @start_time, @end_time = scope_criteria[:time].collect {|str| parse_date(str) }
 
-      @inclusive = scope_criteria[:inclusive] || false
+      @inclusive = @inclusive || scope_criteria[:inclusive] || nil
     end
 
     self

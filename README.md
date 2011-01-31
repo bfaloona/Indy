@@ -40,16 +40,22 @@ Usage
 
     Indy.search(log_string).for(:message => 'Entering application')
 
-## Specify your Pattern
-
-The default search pattern resembles something you might find:
-
-    YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
+## Log Pattern
 
 ### Default Log Pattern
   
-   Indy.search(source).for(:severity => 'INFO')
-   Indy.search(source).for(:application => 'MyApp', :severity => 'DEBUG')
+The default search pattern follows this form:  
+YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
+
+Which uses this regexp:
+    /^(\d{4}.\d{2}.\d{2}\s+\d{2}.\d{2}.\d{2})\s+(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\s+(\w+)\s+-\s+(.+)$/
+
+and specifies these fields:  
+    [:time, :severity, :application, :message]
+
+For example:  
+    Indy.search(source).for(:severity => 'INFO')
+    Indy.search(source).for(:application => 'MyApp', :severity => 'DEBUG')
 
 ### Custom Log Pattern
 
@@ -98,11 +104,10 @@ Example:
     severity_string = 'DEBUG|INFO|WARN|ERROR|FATAL'
 
     # single line regexp would be:
-    #        /^(#{severity_string}) (\w+) - (.*)$/
+    #                  /^(#{severity_string}) (\w+) - (.*)$/
+    multiline_regexp = /^(#{severity_string}) (\w+) - (.*?)(?=^#{severity_string}|\z)/
 
-    regexp = /^(#{severity_string}) (\w+) - (.*?)(?=^#{severity_string}|\z)/
-
-    Indy.new( :multiline => true, :pattern => [regexp, :severity, :application, :message], :source => MY_LOG)
+    Indy.new( :multiline => true, :pattern => [multiline_regexp, :severity, :application, :message], :source => MY_LOG)
 
 ### Explicit Time Format
 
@@ -125,13 +130,6 @@ This is required when log data uses a non-standard date format, e.g.: U.S. forma
     Indy.search(source).for(:message => 'Entering Application', :application => 'MyApp')
     Indy.search(source).for(:severity => 'INFO', :application => 'MyApp')
 
-### Time Scope
-
-    Indy.search(source).after(:time => '2011-01-13 13:40:00').for(:all)
-    Indy.search(source).before(:time => '2010-12-31 23:59:59').for(:all)
-    Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 2).for(:all) # 2 minutes around New Year's Eve
-    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).for(:severity => 'ERROR', :application => 'MyApp')
-
 ### Partial Match
 
     Indy.search(source).like(:message => 'Memory')
@@ -140,17 +138,46 @@ This is required when log data uses a non-standard date format, e.g.: U.S. forma
 
     Indy.search(source).like(:severity => '(?:INFO|DEBUG)', :message => 'Memory')
 
+## Log Scopes
+
+Multiple scope methods can be called on an instance. Use #reset_scope to remove scope constrints on the instance.
+
+### Time Scope
+
+    # After Dec 1
+    Indy.search(source).after(:time => '2010-12-01 23:59:59').for(:all)
+
+    # 20 minutes Around New Year's eve
+    Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 20).for(:all)
+
+    # After Jan 1 but Before Feb 1
+    @log = Indy.search(source)
+    @log.after(:time => '2011-01-01 00:00:00').before(:time => '2011-02-01 00:00:00')
+    @log.for(:all)
+
+    # Within Jan 1 and Feb 1 (same time scope as above)
+    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).for(:all)
+
+    # After Jan 1
+    @log = Indy.search(source)
+    @log.after(:time => '2011-01-01 00:00:00')
+    @log.for(:all)
+    # Reset the time scope to include entries before Jan 1
+    @log.reset_scope
+    # Before Feb 1
+    @log.before(:time => '2011-02-01 00:00:00')
+    @log.for(:all)
+
 ## Process the Results
 
-    A ResultSet (Array) is returned by #for, #like, #after, etc.
+A ResultSet is returned by #for and #like, which is an Enumerable containing a hash for each log entry.
 
     entries = Indy.search(source).for(:message => 'Entering Application')
+    entries.first.keys
+    # => [:line, :time, :severity, :application, :message]
 
     Indy.search(source).for(:message => 'Entering Application').each do |entry|
-
-      # each log line entry returned is an OpenStruct object
       puts "[#{entry.time}] #{entry.message}: #{entry.application}"
-
     end
 
 LICENSE
