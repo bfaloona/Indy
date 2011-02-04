@@ -204,7 +204,7 @@ describe Indy do
     end
 
     it "should be accurate" do
-      @time_search_result.first._time.to_s.should == "Thu Sep 07 14:07:41 -0700 2000"
+      @time_search_result.first._time.strftime("%a %b %d %H:%M:%S %Z").should == "Thu Sep 07 14:07:41 PDT"
     end
 
     it "should allow for time range calculations" do

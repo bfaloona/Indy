@@ -80,7 +80,7 @@ class Indy
     #
     def search(params=nil)
   
-      raise Indy::InvalidSource if params.nil?
+      raise Indy::InvalidSource if params.nil? || params.is_a?(Fixnum)
 
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
@@ -539,8 +539,8 @@ class Indy
   def parse_date(param)
     return nil unless @time_field
     return param if param.kind_of? Time or param.kind_of? DateTime
-
-    time_string = param[@time_field] ? param[@time_field] : param
+    
+    time_string = param.is_a?(Hash) ? param[@time_field] : param.to_s
 
     if @time_format
       begin
