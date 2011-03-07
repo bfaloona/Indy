@@ -300,4 +300,21 @@ describe 'Indy' do
 
   end
 
+  context 'source' do
+    before(:each) do
+      @indy = Indy.search(
+        [ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
+          "2000-09-07 14:08:41 INFO  MyApp - Initializing APPLICATION.",
+          "2000-09-07 14:09:41 INFO  MyApp - Configuring APPLICATION.",
+          "2000-09-07 14:10:50 INFO  MyApp - Running APPLICATION.",
+          "2000-09-07 14:11:42 INFO  MyApp - Exiting APPLICATION.",
+          "2000-09-07 14:12:15 INFO  MyApp - Exiting APPLICATION."
+        ].join("\n") )
+    end
+
+    it "should know how many lines it contains" do
+      @indy.send(:num_lines).should == 6
+    end
+  end
+
 end
