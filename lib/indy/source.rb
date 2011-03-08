@@ -104,15 +104,26 @@ class Indy
     # the number of lines in the source
     #
     def num_lines
-      if @num_lines
-        @num_lines
-      else
-        self.open
-        @lines = @io.readlines
-        @io.rewind
-        @num_lines = @lines.count
-        @num_lines
-      end
+      load_data unless @num_lines
+      @num_lines
+    end
+
+    #
+    # array of log lines from source
+    #
+    def lines
+      load_data unless @lines
+      @lines
+    end
+
+    #
+    # read source data and populate instance variables
+    #
+    def load_data
+      self.open
+      @lines = @io.readlines
+      @io.rewind
+      @num_lines = @lines.count
     end
 
     # def start_time

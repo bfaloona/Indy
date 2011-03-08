@@ -1,0 +1,10 @@
+2000-09-07 14:07:41 INFO  MyApp - Entering application with data:
+multi-line data.
+2001-09-07 14:07:41 INFO  MyApp - Initializing application
+2002-09-07 14:07:42 INFO  MyApp - Exiting application with data:
+multi-line data (2003-09-07 14:07:42) ....
+
+    2004-09-07 14:07:42 even more data
+    end of multi-line data
+2005-09-07 14:07:43 INFO  MyApp - Entering application with data:
+multi-line data.
