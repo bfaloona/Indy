@@ -198,7 +198,7 @@ describe Indy do
       @time_search_result = Indy.search(log_string).before(:time => "2020-09-07").for(:application => 'MyApp')
     end
 
-    it "should not exist as an attribute when unless performing a time search" do
+    it "should not exist as an attribute unless performing a time search" do
       @search_result.first._time.class.should == NilClass
       @time_search_result.first._time.class.should == Time
     end

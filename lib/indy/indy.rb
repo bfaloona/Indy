@@ -6,33 +6,21 @@ class Indy
 
   VERSION = "0.1.6"
 
-  #
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
-  #
   attr_accessor :source
 
-  #
   # array with regexp string and capture groups followed by log field
   # name symbols. :time field is required to use time scoping
-  #
   attr_accessor :pattern
 
-  #
   # format string for explicit date/time format (optional)
-  #
   attr_accessor :time_format
 
-  #
-  # initialization flag required if multiline log entries are allowed
-  #
-  # @example
-  #
-  #  Indy.new(:source => MY_LOG, :pattern => [MY_REGEXP, FIELD1, FIELD2, FIELD3], :multiline => true)
-  #
+  # initialization flag (true || nil) to enable multiline log entries. See README
   attr_accessor :multiline
 
   #
-  # Initialize Indy.
+  # Initialize Indy. Also see class method Indy.search()
   #
   # @example
   #
@@ -44,7 +32,6 @@ class Indy
   #
   def initialize(args)
     @source = @pattern = @time_format = @log_regexp = @log_fields = @multiline = nil
-    @source = Hash.new
 
     while (arg = args.shift) do
       send("#{arg.first}=",arg.last)
@@ -52,6 +39,15 @@ class Indy
 
     update_log_pattern( @pattern )
 
+  end
+
+  #
+  # Create an Indy::Source object to manage the log source
+  #
+  # @param [String,Hash] source A filename, or log content as a string. Use a Hash with :cmd key to specify a command string.
+  #
+  def source=(param)
+    @source = Source.new(param)
   end
 
   class << self
@@ -66,22 +62,20 @@ class Indy
     #   Alternately, a Hash with a :source key (amoung others) can be used to
     #   provide multiple initialization parameters.
     #
-    # @example
+    # @example filename source
     #   Indy.search("apache.log").for(:severity => "INFO")
     #   
-    # @example
+    # @example string source
     #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").for(:all)
     #
-    # @example
+    # @example command source
     #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
     #
-    # @example
+    # @example source as well as other paramters
     #   Indy.search(:source => {:cmd => "cat apache.log"}, :pattern => LOG_PATTERN, :time_format => MY_TIME_FORMAT).for(:all)
     #
     def search(params=nil)
   
-      raise Indy::InvalidSource if params.nil? || params.is_a?(Fixnum)
-
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
@@ -89,8 +83,17 @@ class Indy
       end
     end
 
-  end
+    #
+    # Return a Struct::Line object from a hash of values from a log entry
+    #
+    # @param [Hash] line_hash a hash of :field_name => value pairs for one log line
+    #
+    def create_struct( line_hash )
+      params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
+      Struct::Line.new( *params )
+    end
 
+  end
 
 
   #
@@ -123,11 +126,11 @@ class Indy
     case search_criteria
     when Enumerable
       results += _search do |result|
-        create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
       end
 
     when :all
-      results += _search {|result| create_struct(result) }
+      results += _search {|result| Indy.create_struct(result) }
     end
 
     results
@@ -148,7 +151,7 @@ class Indy
     results = ResultSet.new
 
     results += _search do |result|
-      create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
+      Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
     end
 
     results
@@ -158,7 +161,7 @@ class Indy
 
 
   #
-  # Last() scopes the eventual search to the last N entries, or last N minutes of entries.
+  # Scopes the eventual search to the last N entries, or last N minutes of entries.
   #
   # @param [Fixnum,Hash] scope_criteria the number of rows, or a hash describing
   #   the amount of time at the last portion of the source
@@ -191,7 +194,7 @@ class Indy
 
 
   #
-  # After() scopes the eventual search to all entries after to this point.
+  # Scopes the eventual search to all entries after to this point.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -217,15 +220,15 @@ class Indy
   end
 
   #
-  # reset_time_scope removes any existing start and end times from the instance
-  # Otherwise consecutive calls retain state
+  # Removes any existing start and end times from the instance
+  # Otherwise consecutive search calls retain time scope state
   #
   def reset_scope
     @inclusive = @start_time = @end_time = nil
   end
     
   #
-  # Before() scopes the eventual search to all entries prior to this point.
+  # Scopes the eventual search to all entries prior to this point.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -267,7 +270,7 @@ class Indy
 
 
   #
-  # Within() scopes the eventual search to all entries between two points.
+  # Scopes the eventual search to all entries between two times.
   #
   # @param [Hash] scope_criteria the field to scope for as the key and the
   #        value to compare against the other log messages
@@ -284,18 +287,6 @@ class Indy
     end
 
     self
-  end
-
-  #
-  # the number of lines in the source
-  #
-  def num_lines
-    if @num_lines
-      @num_lines
-    else
-      @lines = open_source.lines
-      @num_lines = @lines.count
-    end
   end
 
 
@@ -337,7 +328,7 @@ class Indy
     line_matched = nil
     time_search = use_time_criteria?
 
-    source_io = open_source(time_search)
+    source_io = @source.open(time_search)
 
     if @multiline
       results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
@@ -374,7 +365,6 @@ class Indy
 
     warn "No matching lines found in source: #{source_io.class}" unless line_matched
 
-    source_io.close if @source[:file] || @source[:cmd]    
     results.compact
   end
 
@@ -404,7 +394,6 @@ class Indy
 
     hash = Hash[ *@log_fields.zip( values ).flatten ]
     hash[:line] = entire_line.strip
-
 
     hash
   end
@@ -479,47 +468,6 @@ class Indy
   end
 
   #
-  # Try opening the string as a command string, returning an IO object
-  #
-  # @param [String] command_string string of command that will return log contents
-  #
-  def exec_command(command_string)
-
-    begin
-      io = IO.popen(command_string)
-      return nil if io.eof?
-    rescue
-      nil
-    end
-    io
-  end
-
-  #
-  # Define Struct::Line with the fields configured with @pattern
-  #
-  def define_struct
-    fields = (@log_fields + [:_time, :line]).sort_by{|e|e.to_s}
-
-    # suppress Struct 'redefining constant' warning
-    verbose = $VERBOSE
-    $VERBOSE = nil
-
-    Struct.new( "Line", *fields )
-
-    $VERBOSE = verbose
-  end
-
-  #
-  # Return a Struct::Line object populated with the values from the line_hash
-  #
-  # @param [Hash] line_hash a hash of :field_name => value pairs for one log line
-  #
-  def create_struct( line_hash )
-    params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
-    Struct::Line.new( *params )
-  end
-
-  #
   # Return a time or datetime object way in the future
   #
   def forever
@@ -538,5 +486,56 @@ class Indy
     end
   end
 
+  #
+  # Define Struct::Line with the fields configured with @pattern
+  #
+  def define_struct
+    fields = (@log_fields + [:_time, :line]).sort_by{|e|e.to_s}
+
+    # suppress Struct 'redefining constant' warning
+    verbose = $VERBOSE
+    $VERBOSE = nil
+
+    Struct.new( "Line", *fields )
+
+    $VERBOSE = verbose
+  end
+
+  #
+  # Return a Struct::Line for the last valid entry from the source
+  #
+  def last_entry
+    last_entries(1)
+  end
+
+  #
+  # Return an array of Struct::Line entries for the last N valid entries from the source
+  #
+  # @param [Fixnum] num the number of rows to retrieve
+  #
+  def last_entries(num)
+
+    num_entries = 0
+    result = []
+
+    source_io = @source.open
+
+    source_io.reverse_each do |line|
+
+      hash = parse_line(line)
+
+      set_time(hash) if @time_field
+
+      if hash
+        num_entries += 1
+        result << hash
+        break if num_entries >= num
+      end
+    end
+
+    warn "#last_entries found no matching lines in source." if result.empty?
+
+    num == 1 ? Indy.create_struct(result.first) : result.collect{|e| Indy.create_struct(e)}
+  end
 
 end

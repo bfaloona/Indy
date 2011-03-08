@@ -29,20 +29,8 @@ describe Indy do
     before(:all) do
     end
 
-    it "should open and close file once per search" do
-      file_path =  File.join( File.dirname(__FILE__), 'data.log')
-      file_io1 = File.open(file_path)
-      file_io2 = File.open(file_path)
-
-      File.should_receive( :exist? ).with(file_path).ordered.and_return(true)
-      File.should_receive( :open ).ordered.and_return( file_io1 )
-      file_io1.should_receive( :close ).ordered
-      File.should_receive( :open ).ordered.and_return( file_io2 )
-      file_io2.should_receive( :close ).ordered
-
-      @indy = Indy.search(file_path)
-      @indy.for(:all).length.should == 2
-      @indy.for(:all).length.should == 2
+    it "should open file in block mode once per search" do
+      pending "Block mode file open test should replace the file.close test"
     end
 
   end
