@@ -42,7 +42,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency('cucumber', '>= 0.10.0')
   s.add_development_dependency('yard', '>= 0.6.4')
-  s.add_development_dependency('cucumber-in-the-yard', '>= 1.7.7')
+  s.add_development_dependency('yard-cucumber', '>= 2.0.0')
   s.add_development_dependency('rspec', '>= 2.4.0')
   s.add_development_dependency('rspec-mocks', '>= 2.4.0')
   s.add_development_dependency('rspec-prof', '>= 0.0.3')

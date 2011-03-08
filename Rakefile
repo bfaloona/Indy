@@ -4,7 +4,6 @@ require 'rspec/core/rake_task'
 require 'rcov/rcovtask'
 require "cucumber/rake/task"
 require "yard"
-require "city"
 
 desc 'Default: run tests'
 task :default => :test
@@ -64,8 +63,8 @@ Rcov::RcovTask.new do |t|
   t.verbose = true
 end
 
-# Task :yard -- Generate yard + CITY docs
-YARD::Rake::CitydocTask.new do |t|
+# Task :yard -- Generate yard + yard-cucumber docs
+YARD::Rake::YardocTask.new do |t|
   t.files   = ['features/**/*', 'lib/**/*.rb']
   t.options = ['--private']
 end

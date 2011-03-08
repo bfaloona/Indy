@@ -1,3 +1,14 @@
+=== 0.2.0 / 2011-03-08
+
+* Support for Multiline log entries. See README.md
+* Time scopes now respect inclusive flag
+* #last() no longer supports number of rows as a parameter. Use :span => minutes.
+* Fixes for Ruby 1.9.2
+
+=== 0.1.6 / 2011-03-07
+
+* Unsupported. Gem version 0.1.6 == 0.2.0
+
 === 0.1.5 / 2011-01-21
 
 * Searching with time scopes (#after, #within, #before) are much faster
