@@ -162,6 +162,14 @@ class Indy
 
   #
   # Scopes the eventual search to the last N entries, or last N minutes of entries.
+<<<<<<< HEAD
+=======
+  #
+  # @param [Fixnum,Hash] scope_criteria the number of rows, or a hash describing
+  #   the amount of time at the last portion of the source
+  #
+  # @example For last 100 entries
+>>>>>>> e154c5c38def1e9ab7dc4cd268a96f79a1def48e
   #
   # @param [Hash] scope_criteria hash describing the amount of time at
   # the last portion of the source
