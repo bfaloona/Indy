@@ -97,9 +97,10 @@ Example:
 
     # Given this log containing two entries:
     #
-    # INFO MyApp - Multiline message begins here
+    # INFO MyApp - Multiline message begins here...
     # and ends here
-    # DEBUG MyOtherApp - Single line message
+    # DEBUG MyOtherApp - Single line message.
+    # WARN MyOtherApp - Another single line message.
     
     severity_string = 'DEBUG|INFO|WARN|ERROR|FATAL'
 

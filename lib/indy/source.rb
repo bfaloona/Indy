@@ -1,125 +1,135 @@
 class Indy
 
+  # 
+  # A StringIO interface to the underlying log source.
+  # 
   class Source
-    def initialize
 
-    end
+    # log source type. :cmd, :file, or :string
+    attr_reader :type
 
-    def start_time
+    # log source connection string (cmd, filename or log data)
+    attr_reader :connection_string
 
-    end
-    
-    def end_time
-      
-    end
-    
-  end
+    # the SriingIO object
+    attr_reader :io
 
+    # Exception raised when unable to open source
+    class Invalid < Exception; end
 
-  #
-  # Sets the source for the Indy instance.
-  #
-  # @param [String,Hash] source A filename, or log content as a string. Use a Hash with :cmd key to specify a command string.
-  #
-  # @example
-  #
-  #   source("apache.log")
-  #   source(:cmd => "cat apache.log")
-  #   source("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.")
-  #
-  def source=(param)
+    ##
+    # Creates a Source object.
+    #
+    # @param [String, Hash] param The source content String, filepath String, or :cmd => 'command' Hash
+    #
+    def initialize(param)
+      raise Indy::Source::Invalid if param.nil?
 
-    raise Indy::InvalidSource if param.nil?
-
-    cmd = param[:cmd] rescue nil
-    @source[:cmd] = param[:cmd] if cmd
-
-    unless cmd
-      File.exist?(param) ? @source[:file] = param : @source[:string] = param
-    end
-
-    raise Indy::InvalidSource unless @source.values.reject {|value| value.kind_of? String }.empty?
-
-  end
-
-  #
-  # throw away large portions of the source that don't match the time criteria
-  #
-  def scope_by_time(source_io)
-    return StringIO.new('') if @start_time > source_end_time
-    return StringIO.new('') if @end_time < source_start_time
-
-    source_io
-  end
-
-
-  #
-  # Return a Struct::Line for the last valid entry from the source
-  #
-  def last_entry
-    last_entries(1)
-  end
-
-  #
-  # Return an array of Struct::Line entries for the last N valid entries from the source
-  #
-  # @param [Fixnum] num the number of rows to retrieve
-  #
-  def last_entries(num)
-
-    num_entries = 0
-    result = []
-
-    source_io = open_source
-    source_io.reverse_each do |line|
-
-      hash = parse_line(line)
-
-      set_time(hash) if @time_field
-
-      if hash
-        num_entries += 1
-        result << hash
-        break if num_entries >= num
-      end
-    end
-
-    warn "No matching lines found in source: #{source_io.class}" if result.empty?
-
-    source_io.close if @source[:file] || @source[:cmd]
-
-    num == 1 ? create_struct(result.first) : result.collect{|e| create_struct(e)}
-  end
-
-  #
-  # Return a log io object
-  #
-  def open_source(time_search=nil)
-    begin
-
-      case @source.keys.first # and only
-      when :cmd
-        source_io = exec_command(@source[:cmd])
-        raise "Failed to execute command (#{@source[:cmd]})" if source_io.nil?
-
-      when :file
-        source_io = File.open(@source[:file], 'r')
-        raise "Filed to open file: #{@source[:file]}" if source_io.nil?
-
-      when :string
-        source_io = StringIO.new( @source[:string] )
-
+      if param.kind_of?(Enumerable) && param[:cmd]
+        set_connection(:cmd, param[:cmd])
       else
-        raise "Unsupported log source: #{@source.inspect}"
+  
+        raise Indy::Source::Invalid unless param.kind_of? String
+
+        if File.exist?(param)
+          set_connection(:file, param)
+        else
+          # fall back to source being the string passed in
+          set_connection(:string, param)
+        end
       end
 
-    rescue Exception => e
-      raise "Unable to open log source. (#{e.message})"
+      raise Indy::Source::Invalid unless @connection_string.kind_of? String
     end
 
-    #scope_by_time(source_io) if time_search
+    #
+    # set the source connection type and connection_string
+    #
+    def set_connection(type, string)
+      @type = type
+      @connection_string = string
+    end
 
-    source_io
+    #
+    # Return a StringIO object to provide access to the underlying log source
+    #
+    def open(time_search=nil)
+      begin
+
+        case @type
+        when :cmd
+          @io = StringIO.new( exec_command(@connection_string).read )
+          raise "Failed to execute command (#{@connection_string})" if @io.nil?
+
+        when :file
+          File.open(@connection_string, 'r') do |file|
+            @io = StringIO.new(file.read)
+          end
+          raise "Failed to open file: #{@connection_string}" if @io.nil?
+
+        when :string
+          @io = StringIO.new( @connection_string )
+
+        else
+          raise RuntimeError, "Invalid log source type: #{@type.inspect}"
+        end
+
+      rescue Exception => e
+        raise "Unable to open log source. (#{e.message})"
+      end
+
+      # scope_by_time(source_io) if time_search
+
+      @io
+    end
+    
+    #
+    # Execute the source's connection string, returning an IO object
+    #
+    # @param [String] command_string string of command that will return log contents
+    #
+    def exec_command(command_string)
+      begin
+        io = IO.popen(command_string)
+        return nil if io.eof?
+      rescue
+        nil
+      end
+      io
+    end
+
+    
+
+    #
+    # the number of lines in the source
+    #
+    def num_lines
+      if @num_lines
+        @num_lines
+      else
+        self.open
+        @lines = @io.readlines
+        @io.rewind
+        @num_lines = @lines.count
+        @num_lines
+      end
+    end
+
+    # def start_time
+    # end
+
+    # def end_time
+    # end
+
+    #
+    # trim data to match scope of start_time and end_time
+    #
+    def scope_by_time(source_io)
+      return StringIO.new('') if @start_time > source_end_time
+      return StringIO.new('') if @end_time < source_start_time
+
+      source_io
+    end
+
   end
-
 end
