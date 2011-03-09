@@ -123,11 +123,23 @@ class Indy
     case search_criteria
     when Enumerable
       results += _search do |result|
-        create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+          result_struct = create_struct(result)
+          
+          yield result_struct if block_given?
+          
+          result_struct
+        end
       end
 
     when :all
-      results += _search {|result| create_struct(result) }
+      results += _search do |result| 
+        
+        result_struct = create_struct(result)
+        yield result_struct if block_given?
+        result_struct
+        
+      end
     end
 
     results
@@ -148,7 +160,13 @@ class Indy
     results = ResultSet.new
 
     results += _search do |result|
-      create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
+      if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
+        result_struct = create_struct(result)
+        
+        yield result_struct if block_given?
+        
+        result_struct
+      end
     end
 
     results
