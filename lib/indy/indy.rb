@@ -4,7 +4,7 @@ class Indy
 
   class InvalidSource < Exception; end
 
-  VERSION = "0.1.5"
+  VERSION = "0.2.0"
 
   #
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
@@ -176,14 +176,10 @@ class Indy
 
 
   #
-  # Last() scopes the eventual search to the last N entries, or last N minutes of entries.
+  # Last() scopes the eventual search to the last N minutes worth of entries.
   #
-  # @param [Fixnum,Hash] scope_criteria the number of rows, or a hash describing
-  #   the amount of time at the last portion of the source
-  #
-  # @example For last 100 entries
-  #
-  #   Indy.search(LOG_FILE).last(100).for(:all)
+  # @param [Hash] scope_criteria hash describing the amount of time at
+  # the last portion of the source
   #
   # @example For last 10 minutes worth of entries
   #

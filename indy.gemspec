@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + "/lib/indy"
 
-module Indy
+class Indy
 
   def self.show_version_changes(version)
     date = ""
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Franklin Webber","Brandon Faloona"]
   s.description = %{ Indy is a log archelogy library that treats logs like data structures. Search fixed format or custom logs by field and/or time. }
   s.summary     = "Log Search Library"
-  s.email       = 'franklin.webber@gmail.com'
+  s.email       = 'brandon@faloona.net'
   s.homepage    = "http://github.com/burtlo/Indy"
   s.license     = 'MIT'
 
@@ -40,9 +40,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.8.5'
   s.add_dependency('activesupport', '>= 2.3.5')
 
-  s.add_development_dependency('cucumber', '>= 0.9.2')
+  s.add_development_dependency('cucumber', '>= 0.10.0')
   s.add_development_dependency('yard', '>= 0.6.4')
-  s.add_development_dependency('cucumber-in-the-yard', '>= 1.7.7')
+  s.add_development_dependency('yard-cucumber', '>= 2.0.0')
   s.add_development_dependency('rspec', '>= 2.4.0')
   s.add_development_dependency('rspec-mocks', '>= 2.4.0')
   s.add_development_dependency('rspec-prof', '>= 0.0.3')
@@ -62,11 +62,12 @@ Gem::Specification.new do |s|
 
   }
 
-  #  exclusions          = [File.join("performance", "large.log")]
-  #  s.files             = `git ls-files`.split("\n") - exclusions
-
+  
   s.rubygems_version  = "1.3.7"
-  s.files             = `git ls-files`.split("\n")
+
+  exclusions          = [File.join("performance", "large.log")]
+  s.files             = `git ls-files`.split("\n") - exclusions
+
   s.extra_rdoc_files  = ["README.md", "History.txt"]
   s.rdoc_options      = ["--charset=UTF-8"]
   s.require_path      = "lib"

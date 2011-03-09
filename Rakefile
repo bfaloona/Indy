@@ -1,9 +1,9 @@
 require 'rake'
 require 'rspec/core'
 require 'rspec/core/rake_task'
+require 'rcov/rcovtask'
 require "cucumber/rake/task"
 require "yard"
-require "city"
 
 desc 'Default: run tests'
 task :default => :test
@@ -55,15 +55,16 @@ task :flog_detail do
   system('find lib -name \*.rb | xargs flog -d')
 end
 
-desc "Generate code coverage"
-RSpec::Core::RakeTask.new(:coverage) do |t|
-  t.pattern = "./spec/**/*_spec.rb" # don't need this, it's default.
-  t.rcov = true
+# Task :rcov -- Run RCOV to Generate code coverage report
+Rcov::RcovTask.new do |t|
+  t.libs << "lib"
+  t.test_files = FileList['spec/*.rb']
   t.rcov_opts = ['--exclude', 'spec', '--exclude', 'gems', '-T']
+  t.verbose = true
 end
 
-
-YARD::Rake::CitydocTask.new do |t|
+# Task :yard -- Generate yard + yard-cucumber docs
+YARD::Rake::YardocTask.new do |t|
   t.files   = ['features/**/*', 'lib/**/*.rb']
   t.options = ['--private']
 end
