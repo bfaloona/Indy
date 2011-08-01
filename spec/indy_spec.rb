@@ -204,7 +204,30 @@ describe 'Indy' do
     end
 
   end
-
+  
+  context "support for blocks" do
+    
+    def log
+      [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
+    end
+    
+    it "should allow a block and yield on each line of the results" do
+      actual_yield_count = 0
+      
+      Indy.search(log).for(:all) do |result|
+        result.should be_kind_of(Struct::Line)
+        actual_yield_count = actual_yield_count + 1
+      end
+      
+      actual_yield_count.should == 3
+      
+    end
+    
+  end
+  
+  
   context "instance" do
 
     before(:each) do
