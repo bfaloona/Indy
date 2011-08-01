@@ -30,7 +30,8 @@ Usage
 
 ### As a file
 
-    Indy.search('logpath/output.log').for(:application => 'MyApp')
+    Indy.search(file_object).for(:application => 'MyApp')
+    Indy.search(:file => file_object).for(:application => 'MyApp')
 
 ### As a string
 

@@ -39,13 +39,13 @@ describe Indy do
 
     before(:all) do
       @file = Tempfile.new('file_search_spec')
-      @file_path = @file.path
       @file.write([ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
                     "2000-09-07 14:08:41 INFO  MyOtherApp - Exiting APPLICATION.",
                     "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."
                   ].join("\n"))
       @file.flush
-      @indy = Indy.search(@file_path)
+      @file.rewind
+      @indy = Indy.search(:file => @file)
     end
 
     it "should return 2 records" do

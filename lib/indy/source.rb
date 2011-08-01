@@ -9,9 +9,9 @@ class Indy
     attr_reader :type
 
     # log source connection string (cmd, filename or log data)
-    attr_reader :connection_string
+    attr_reader :connection
 
-    # the SriingIO object
+    # the StringIO object
     attr_reader :io
 
     # Exception raised when unable to open source
@@ -24,30 +24,28 @@ class Indy
     #
     def initialize(param)
       raise Indy::Source::Invalid if param.nil?
-
-      if param.kind_of?(Enumerable) && param[:cmd]
-        set_connection(:cmd, param[:cmd])
-      else
-  
-        raise Indy::Source::Invalid unless param.kind_of? String
-
-        if File.exist?(param)
+      if param.respond_to?(:keys)
+        set_connection(:cmd, param[:cmd]) if param[:cmd]
+        set_connection(:file, param[:file]) if ( param[:file] and param[:file].size > 0 )
+        set_connection(:string, param[:string]) if param[:string]
+      elsif param.respond_to?(:read) and param.respond_to?(:rewind)
           set_connection(:file, param)
-        else
-          # fall back to source being the string passed in
-          set_connection(:string, param)
-        end
+      elsif param.respond_to?(:to_s)
+        # fall back to source being the string passed in
+        set_connection(:string, param)
+      else
+        raise Indy::Source::Invalid
       end
 
-      raise Indy::Source::Invalid unless @connection_string.kind_of? String
+
     end
 
     #
     # set the source connection type and connection_string
     #
-    def set_connection(type, string)
+    def set_connection(type, value)
       @type = type
-      @connection_string = string
+      @connection = value
     end
 
     #
@@ -58,24 +56,23 @@ class Indy
 
         case @type
         when :cmd
-          @io = StringIO.new( exec_command(@connection_string).read )
-          raise "Failed to execute command (#{@connection_string})" if @io.nil?
+          @io = StringIO.new( exec_command(@connection).read )
+          raise "Failed to execute command (#{@connection})" if @io.nil?
 
         when :file
-          File.open(@connection_string, 'r') do |file|
-            @io = StringIO.new(file.read)
-          end
-          raise "Failed to open file: #{@connection_string}" if @io.nil?
+          @connection.rewind
+          @io = StringIO.new(@connection.read)
+          raise "Failed to open file: #{@connection}" if @io.nil?
 
         when :string
-          @io = StringIO.new( @connection_string )
+          @io = StringIO.new( @connection )
 
         else
           raise RuntimeError, "Invalid log source type: #{@type.inspect}"
         end
 
       rescue Exception => e
-        raise "Unable to open log source. (#{e.message})"
+        raise Indy::Source::Invalid, "Unable to open log source. (#{e.message})"
       end
 
       # scope_by_time(source_io) if time_search
@@ -119,6 +116,8 @@ class Indy
     #
     # read source data and populate instance variables
     #
+    # TODO: hmmm... not called when Source#open is called directly, but #load_data would call open again. :(
+    #
     def load_data
       self.open
       @lines = @io.readlines
@@ -134,6 +133,8 @@ class Indy
 
     #
     # trim data to match scope of start_time and end_time
+    #
+    # TODO: Implement!! 
     #
     def scope_by_time(source_io)
       return StringIO.new('') if @start_time > source_end_time

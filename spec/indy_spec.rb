@@ -60,6 +60,8 @@ describe 'Indy' do
 
   context ':search' do
 
+    let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }
+
     it "should be a class method" do
       Indy.should respond_to(:search)
     end
@@ -77,13 +79,17 @@ describe 'Indy' do
       Indy.search(:cmd => "ls").should be_kind_of(Indy)
     end
 
+    it "should create an instance of Indy::Source" do
+      Indy.search("source string").instance_variable_get(:@source).should be_kind_of(Indy::Source)
+    end
+
     it "the instance should have the source specified" do
       Indy.search("source string").source.should_not be_nil
       Indy.search(:cmd => "ls").source.should_not be_nil
     end
 
-    it "the instance should raise an exception when passed an invalid source: Fixnum" do
-      lambda{ Indy.search(9) }.should raise_error Indy::Source::Invalid
+    it "the instance should raise an exception when passed an invalid source" do
+      lambda{ Indy.search(nil) }.should raise_error Indy::Source::Invalid
     end
 
     it "the instance should raise an exception when passed an invalid source: nil" do
@@ -94,47 +100,20 @@ describe 'Indy' do
       lambda{ Indy.search( ) }.should raise_error Indy::Source::Invalid
     end
 
-    context "for a String" do
+    context "treat it second like a string" do
 
-      let(:log_file) { "#{File.dirname(__FILE__)}/data.log" }
-
-      context "treat it first like a file" do
-
-        it "should attempt to open the file" do
-          File.should_receive(:exist?).with("possible_file.ext").ordered
-          Indy.search("possible_file.ext")
-        end
-
-        it "should not throw an error for a non-existent file" do
-          lambda { Indy.search("possible_file.ext") }.should_not raise_error
-        end
-
-        it "should return an IO object when there is a file" do
-          pending "The File class expectation is not working. Perhaps because the block form is now being used."
-          File.should_receive(:exist?).with("file_exists.ext").and_return( true )
-          File.should_receive(:open).and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
-          Indy.search("file_exists.ext").for(:application => 'MyApp').length.should == 1
-        end
-
-        it "should handle a real file" do
-          Indy.search(log_file).for(:application => 'MyApp').length.should == 2
-        end
-
+      it "should attempt to treat it as a string" do
+        string = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."
+        string_io = StringIO.new(string)
+        StringIO.should_receive(:new).with(string).ordered.and_return(string_io)
+        Indy.search(string).for(:application => 'MyApp').length.should == 1
       end
 
-      context "treat it second like a string" do
+    end
 
-        it "should attempt to treat it as a string" do
-          string = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."
-          string_io = StringIO.new(string)
-          StringIO.should_receive(:new).with(string).ordered.and_return(string_io)
-          Indy.search(string).for(:application => 'MyApp').length.should == 1
-        end
+    context "with explicit source hash" do
 
-      end
-
-
-      context "treat it optionally like a command" do
+      context ":cmd" do
 
         it "should attempt open the command" do
           IO.stub!(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
@@ -155,6 +134,32 @@ describe 'Indy' do
           Indy.search(:cmd => "cat #{log_file}").for(:application => 'MyApp').length.should == 2
         end
 
+        it "should return an IO object upon a successful command" do
+          IO.stub!(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
+          lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").for(:all) }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
+        end
+
+        it "should raise error for an invalid command" do
+          lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").for(:all) }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
+        end
+
+      end
+
+      it ":file" do
+        require 'tempfile'
+        file = stub!(:size).and_return(1)
+        lambda{ Indy.search(:file => file) }
+      end
+
+      it ":string" do
+        string = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."
+        string_io = StringIO.new(string)
+        StringIO.should_receive(:new).with(string).ordered.and_return(string_io)
+        Indy.search(:string => string).for(:application => 'MyApp').length.should == 1
+      end
+
+      it "should raise error when invalid" do
+        lambda{ Indy.search(:foo => "a string").for(:all) }.should raise_error( Indy::Source::Invalid )
       end
 
     end
