@@ -11,7 +11,7 @@ class Indy
 
   class InvalidSource < Exception; end
 
-  VERSION = "0.2.0"
+  VERSION = "0.3.0"
 
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
   attr_accessor :source

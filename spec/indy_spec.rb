@@ -6,22 +6,22 @@ describe 'Indy' do
 
     # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
     it "should accept a log4r pattern string without error" do
-      lambda { Indy.new(:log_format => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
+      Indy.new(:log_format => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).class.should == Indy
     end
 
     # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
     it "should accept a log4j pattern string without error" do
-      lambda { Indy.new(:log_format => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message])}
+      Indy.new(:log_format => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message]).class.should == Indy
     end
 
     it "should not raise error with non-conforming data" do
       @indy = Indy.new(:source => " \nfoobar\n\n baz", :log_format => ['([^\s]+) (\w+)', :time, :message])
-      lambda{ @indy.for(:all) }.should_not raise_error
+      @indy.for(:all).class.should == Array
     end
 
     it "should accept time_format parameter" do
       @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :log_format => ['^([^\s]+) (\w+)$', :time, :message])
-      lambda{ @indy.for(:all) }.should_not raise_error
+      @indy.for(:all).class.should == Array
       @indy.instance_variable_get(:@time_format).should == '%d-%m-%Y'
     end
 
@@ -29,7 +29,8 @@ describe 'Indy' do
       hash = {:time_format => '%d-%m-%Y',
         :source => "1-13-2000 yes",
         :log_format => ['^([^\s]+) (\w+)$', :time, :message]}
-      lambda{ @indy = Indy.search( hash ) }.should_not raise_error
+      @indy = Indy.search(hash)
+      @indy.class.should == Indy
       @indy.for(:all).length.should == 1
     end
 
@@ -67,17 +68,22 @@ describe 'Indy' do
     end
 
     it "should accept a string parameter" do
-      lambda{ Indy.search("String Log") }.should_not raise_error
+      Indy.search("String Log").class.should == Indy
     end
 
     it "should accept a :cmd symbol and a command string parameter" do
-      lambda{ Indy.search(:cmd =>"ls") }.should_not raise_error
+      Indy.search(:cmd =>"ls").class.should == Indy
     end
 
     it "should return an instance of Indy" do
       Indy.search("source string").should be_kind_of(Indy)
       Indy.search(:cmd => "ls").should be_kind_of(Indy)
     end
+
+    it "should return an instance of Indy" do
+      Indy.search(:source => {:cmd => 'ls'}, :log_format => Indy::DEFAULT_LOG_FORMAT).class.should == Indy
+    end
+
 
     it "should create an instance of Indy::Source" do
       Indy.search("source string").instance_variable_get(:@source).should be_kind_of(Indy::Source)
@@ -122,7 +128,7 @@ describe 'Indy' do
 
         it "should not throw an error for an invalid command" do
           IO.stub!(:popen).with('an invalid command').and_return('')
-          lambda { Indy.search(:cmd => "an invalid command") }.should_not raise_error
+          Indy.search(:cmd => "an invalid command").class.should == Indy
         end
 
         it "should return an IO object upon a successful command" do
@@ -257,11 +263,11 @@ describe 'Indy' do
     end
 
     it "with() should accept the log4r default pattern const without error" do
-      lambda { @indy.with(Indy::LOG4R_DEFAULT_FORMAT) }.should_not raise_error
+      @indy.with(Indy::LOG4R_DEFAULT_FORMAT).class.should == Indy
     end
 
     it "with() should accept :default without error" do
-      lambda { @indy.with(:default) }.should_not raise_error
+      @indy.with(:default).class.should == Indy
     end
 
     it "with() should use default log pattern when passed :default" do
@@ -269,7 +275,7 @@ describe 'Indy' do
     end
 
     it "with() should accept no params without error" do
-      lambda { @indy.with() }.should_not raise_error
+      @indy.with().class.should == Indy
     end
 
     it "should return itself" do
@@ -282,7 +288,7 @@ describe 'Indy' do
       end
 
       it "#{method}() should accept a hash of search criteria" do
-        lambda { @indy.send(method,:severity => "INFO") }.should_not raise_error
+        @indy.send(method,:severity => "INFO").class.should == Array
       end
 
       it "#{method}() should return a set of results" do

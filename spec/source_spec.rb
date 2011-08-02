@@ -8,6 +8,15 @@ class Indy
       lambda{ Source.new }.should raise_error( ArgumentError )
     end
 
+    it "should raise with nil parameter" do
+      lambda{ Source.new(nil) }.should raise_error( Indy::Source::Invalid )
+    end
+
+    it "should raise with bad parameter" do
+      class NotString;end
+      lambda{ Source.new(NotString.new) }.should raise_error( Indy::Source::Invalid )
+    end
+
     it "should return Indy::Source object" do
       Source.new('logdata').class.should == Indy::Source
     end

@@ -30,7 +30,7 @@ class Indy
         set_connection(:string, param[:string]) if param[:string]
       elsif param.respond_to?(:read) and param.respond_to?(:rewind)
           set_connection(:file, param)
-      elsif param.respond_to?(:to_s)
+      elsif param.respond_to?(:to_s) and param.respond_to?(:length)
         # fall back to source being the string passed in
         set_connection(:string, param)
       else
@@ -123,24 +123,6 @@ class Indy
       @lines = @io.readlines
       @io.rewind
       @num_lines = @lines.count
-    end
-
-    # def start_time
-    # end
-
-    # def end_time
-    # end
-
-    #
-    # trim data to match scope of start_time and end_time
-    #
-    # TODO: Implement!! 
-    #
-    def scope_by_time(source_io)
-      return StringIO.new('') if @start_time > source_end_time
-      return StringIO.new('') if @end_time < source_start_time
-
-      source_io
     end
 
   end
