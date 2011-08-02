@@ -83,7 +83,7 @@ Several log formats have been predefined for ease of configuration. See indy/for
     #
     # Example (Log4r)
     #  INFO mylog: This is a message with level INFO
-    Indy.new(:source => log_file, :format => Indy::LOG4R_DEFAULT_FORMAT).for(:application => 'mylog')
+    Indy.new(:source => log_file, :log_format => Indy::LOG4R_DEFAULT_FORMAT).for(:application => 'mylog')
 
 ### Multiline log entries
 
@@ -114,7 +114,7 @@ Example:
     #                  /^(#{severity_string}) (\w+) - (.*)$/
     multiline_regexp = /^(#{severity_string}) (\w+) - (.*?)(?=^#{severity_string}|\z)/
 
-    Indy.new( :multiline => true, :format => [multiline_regexp, :severity, :application, :message], :source => MY_LOG)
+    Indy.new( :multiline => true, :log_format => [multiline_regexp, :severity, :application, :message], :source => MY_LOG)
 
 ### Explicit Time Format
 
