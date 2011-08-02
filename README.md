@@ -4,7 +4,7 @@ Indy: A Log Archaeology Tool
 Synopsis
 --------
 
-Log files are often searched for particular strings but it does not often treat the logs themselves as data structures.  Indy attempts to deliver logs with more powerful features by allowing the ability to collect segments of a log from particular time; find a particular event; or monitor/reflect on a log to see if a particular event occurred (or not occurred).
+Log files are often searched for particular strings but are not often treated as data structures.  Indy attempts to deliver log content via more powerful features by allowing the ability to collect segments of a log from particular time; find a particular event; or monitor/reflect on a log to see if a particular event occurred (or not occurred).
 
 Installation
 ------------
@@ -43,42 +43,47 @@ Usage
 
 ## Log Pattern
 
-### Default Log Pattern
+### Default Log Format
   
-The default search pattern follows this form:  
+The default log format follows this form:
 YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
 
-Which uses this regexp:
+Which uses this Regexp:
     /^(\d{4}.\d{2}.\d{2}\s+\d{2}.\d{2}.\d{2})\s+(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\s+(\w+)\s+-\s+(.+)$/
 
 and specifies these fields:  
     [:time, :severity, :application, :message]
 
 For example:  
-    Indy.search(source).for(:severity => 'INFO')
-    Indy.search(source).for(:application => 'MyApp', :severity => 'DEBUG')
+    Indy.search(log_file).for(:severity => 'INFO')
+    Indy.search(log_file).for(:application => 'MyApp', :severity => 'DEBUG')
 
-### Custom Log Pattern
+### Custom Log Format
 
-If the default pattern is obviously not strong enough for you, brew your own.
-To do so, specify a pattern and each of the match with their symbolic name.
+If you have a different log format you can brew your own.
+To do so, specify a Regexp pattern that captures each field you want to reference.
+Include it as the first item of your log format array, followed by a list of symbols that name the captured fields.
 
+    # If your log format is:
     # HH:MM:SS SEVERITY APPLICATION#METHOD - MESSAGE
-    custom_pattern = /^(\d{2}:\d{2}:\d{2})\s*(INFO|DEBUG|WARN|ERROR)\s*([^#]+)#([^\s]+)\s*-\s*(.+)$/
+    # Build an appropriate regexp
+    custom_regexp = /^(\d{2}:\d{2}:\d{2})\s*(INFO|DEBUG|WARN|ERROR)\s*([^#]+)#([^\s]+)\s*-\s*(.+)$/
+    # Combine the pattern and the list of fields
+    custom_log_format = [custom_regexp,:time,:severity,:application,:method,:message]
+    # Use Indy#with to define your format
+    Indy.search(source).with(custom_log_format).for(:severity => 'INFO', :method => 'allocate')
 
-    Indy.search(source).with(custom_pattern,:time,:severity,:application,:method,:message).for(:severity => 'INFO', :method => 'allocate')
+### Predefined Log Format
 
-### Predefined Log Patterns
+Several log formats have been predefined for ease of configuration. See indy/formats.rb
 
-Several log formats have been predefined for ease of configuration. See indy/patterns.rb
-
-    # Indy::COMMON_LOG_PATTERN
-    # Indy::COMBINED_LOG_PATTERN
-    # Indy::LOG4R_DEFAULT_PATTERN
+    # Indy::COMMON_LOG_FORMAT
+    # Indy::COMBINED_LOG_FORMAT
+    # Indy::LOG4R_DEFAULT_FORMAT
     #
     # Example (Log4r)
     #  INFO mylog: This is a message with level INFO
-    Indy.new(:source => 'logfile.txt', :pattern => Indy::LOG4R_DEFAULT_PATTERN).for(:application => 'mylog')
+    Indy.new(:source => log_file, :format => Indy::LOG4R_DEFAULT_FORMAT).for(:application => 'mylog')
 
 ### Multiline log entries
 
@@ -109,7 +114,7 @@ Example:
     #                  /^(#{severity_string}) (\w+) - (.*)$/
     multiline_regexp = /^(#{severity_string}) (\w+) - (.*?)(?=^#{severity_string}|\z)/
 
-    Indy.new( :multiline => true, :pattern => [multiline_regexp, :severity, :application, :message], :source => MY_LOG)
+    Indy.new( :multiline => true, :format => [multiline_regexp, :severity, :application, :message], :source => MY_LOG)
 
 ### Explicit Time Format
 

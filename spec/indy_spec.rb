@@ -6,21 +6,21 @@ describe 'Indy' do
 
     # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
     it "should accept a log4r pattern string without error" do
-      lambda { Indy.new(:pattern => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
+      lambda { Indy.new(:log_format => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]) }.should_not raise_error
     end
 
     # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
     it "should accept a log4j pattern string without error" do
-      lambda { Indy.new(:pattern => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message])}
+      lambda { Indy.new(:log_format => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message])}
     end
 
     it "should not raise error with non-conforming data" do
-      @indy = Indy.new(:source => " \nfoobar\n\n baz", :pattern => ['([^\s]+) (\w+)', :time, :message])
+      @indy = Indy.new(:source => " \nfoobar\n\n baz", :log_format => ['([^\s]+) (\w+)', :time, :message])
       lambda{ @indy.for(:all) }.should_not raise_error
     end
 
     it "should accept time_format parameter" do
-      @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :pattern => ['^([^\s]+) (\w+)$', :time, :message])
+      @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :log_format => ['^([^\s]+) (\w+)$', :time, :message])
       lambda{ @indy.for(:all) }.should_not raise_error
       @indy.instance_variable_get(:@time_format).should == '%d-%m-%Y'
     end
@@ -28,7 +28,7 @@ describe 'Indy' do
     it "should accept an initialization hash passed to #search" do
       hash = {:time_format => '%d-%m-%Y',
         :source => "1-13-2000 yes",
-        :pattern => ['^([^\s]+) (\w+)$', :time, :message]}
+        :log_format => ['^([^\s]+) (\w+)$', :time, :message]}
       lambda{ @indy = Indy.search( hash ) }.should_not raise_error
       @indy.for(:all).length.should == 1
     end
@@ -39,7 +39,7 @@ describe 'Indy' do
   context 'instance' do
 
     before(:all) do
-      @indy = Indy.new(:source => '1/2/2002 string', :pattern => ['([^\s]+) (\w+)', :time, :message])
+      @indy = Indy.new(:source => '1/2/2002 string', :log_format => ['([^\s]+) (\w+)', :time, :message])
     end
 
     context "method" do
@@ -189,7 +189,7 @@ describe 'Indy' do
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data."].join("\n")
       regexp = "^((#{Indy::LogFormats::DEFAULT_DATE_TIME})\\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\\s+-\\s+(.*?)(?=#{Indy::LogFormats::DEFAULT_DATE_TIME}|\\z))"
-      @indy = Indy.new(:source => log, :pattern => [regexp, :time,:severity,:application,:message], :multiline => true  )
+      @indy = Indy.new(:source => log, :log_format => [regexp, :time,:severity,:application,:message], :multiline => true  )
     end
 
     it "should find the first row" do
@@ -257,7 +257,7 @@ describe 'Indy' do
     end
 
     it "with() should accept the log4r default pattern const without error" do
-      lambda { @indy.with(Indy::LOG4R_DEFAULT_PATTERN) }.should_not raise_error
+      lambda { @indy.with(Indy::LOG4R_DEFAULT_FORMAT) }.should_not raise_error
     end
 
     it "with() should accept :default without error" do

@@ -3,10 +3,9 @@ class Indy
   #
   # LogFormats defines the building blocks of Indy's built in log patterns.
   #
-  # See indy/patterns.rb for the following Constants:
-  # Indy::COMMON_LOG_PATTERN
-  # Indy::COMBINED_LOG_PATTERN
-  # Indy::LOG4R_DEFAULT_PATTERN
+  # Indy::COMMON_LOG_FORMAT
+  # Indy::COMBINED_LOG_FORMAT
+  # Indy::LOG4R_DEFAULT_FORMAT
   #
   module LogFormats
 
@@ -36,4 +35,27 @@ class Indy
     LOG4R_DEFAULT_FIELDS = [:level, :application, :message]
     LOG4R_DEFAULT_REGEXP = /(?:\s+)?([A-Z]+) (\S+): (.*)$/
   end
+
+  #
+  # Indy default log format @pattern
+  # e.g.:
+  # INFO 2000-09-07 MyApp - Entering APPLICATION.
+  #
+  DEFAULT_LOG_FORMAT = [LogFormats::DEFAULT_LOG_REGEXP, LogFormats::DEFAULT_LOG_FIELDS].flatten
+
+  #
+  # Uncustomized Log4r log @pattern
+  #
+  LOG4R_DEFAULT_FORMAT = [LogFormats::LOG4R_DEFAULT_REGEXP, LogFormats::LOG4R_DEFAULT_FIELDS].flatten
+
+  #
+  # NCSA Common Log Format log @pattern
+  #
+  COMMON_LOG_FORMAT = [LogFormats::COMMON_REGEXP, LogFormats::COMMON_FIELDS].flatten
+
+  #
+  # NCSA Combined Log Format log @pattern
+  #
+  COMBINED_LOG_FORMAT = [LogFormats::COMBINED_REGEXP, LogFormats::COMBINED_FIELDS].flatten
+
 end

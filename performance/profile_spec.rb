@@ -37,7 +37,7 @@ describe "Search Performance" do
     before(:all) do
       @indy = Indy.new(
         :source => large_file,
-        :pattern => [/^\[([^\|]+)\|([^\]]+)\] (.*)$/,:severity, :time, :message],
+        :log_format => [/^\[([^\|]+)\|([^\]]+)\] (.*)$/,:severity, :time, :message],
         :time_format => '%d-%m-%Y %H:%M:%S')
     end
 

@@ -23,7 +23,9 @@ describe Indy do
         "15-03-2000 message7",
         "16-03-2000 message8\r\n",
         "17-03-2000 message9"].join("\n")
-      @indy = Indy.new(:source => logdata, :pattern => ['^(\d[^\s]+\d) (.+)$', :time, :message])
+      @indy = Indy.new(
+        :source => logdata,
+        :log_format => ['^(\d[^\s]+\d) (.+)$', :time, :message])
       @indy.after(:time => '13-03-2000')
       @indy.for(:all).length.should == 4
     end
@@ -157,7 +159,8 @@ describe Indy do
 
     before(:all) do
       pattern = "(\w+) (\d{4}-\d{2}-\d{2}) (\w+) - (.*)"
-      @indy = Indy.new(:source => "INFO 2000-09-07 MyApp - Entering APPLICATION.", :pattern => [pattern, :severity, :time, :application, :message])
+      @indy = Indy.new(:source => "INFO 2000-09-07 MyApp - Entering APPLICATION.", 
+        :log_format => [pattern, :severity, :time, :application, :message])
     end
 
     it "should parse a non-standard date" do
@@ -171,7 +174,9 @@ describe Indy do
 
     before(:each) do
       pattern = "^([^\s]+) (.*)$"
-      @indy = Indy.new(:time_format => '%m-%d-%Y', :source => "1-13-2002 message\n1-14-2002 another message\n1-15-2002 another message", :pattern => [pattern, :time, :message])
+      @indy = Indy.new(:time_format => '%m-%d-%Y', 
+        :source => "1-13-2002 message\n1-14-2002 another message\n1-15-2002 another message",
+        :log_format => [pattern, :time, :message])
     end
 
     it "should parse a US style date when given a time format by using DateTime" do

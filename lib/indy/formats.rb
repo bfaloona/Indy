@@ -1,0 +1,3 @@
+class Indy
+
+end

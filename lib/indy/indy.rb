@@ -2,6 +2,13 @@ require 'active_support/core_ext'
 
 class Indy
 
+  def self.suppress_warnings(&block)
+    verbose = $VERBOSE
+    $VERBOSE = nil
+    yield block
+    $VERBOSE = verbose
+  end
+
   class InvalidSource < Exception; end
 
   VERSION = "0.2.0"
@@ -11,7 +18,7 @@ class Indy
 
   # array with regexp string and capture groups followed by log field
   # name symbols. :time field is required to use time scoping
-  attr_accessor :pattern
+  attr_accessor :log_format
 
   # format string for explicit date/time format (optional)
   attr_accessor :time_format
@@ -24,20 +31,20 @@ class Indy
   #
   # @example
   #
-  #  Indy.new(:source => LOG_FILENAME)
+  #  Indy.new(:source => LOG_FILE)
   #  Indy.new(:source => LOG_CONTENTS_STRING)
   #  Indy.new(:source => {:cmd => LOG_COMMAND_STRING})
-  #  Indy.new(:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
-  #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILENAME)
+  #  Indy.new(:log_format => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILE)
+  #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILE)
   #
   def initialize(args)
-    @source = @pattern = @time_format = @log_regexp = @log_fields = @multiline = nil
+    @source = @log_format = @time_format = @log_regexp = @log_fields = @multiline = nil
 
     while (arg = args.shift) do
       send("#{arg.first}=",arg.last)
     end
 
-    update_log_pattern( @pattern )
+    update_log_format( @log_format )
 
   end
 
@@ -72,14 +79,14 @@ class Indy
     #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
     #
     # @example source as well as other paramters
-    #   Indy.search(:source => {:cmd => "cat apache.log"}, :pattern => LOG_PATTERN, :time_format => MY_TIME_FORMAT).for(:all)
+    #   Indy.search(:source => {:cmd => "cat apache.log"}, :log_format => LOG_FORMAT, :time_format => MY_TIME_FORMAT).for(:all)
     #
     def search(params=nil)
   
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
-        Indy.new(:source => params, :pattern => DEFAULT_LOG_PATTERN)
+        Indy.new(:source => params, :log_format => DEFAULT_LOG_FORMAT)
       end
     end
 
@@ -97,10 +104,10 @@ class Indy
 
 
   #
-  # Specify the log pattern to use as the comparison against each line within
+  # Specify the log format to use as the comparison against each line within
   # the log file that has been specified.
   #
-  # @param [Array] pattern_array an Array with the regular expression as the first element
+  # @param [Array] log_format an Array with the regular expression as the first element
   #        followed by list of fields (Symbols) in the log entry
   #        to use for comparison against each log line.
   #
@@ -108,8 +115,8 @@ class Indy
   #
   #  Indy.search(LOG_FILE).with(/^(\d{2}.\d{2}.\d{2})\s*(.+)$/,:time,:message)
   #
-  def with(pattern_array = :default)
-    update_log_pattern( pattern_array )
+  def with(log_format = :default)
+    update_log_format( log_format )
     self
   end
   
@@ -302,16 +309,16 @@ class Indy
   #        followed by list of fields (Symbols) in the log entry
   #        to use for comparison against each log line.
   #
-  def update_log_pattern( pattern_array )
+  def update_log_format( log_format )
 
-    case pattern_array
+    case log_format
     when :default, nil
-      @pattern = DEFAULT_LOG_PATTERN
+      @log_format = DEFAULT_LOG_FORMAT
     else
-      @pattern = pattern_array
+      @log_format = log_format
     end
 
-    @log_regexp, *@log_fields = @pattern
+    @log_regexp, *@log_fields = @log_format
 
     @time_field = ( @log_fields.include?(:time) ? :time : nil )
 
@@ -366,7 +373,7 @@ class Indy
 
     end
 
-    warn "No matching lines found in source: #{source_io.class}" unless line_matched
+#    warn "No matching lines found in source: #{source_io.class}" unless line_matched
 
     results.compact
   end
@@ -381,7 +388,8 @@ class Indy
   def parse_line( line )
 
     if line.kind_of? String
-      match_data = /#{@log_regexp}/.match(line)
+      match_data = nil
+      Indy.suppress_warnings { match_data = /#{@log_regexp}/.match(line) }
       return nil unless match_data
 
       values = match_data.captures
@@ -494,14 +502,7 @@ class Indy
   #
   def define_struct
     fields = (@log_fields + [:_time, :line]).sort_by{|e|e.to_s}
-
-    # suppress Struct 'redefining constant' warning
-    verbose = $VERBOSE
-    $VERBOSE = nil
-
-    Struct.new( "Line", *fields )
-
-    $VERBOSE = verbose
+    Indy.suppress_warnings { Struct.new( "Line", *fields ) }
   end
 
   #
