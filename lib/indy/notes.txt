@@ -1,0 +1,9 @@
+
+bisect_log (by time)
+
+first_entry._time
+last_entry._time
+log_size
+median_entry
+tail( entries )
+

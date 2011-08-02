@@ -213,18 +213,33 @@ describe 'Indy' do
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
     end
     
-    it "should allow a block and yield on each line of the results" do
+    it "should allow a block with :for and yield on each line of the results using :all" do
       actual_yield_count = 0
-      
       Indy.search(log).for(:all) do |result|
         result.should be_kind_of(Struct::Line)
         actual_yield_count = actual_yield_count + 1
       end
-      
       actual_yield_count.should == 3
-      
     end
-    
+
+    it "should allow a block with :for and yield on each line of the results" do
+      actual_yield_count = 0
+      Indy.search(log).for(:severity => 'INFO') do |result|
+        result.should be_kind_of(Struct::Line)
+        actual_yield_count = actual_yield_count + 1
+      end
+      actual_yield_count.should == 2
+    end
+
+    it "should allow a block with :like and yield on each line of the results" do
+      actual_yield_count = 0
+      Indy.search(log).like(:message => '\be\S+ing') do |result|
+        result.should be_kind_of(Struct::Line)
+        actual_yield_count = actual_yield_count + 1
+      end
+      actual_yield_count.should == 2
+    end
+
   end
   
   

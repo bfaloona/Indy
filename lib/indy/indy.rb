@@ -122,18 +122,23 @@ class Indy
   #
   def for(search_criteria)
     results = ResultSet.new
-
     case search_criteria
     when Enumerable
       results += _search do |result|
-        Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        result_struct = Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        yield result_struct if block_given? and result_struct
+        result_struct
       end
 
     when :all
-      results += _search {|result| Indy.create_struct(result) }
+      results += _search do |result|
+        result_struct = Indy.create_struct(result)
+        yield result_struct if block_given?
+        result_struct
+      end
     end
 
-    results
+    results.compact
   end
 
 
@@ -145,16 +150,18 @@ class Indy
   #
   # @example For all applications that end with Service
   #
-  #  Indy.search(LOG_FILE).like(:application => '(.+)Service')
+  #  Indy.search(LOG_FILE).like(:application => '.+service')
   #
   def like(search_criteria)
     results = ResultSet.new
 
     results += _search do |result|
-      Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/ }.empty?
+      result_struct = Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
+      yield result_struct if block_given? and result_struct
+      result_struct
     end
 
-    results
+    results.compact
   end
 
   alias_method :matching, :like
