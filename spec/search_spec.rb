@@ -24,17 +24,6 @@ describe Indy do
 
   end
 
-  context "file operations" do
-
-    before(:all) do
-    end
-
-    it "should open file in block mode once per search" do
-      pending "Block mode file open test should replace the file.close test"
-    end
-
-  end
-
   context "search file" do
 
     before(:all) do
