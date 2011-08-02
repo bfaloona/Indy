@@ -1,3 +1,6 @@
+require 'simplecov'
+SimpleCov.start
+
 require File.expand_path("#{File.dirname(__FILE__)}/../lib/indy") unless 
   $:.include? File.expand_path("#{File.dirname(__FILE__)}/../lib/indy")
 

@@ -1,7 +1,6 @@
 require 'rake'
 require 'rspec/core'
 require 'rspec/core/rake_task'
-require 'rcov/rcovtask'
 require "cucumber/rake/task"
 require "yard"
 
@@ -29,8 +28,6 @@ desc "Run all reports, specs and features"
 task :all do
   puts "\nProfiling report"
   Rake::Task['perf'].invoke
-  puts "\nCode Coverage report"
-  Rake::Task['coverage'].invoke
   puts "\nFlog results"
   Rake::Task['flog'].invoke
   puts "\nSpec Tests"
@@ -55,13 +52,6 @@ task :flog_detail do
   system('find lib -name \*.rb | xargs flog -d')
 end
 
-# Task :rcov -- Run RCOV to Generate code coverage report
-Rcov::RcovTask.new do |t|
-  t.libs << "lib"
-  t.test_files = FileList['spec/*.rb']
-  t.rcov_opts = ['--exclude', 'spec', '--exclude', 'gems', '-T']
-  t.verbose = true
-end
 
 # Task :yard -- Generate yard + yard-cucumber docs
 YARD::Rake::YardocTask.new do |t|
