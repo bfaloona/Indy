@@ -4,6 +4,7 @@ require 'rspec/core/rake_task'
 require "cucumber/rake/task"
 require "yard"
 
+
 desc 'Default: run tests'
 task :default => :test
 
@@ -24,7 +25,7 @@ Cucumber::Rake::Task.new(:features) do |task|
   task.cucumber_opts = ["features", "-f progress"]
 end
 
-desc "Run all reports, specs and features"
+desc "Run perf, flog, specs and features"
 task :all do
   puts "\nProfiling report"
   Rake::Task['perf'].invoke
@@ -42,6 +43,7 @@ task :test do
   Rake::Task['features'].invoke
 end
 
+
 desc "Flog the code! (*nix only)"
 task :flog do
   system('find lib -name \*.rb | xargs flog')
@@ -58,3 +60,5 @@ YARD::Rake::YardocTask.new do |t|
   t.files   = ['features/**/*', 'lib/**/*.rb']
   t.options = ['--private']
 end
+
+puts "\nTo create a report in /coverage, execute:\nCOVERAGE=true rake test\n\n"
