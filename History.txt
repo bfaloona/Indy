@@ -1,3 +1,9 @@
+=== 0.3.0 / 2011-08-02
+
+* To search a file, specify a File object as the source.
+  (Support for file paths will be restored in the future.)
+* Use :log_format as the key to specify your custom format and fields (:pattern is deprecated).
+
 === 0.2.0 / 2011-03-08
 
 * Support for Multiline log entries. See README.md

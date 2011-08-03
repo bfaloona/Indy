@@ -47,6 +47,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rspec-mocks', '>= 2.4.0')
   s.add_development_dependency('rspec-prof', '>= 0.0.3')
   s.add_development_dependency('simplecov', '>= 0.4.0')
+  s.add_development_dependency('ruby-debug19', '>= 0.11.0')
   s.add_development_dependency('flog', '>= 2.5.0')
 
   changes = Indy.show_version_changes(::Indy::VERSION)
