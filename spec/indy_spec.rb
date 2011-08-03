@@ -209,8 +209,13 @@ describe 'Indy' do
       results.length.should == 5
     end
 
+    it "should find using time based search" do
+      results = @indy.before(:time => '2000-09-07 14:07:42', :inclusive => false).for(:all)
+      results.length.should == 2
+    end
+
   end
-  
+
   context "support for blocks" do
     
     def log
