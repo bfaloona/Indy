@@ -9,7 +9,7 @@ class Indy
     $VERBOSE = verbose
   end
 
-  VERSION = "0.3.1"
+  VERSION = "0.3.2"
 
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
   attr_accessor :source
