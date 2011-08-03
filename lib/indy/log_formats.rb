@@ -37,24 +37,24 @@ class Indy
   end
 
   #
-  # Indy default log format @pattern
+  # Indy default log format 
   # e.g.:
   # INFO 2000-09-07 MyApp - Entering APPLICATION.
   #
   DEFAULT_LOG_FORMAT = [LogFormats::DEFAULT_LOG_REGEXP, LogFormats::DEFAULT_LOG_FIELDS].flatten
 
   #
-  # Uncustomized Log4r log @pattern
+  # Uncustomized Log4r log format
   #
   LOG4R_DEFAULT_FORMAT = [LogFormats::LOG4R_DEFAULT_REGEXP, LogFormats::LOG4R_DEFAULT_FIELDS].flatten
 
   #
-  # NCSA Common Log Format log @pattern
+  # NCSA Common Log Format log format
   #
   COMMON_LOG_FORMAT = [LogFormats::COMMON_REGEXP, LogFormats::COMMON_FIELDS].flatten
 
   #
-  # NCSA Combined Log Format log @pattern
+  # NCSA Combined Log Format log format
   #
   COMBINED_LOG_FORMAT = [LogFormats::COMBINED_REGEXP, LogFormats::COMBINED_FIELDS].flatten
 
