@@ -209,7 +209,7 @@ describe Indy do
     end
 
     it "should be accurate" do
-      @time_search_result.first._time.strftime("%a %b %d %H:%M:%S %Z").should == "Thu Sep 07 14:07:41 PDT"
+      @time_search_result.first._time.strftime("%a %b %d %H:%M:%S %Z").should match(/^Thu Sep 07 14:07:41 .{3}/)
     end
 
     it "should allow for time range calculations" do
