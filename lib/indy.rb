@@ -1,7 +1,7 @@
 begin
   require 'simplecov'
   SimpleCov.start if ENV["COVERAGE"]
-rescue
+rescue Exception => e
   # ignore
 end
 

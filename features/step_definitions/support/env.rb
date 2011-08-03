@@ -1,7 +1,7 @@
 begin
   require 'simplecov'
   SimpleCov.start if ENV["COVERAGE"]
-rescue
+rescue Exception => e
   puts 'Run "gem install simplecov" to enable code coverage reporting'
 end
 
