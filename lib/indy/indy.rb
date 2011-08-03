@@ -9,8 +9,6 @@ class Indy
     $VERBOSE = verbose
   end
 
-  class InvalidSource < Exception; end
-
   VERSION = "0.3.0"
 
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
