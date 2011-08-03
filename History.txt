@@ -1,3 +1,8 @@
+=== 0.3.1 / 2011-08-03
+
+* Patch to ignore simplecov load error
+* See History.txt to review changes from 0.2.0
+
 === 0.3.0 / 2011-08-02
 
 * To search a file, specify a File object as the source.
