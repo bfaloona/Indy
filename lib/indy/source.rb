@@ -26,7 +26,7 @@ class Indy
       raise Indy::Source::Invalid if param.nil?
       if param.respond_to?(:keys)
         set_connection(:cmd, param[:cmd]) if param[:cmd]
-        set_connection(:file, param[:file]) if ( param[:file] and param[:file].size > 0 )
+        set_connection(:file, param[:file]) if ( param[:file] and File.size(param[:file].path) > 0 )
         set_connection(:string, param[:string]) if param[:string]
       elsif param.respond_to?(:read) and param.respond_to?(:rewind)
           set_connection(:file, param)
