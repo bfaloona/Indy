@@ -187,6 +187,28 @@ A ResultSet is returned by #for and #like, which is an Enumerable containing a h
       puts "[#{entry.time}] #{entry.message}: #{entry.application}"
     end
 
+Contributing
+------------
+
+To get your improvements included, please fork and submit a pull request.
+Bugs and/or failing tests are very appreciated.
+
+Any suggestions about log formats to support, and/or intelligent defaults would be great.
+
+To create a report in /coverage, run
+    gem install simplecov
+    COVERAGE=true rake test
+
+## Supported Rubies
+
+This library aims to support and is tested against the follow Ruby implementations:
+* Ruby 1.8.7
+* Ruby 1.9.2
+* Rubinius
+
+Testing with RVM:
+    $ rvm 1.8.7,1.9.2,rbx rake test
+
 LICENSE
 -------
 

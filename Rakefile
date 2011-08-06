@@ -60,5 +60,3 @@ YARD::Rake::YardocTask.new do |t|
   t.files   = ['features/**/*', 'lib/**/*.rb']
   t.options = ['--private']
 end
-
-puts "\nTo create a report in /coverage, execute:\nCOVERAGE=true rake test\n\n"
