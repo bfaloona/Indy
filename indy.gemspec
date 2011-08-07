@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
-require 'indy/platform'
+require 'indy/version'
 
 
 Gem::Specification.new do |s|
@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.description = %{ Indy is a log archelogy library that treats logs like data structures. Search fixed format or custom logs by field and/or time. }
   s.summary     = "indy-#{s.version}"
   s.email       = 'brandon@faloona.net'
-  s.homepage    = "http://github.com/burtlo/Indy"
+  s.homepage    = "http://github.com/bfaloona/Indy"
   s.license     = 'MIT'
 
   s.platform    = Gem::Platform::RUBY
@@ -38,6 +38,7 @@ Gem::Specification.new do |s|
 
     Changes:
     #{changes[:changes].collect{|change| "  #{change}"}.join("")}
+    Please find examples at https://github.com/bfaloona/Indy#readme
     [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>] [<>]
 
   }

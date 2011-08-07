@@ -1,8 +1,13 @@
+=== 0.3.4 / 2011-08-07
+
+* Updated gemspec
+* See History.txt to review API changes from 0.2.0
+
 === 0.3.3 / 2011-08-05
 
 * Tested with rubinius at #rbxday party
 * Fix for ruby 1.8.7
-* See History.txt to review API changes from 0.2.0
+
 
 === 0.3.2 / 2011-08-03
 

@@ -207,7 +207,7 @@ This library aims to support and is tested against the follow Ruby implementatio
 * Rubinius
 
 Testing with RVM:
-    $ rvm 1.8.7,1.9.2,rbx rake test
+    $ rvm 1.8.7,1.9.2,rbx exec rake test
 
 LICENSE
 -------
