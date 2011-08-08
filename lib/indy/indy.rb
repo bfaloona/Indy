@@ -509,6 +509,14 @@ class Indy
   end
 
   #
+  # Return a Struct::Line for the middle valid entry from the source,
+  # given the file offset parameters
+  #
+  def middle_entry(begin_offset=nil,end_offset=nil)
+    OpenStruct.new(:message=>'Middle Entry')
+  end
+
+  #
   # Return an array of Struct::Line entries for the last N valid entries from the source
   #
   # @param [Fixnum] num the number of rows to retrieve
