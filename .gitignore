@@ -1,3 +1,8 @@
 *.rbc
 nbproject
-
+.yardoc
+coverage
+doc
+rerun.txt
+Gemfile.lock
+misc
