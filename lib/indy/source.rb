@@ -123,6 +123,15 @@ class Indy
       @lines = @io.readlines
       @io.rewind
       @num_lines = @lines.count
+      @num_bytes = @io.bytes
+    end
+
+    def num_bytes
+      @num_bytes
+    end
+
+    def current_line
+
     end
 
   end

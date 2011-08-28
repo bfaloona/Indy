@@ -90,7 +90,7 @@ class Indy
     # Return a Struct::Line object from a hash of values from a log entry
     #
     # @param [Hash] line_hash a hash of :field_name => value pairs for one log line
-    #
+    #line_hash
     def create_struct( line_hash )
       params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
       Struct::Line.new( *params )
@@ -331,7 +331,6 @@ class Indy
   #
   def _search(&block)
 
-    line_matched = nil
     time_search = use_time_criteria?
 
     source_io = @source.open(time_search)
@@ -340,13 +339,13 @@ class Indy
       results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
 
         hash = parse_line(entry)
-        hash ? (line_matched = true) : next
+        next unless hash
 
         if time_search
           set_time(hash)
           next unless inside_time_window?(hash)
         else
-          hash[:_time] = nil if hash
+          hash[:_time] = nil
         end
 
         block_given? ? block.call(hash) : nil
@@ -355,13 +354,13 @@ class Indy
     else
       results = source_io.collect do |line|
         hash = parse_line(line)
-        hash ? (line_matched = true) : next
+        next unless hash
 
         if time_search
           set_time(hash)
           next unless inside_time_window?(hash)
         else
-          hash[:_time] = nil if hash
+          hash[:_time] = nil
         end
 
         block_given? ? block.call(hash) : nil
@@ -498,6 +497,7 @@ class Indy
   #
   def define_struct
     fields = (@log_fields + [:_time, :line]).sort_by{|e|e.to_s}
+                                    # .keys.sort_by{|e|e.to_s}
     Indy.suppress_warnings { Struct.new( "Line", *fields ) }
   end
 
@@ -512,8 +512,15 @@ class Indy
   # Return a Struct::Line for the middle valid entry from the source,
   # given the file offset parameters
   #
-  def middle_entry(begin_offset=nil,end_offset=nil)
-    OpenStruct.new(:message=>'Middle Entry')
+  def middle_entry(begin_offset=0,end_offset=:eof)
+
+    io = @source.load_data
+    #require 'ruby-debug';debugger
+    num_middle = @source.num_lines/2
+    line = @source.lines[ num_middle ]
+    hash = parse_line(line)
+    use_time_criteria? ? set_time(hash) : hash[:_time] = nil
+    Indy.create_struct(hash)
   end
 
   #

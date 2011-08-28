@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="RUBY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" scope="PROVIDED" name="json (v1.5.1, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-mocks (v2.4.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="flog (v2.5.1, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="builder (v3.0.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="yard-cucumber (v2.1.1, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="gherkin (v2.3.5, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="activesupport (v3.0.9, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="sexp_processor (v3.0.5, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="i18n (v0.6.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec (v2.4.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="cucumber (v1.0.2, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="diff-lcs (v1.1.2, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="term-ansicolor (v1.0.5, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="ruby_parser (v2.0.6, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="yard (v0.7.2, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-expectations (v2.4.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="rspec-core (v2.4.0, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="bundler (v1.0.15, RVM: ruby-1.9.2-p180) [gem]" level="application" />
+  </component>
+</module>
+

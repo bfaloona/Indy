@@ -2,7 +2,7 @@ require "#{File.dirname(__FILE__)}/helper"
 
 describe Indy do
 
-  context "binary search" do
+  context "middle entry search" do
 
     before(:each) do
       log_string = [
@@ -17,10 +17,14 @@ describe Indy do
                     "2000-09-07 14:15:55 INFO MyApp - Exiting APPLICATION."
                   ].join("\n")
       @indy = Indy.search(log_string)
+      puts '.'
     end
 
     it "should find the middle row" do
-      @indy.send(:middle_entry).message.should == 'Middle Entry'
+      line = @indy.send(:middle_entry)
+      #require 'ruby-debug';debugger
+      line.message.should == 'Middle Entry'
+      #message.should == 'Middle Entry'
     end
 
   end

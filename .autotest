@@ -5,7 +5,7 @@ rescue Exception
 Autotest/Autospec can use Growl (growl.info|growlforwindows.com) to assist with reporting errors.
 This would require Growl for the appropriate platform (MAC|Windows) and the Ruby gem 'karl-autotest-growl'
 }
-  sleep 4
+  sleep 0.04
 end
 
 Autotest.add_hook(:initialize) {|at|
