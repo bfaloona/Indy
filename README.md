@@ -15,6 +15,21 @@ To install Indy use the following command:
     
 (Add `sudo` if you're installing under a POSIX system as root)
 
+Compatibility
+-------------
+
+[![build status](http://travis-ci.org/bfaloona/Indy.png)](http://travis-ci.org/bfaloona/Indy)
+
+Indy supports MacOS, *nix, and MS Windows and runs on the following ruby flavors:
+
+  - 1.8.7
+  - 1.9.2
+  - 1.9.3 (Fails. Awaiting fix in ruby 1.9.3)
+  - rbx-2.0
+  - jruby
+  - ree
+
+
 Usage
 -----
 
