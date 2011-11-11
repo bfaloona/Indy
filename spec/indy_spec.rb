@@ -137,7 +137,8 @@ describe 'Indy' do
         end
 
         it "should handle a real command" do
-          Indy.search(:cmd => "cat #{log_file}").for(:application => 'MyApp').length.should == 2
+          cat_cmd = (is_windows? ? 'type' : 'cat')
+          Indy.search(:cmd => "#{cat_cmd} #{log_file}").for(:application => 'MyApp').length.should == 2
         end
 
         it "should return an IO object upon a successful command" do
