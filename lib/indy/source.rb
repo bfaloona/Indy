@@ -88,7 +88,7 @@ class Indy
     def exec_command(command_string)
       begin
         io = IO.popen(command_string)
-        return nil if io.eof?
+        raise Indy::Source::Invalid, "No data returned from command string execution" if io.eof?
       rescue
         nil
       end

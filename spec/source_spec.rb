@@ -17,6 +17,11 @@ class Indy
       lambda{ Source.new(NotString.new) }.should raise_error( Indy::Source::Invalid )
     end
 
+    it "should raise if #execute_command returns empty string" do
+      IO.stub!(:popen).and_return('')
+      lambda{ Source.new(:cmd => 'a faux command').open }.should raise_error(Indy::Source::Invalid)
+    end
+
     it "should return Indy::Source object" do
       Source.new('logdata').class.should == Indy::Source
     end
@@ -39,7 +44,7 @@ class Indy
     end
 
     context "instance" do
-      
+
       before(:each) do
         log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.",
                 "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
@@ -47,7 +52,7 @@ class Indy
               ].join("\n")
         @source = Source.new(log)
       end
-      
+
       it "should return StringIO from :open" do
         @source.open.class.should == StringIO
       end
