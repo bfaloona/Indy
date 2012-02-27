@@ -68,8 +68,9 @@ describe Indy do
                   ].join("\n"))
       @file.flush
 
-      cmd = "ruby -e 'puts File.open(\"#{@file_path}\").read'"
-
+      cmd = RUBY_PLATFORM.match(/(win|386|mingw)/) ?
+        "type #{@file_path}" :
+        "cat #{@file_path}"
       @indy = Indy.search(:cmd => cmd)
     end
 
