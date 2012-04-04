@@ -1,49 +1,49 @@
 class FastSource
-  Struct.new("Line", :id, :msg) unless defined?(Struct::Line)
+  Struct.new("Line", :num, :msg) unless defined?(Struct::Line)
   def open(string)
     @data = []
     string.split("\n").each do |line|
-      id, msg = line.split(',')
-      @data << Struct::Line.new(id.strip.to_i,  msg.chomp)
+      num, msg = line.split(',')
+      @data << Struct::Line.new(num.strip.to_i,  msg.chomp)
     end
     @data
   end
 
-
-  def scoped_source(range)
+  # return indexes of [begin,end]
+  def scoped_source(value_range)
     scope_end = @data.size - 1
-    scope_begin = find_first(range.first, 0, scope_end)
-    scope_end = find_last(range.last, scope_begin, scope_end)
+    scope_begin = find_first(value_range.first, 0, scope_end)
+    scope_end = find_last(value_range.last, scope_begin, scope_end)
     [scope_begin,scope_end]
   end
 
-  # find index of first record to match id
-  def find_first(id,lower,upper)
-    find(:first,id,lower,upper)
+  # find index of first record to match value
+  def find_first(value,start,stop)
+    find(:first,value,start,stop)
   end
 
-  # find index of last record to match id
-  def find_last(id,lower,upper)
-    find(:last,id,lower,upper)
+  # find index of last record to match value
+  def find_last(value,start,stop)
+    find(:last,value,start,stop)
   end
 
-  def find(direction,id,lower,upper)
-    return lower if lower == upper
-    middle = ((upper - lower) / 2) + lower
-    puts "+ find_#{direction} (#{id}, #{lower}, #{upper}) [middle #{middle}:#{@data[middle].id}]"
-    if @data[middle].id == id
-      case direction
+  def find(boundary,value,start,stop)
+    return start if start == stop
+    mid = ((stop - start) / 2) + start
+    puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid #{mid}:#{@data[mid].num}]"
+    if @data[mid].num == value
+      case boundary
       when :first
-        (@data[middle-1].id == id) ? find_first(id,lower-1,upper) : middle
+        (@data[mid-1].num == value) ? find_first(value,start-1,stop) : mid
       when :last
-        (@data[middle+1].id == id) ? find_last(id,lower,upper+1) : middle
+        (@data[mid+1].num == value) ? find_last(value,start,stop+1) : mid
       end
-    elsif @data[middle].id > id
-      middle -= 1 if ((middle == upper) && (direction == :first))
-      find(direction, id, lower, middle)
-    elsif @data[middle].id < id
-      middle += 1 if ((middle == lower) && (direction == :first))
-      find(direction, id, middle, upper)
+    elsif @data[mid].num > value
+      mid -= 1 if ((mid == stop) && (boundary == :first))
+      find(boundary, value, start, mid)
+    elsif @data[mid].num < value
+      mid += 1 if ((mid == start) && (boundary == :first))
+      find(boundary, value, mid, stop)
     end
   end
 
