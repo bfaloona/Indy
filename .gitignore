@@ -7,3 +7,4 @@ doc
 rerun.txt
 Gemfile.lock
 misc
+*.swp
