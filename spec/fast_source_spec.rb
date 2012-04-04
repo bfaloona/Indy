@@ -10,46 +10,46 @@ class Indy
         @log = "1,one\n2,two\n3,three\n4,four\n5,five\n6,six\n7,seven\n8,eight\n9,nine\n10,ten\n"
       end
 
-      it "should return the first id in range before middle" do
-        range = 4..8
+      it "should return begin/end index array for value_range before middle" do
+        value_range = 4..8
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 3
+        fs.scoped_source(value_range).should == [3,7]
       end
 
-      it "should return the first id in range at beginning" do
-        range = 1..8
+      it "should return begin/end index array for value_range at beginning" do
+        value_range = 1..8
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 0
+        fs.scoped_source(value_range).should == [0,7]
       end
 
-      it "should return the first id in range just before middle" do
-        range = 5..8
+      it "should return begin/end index array for value_range just before middle" do
+        value_range = 5..8
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 4
+        fs.scoped_source(value_range).should == [4,7]
       end
 
-      it "should return the first id in range after middle" do
-        range = 7..8
+      it "should return begin/end index array for value_range after middle" do
+        value_range = 7..8
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 6
+        fs.scoped_source(value_range).should == [6,7]
       end
 
-      it "should return the first id in range just after middle" do
-        range = 6..8
+      it "should return begin/end index array for value_range at middle" do
+        value_range = 6..8
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 5
+        fs.scoped_source(value_range).should == [5,7]
       end
 
-      it "should return the first id in range at end" do
-        range = 10..11
+      it "should return begin/end index array for value_range at end" do
+        value_range = 10..11
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 9
+        fs.scoped_source(value_range).should == [9,9]
       end
 
     end
@@ -63,12 +63,33 @@ class Indy
 
       it "should work with large data set" do
 
-        range = 4301..5100
+        value_range = 4301..5100
         fs = FastSource.new
         fs.open(@log)
-        fs.scoped_source(range).should == 4300
+        fs.scoped_source(value_range).should == [4300,5099]
       end
 
+    end
+    
+    context "Abnormal data" do
+
+      before(:all) do
+        @log = "1,one\n2,two\n2,two\n2,two\n4,four\n5,five\n7,seven\n8,eight\n8,eight\n10,ten\n"
+      end
+
+      it "should return begin/end index array for value_range multiple end values" do
+        value_range = 4..8
+        fs = FastSource.new
+        fs.open(@log)
+        fs.scoped_source(value_range).should == [4,8]
+      end
+      
+      it "should return begin/end index array for value_range multiple begin values" do
+        value_range = 2..8
+        fs = FastSource.new
+        fs.open(@log)
+        fs.scoped_source(value_range).should == [1,8]
+      end
     end
 
   end
