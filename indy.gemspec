@@ -16,6 +16,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.8.5'
   s.add_dependency('activesupport', '>= 2.3.5')
 
+  s.add_development_dependency('rake')
   s.add_development_dependency('i18n')
   s.add_development_dependency('cucumber', '>= 0.10.0')
   s.add_development_dependency('yard', '>= 0.7.2')
