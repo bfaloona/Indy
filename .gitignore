@@ -8,4 +8,5 @@ rerun.txt
 Gemfile.lock
 misc
 .idea
+*.swp
 
