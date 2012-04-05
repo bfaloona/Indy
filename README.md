@@ -59,15 +59,19 @@ Usage
 ### Default Log Format
   
 The default log format follows this form:
-YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
+
+    YYYY-MM-DD HH:MM:SS SEVERITY APPLICATION_NAME - MESSAGE
 
 Which uses this Regexp:
+    
     /^(\d{4}.\d{2}.\d{2}\s+\d{2}.\d{2}.\d{2})\s+(TRACE|DEBUG|INFO|WARN|ERROR|FATAL)\s+(\w+)\s+-\s+(.+)$/
 
 and specifies these fields:  
+    
     [:time, :severity, :application, :message]
 
 For example:  
+    
     Indy.search(log_file).for(:severity => 'INFO')
     Indy.search(log_file).for(:application => 'MyApp', :severity => 'DEBUG')
 
