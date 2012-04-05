@@ -29,7 +29,7 @@ class Indy
         set_connection(:file, param[:file]) if ( param[:file] and File.size(param[:file].path) > 0 )
         set_connection(:string, param[:string]) if param[:string]
       elsif param.respond_to?(:read) and param.respond_to?(:rewind)
-          set_connection(:file, param)
+        set_connection(:file, param)
       elsif param.respond_to?(:to_s) and param.respond_to?(:length)
         # fall back to source being the string passed in
         set_connection(:string, param)
@@ -51,35 +51,69 @@ class Indy
     #
     # Return a StringIO object to provide access to the underlying log source
     #
-    def open(time_search=nil)
+    def open(time_boundaries)
       begin
-
         case @type
         when :cmd
           @io = StringIO.new( exec_command(@connection).read )
           raise "Failed to execute command (#{@connection})" if @io.nil?
-
         when :file
           @connection.rewind
           @io = StringIO.new(@connection.read)
           raise "Failed to open file: #{@connection}" if @io.nil?
-
         when :string
           @io = StringIO.new( @connection )
-
         else
           raise RuntimeError, "Invalid log source type: #{@type.inspect}"
         end
-
       rescue Exception => e
         raise Indy::Source::Invalid, "Unable to open log source. (#{e.message})"
       end
-
-      # scope_by_time(source_io) if time_search
-
-      @io
+      load_data
+      scope_by_time(time_boundaries) if time_boundaries
+      @lines
     end
-    
+   
+    def scope_by_time(time_boundaries)
+      start_time, end_time = time_boundaries
+      scope_end = num_lines - 1
+      scope_begin = find_first(start_time, 0, scope_end)
+      scope_end = find_last(end_time, scope_begin, scope_end)
+      @lines = @lines[scope_begin..scope_end]
+    end
+         
+    # find index of first record to match value
+    def find_first(value,start,stop)
+      find(:first,value,start,stop)
+    end
+
+    # find index of last record to match value
+    def find_last(value,start,stop)
+      find(:last,value,start,stop)
+    end
+
+    def find(boundary,value,start,stop)
+      return start if start == stop
+      mid = ((stop - start) / 2) + start
+      mid_time = Time.parse(@lines[mid])
+      puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid #{mid}:#{mid_time}]"
+      if mid_time == value
+        case boundary
+        when :first
+          (Time.parse(@lines[mid-1]) == value) ? find_first(value,start-1,stop) : mid
+        when :last
+          (Time.parse(@lines[mid+1]) == value) ? find_last(value,start,stop+1) : mid
+        end
+      elsif mid_time > value
+        mid -= 1 if ((mid == stop) && (boundary == :first))
+        find(boundary, value, start, mid)
+      elsif mid_time < value
+        mid += 1 if ((mid == start) && (boundary == :first))
+        find(boundary, value, mid, stop)
+      end
+    end
+
+
     #
     # Execute the source's connection string, returning an IO object
     #
@@ -119,7 +153,7 @@ class Indy
     # TODO: hmmm... not called when Source#open is called directly, but #load_data would call open again. :(
     #
     def load_data
-      self.open
+      self.open if @io.nil?
       @lines = @io.readlines
       @io.rewind
       @num_lines = @lines.count

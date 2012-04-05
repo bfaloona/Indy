@@ -332,8 +332,7 @@ class Indy
   def _search(&block)
 
     time_search = use_time_criteria?
-
-    source_io = @source.open(time_search)
+    source_io = @source.open([@start_time,@end_time])
 
     if @multiline
       results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
