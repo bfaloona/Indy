@@ -49,7 +49,7 @@ class Indy
       end
       
       it "should return StringIO from :open" do
-        @source.open.class.should == StringIO
+        @source.open.class.should == Array
       end
 
       it "should return lines array from :lines" do

@@ -51,7 +51,7 @@ class Indy
     #
     # Return a StringIO object to provide access to the underlying log source
     #
-    def open(time_boundaries)
+    def open(time_boundaries=nil)
       begin
         case @type
         when :cmd
@@ -84,11 +84,13 @@ class Indy
          
     # find index of first record to match value
     def find_first(value,start,stop)
+      return start if Time.parse(@lines[start]) > value
       find(:first,value,start,stop)
     end
 
     # find index of last record to match value
     def find_last(value,start,stop)
+      return stop if Time.parse(@lines[stop])< value
       find(:last,value,start,stop)
     end
 
@@ -149,8 +151,6 @@ class Indy
 
     #
     # read source data and populate instance variables
-    #
-    # TODO: hmmm... not called when Source#open is called directly, but #load_data would call open again. :(
     #
     def load_data
       self.open if @io.nil?

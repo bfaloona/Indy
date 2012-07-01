@@ -203,6 +203,10 @@ describe 'Indy' do
       results.first.message.should match(/first Application data.$/)
     end
 
+    it "should find three INFO rows" do
+      results = @indy.for(severity: 'INFO').count.should == 3
+    end
+
     it "should find the last row" do
       results = @indy.for(:all)
       results.last.message.should match(/\tlast Application data.$/)
