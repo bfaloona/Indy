@@ -93,7 +93,8 @@ class Indy
     #
     def create_struct( line_hash )
       params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
-      Struct::Line.new( *params )
+      result = Struct::Line.new( *params )
+      result
     end
 
   end
@@ -333,9 +334,9 @@ class Indy
 
     line_matched = nil
     time_search = use_time_criteria?
-    source_io = @source.open([@start_time,@end_time])
 
     if @multiline
+      source_io = StringIO.new( (time_search ? @source.open([@start_time,@end_time]) : @source.open).join("\n") )
       results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
 
         hash = parse_line(entry)
@@ -352,7 +353,8 @@ class Indy
       end
 
     else
-      results = source_io.collect do |line|
+      source_lines = (time_search ? @source.open([@start_time,@end_time]) : @source.open)
+      results = source_lines.collect do |line|
         hash = parse_line(line)
         hash ? (line_matched = true) : next
 

@@ -75,8 +75,8 @@ describe Indy do
     end
 
     it "should return 2 records" do
-      @indy.for(:application => 'MyApp').length.should == 2
       results = @indy.for(:application => 'MyApp')
+      results.length.should == 2
       results.last.time.should == '2000-09-07 14:10:55'
       results.last.severity.should == 'INFO'
       results.last.application.should == 'MyApp'
