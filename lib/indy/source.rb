@@ -73,15 +73,20 @@ class Indy
       scope_by_time(time_boundaries) if time_boundaries
       @lines
     end
-   
+
     def scope_by_time(time_boundaries)
       start_time, end_time = time_boundaries
       scope_end = num_lines - 1
+      # short circuit the search if possible
+      if (Time.parse(@lines[0]) > end_time) or (Time.parse(@lines[-1]) < start_time)
+        @lines = []
+        return @lines
+      end
       scope_begin = find_first(start_time, 0, scope_end)
       scope_end = find_last(end_time, scope_begin, scope_end)
       @lines = @lines[scope_begin..scope_end]
     end
-         
+
     # find index of first record to match value
     def find_first(value,start,stop)
       return start if Time.parse(@lines[start]) > value
@@ -95,6 +100,7 @@ class Indy
     end
 
     def find(boundary,value,start,stop)
+      sleep 0.5 if  boundary == :last
       return start if start == stop
       mid = ((stop - start) / 2) + start
       mid_time = Time.parse(@lines[mid])
@@ -107,10 +113,10 @@ class Indy
           (Time.parse(@lines[mid+1]) == value) ? find_last(value,start,stop+1) : mid
         end
       elsif mid_time > value
-        mid -= 1 if ((mid == stop) && (boundary == :first))
+        mid -= 1 if mid == stop
         find(boundary, value, start, mid)
       elsif mid_time < value
-        mid += 1 if ((mid == start) && (boundary == :first))
+        mid += 1 if mid == start
         find(boundary, value, mid, stop)
       end
     end
@@ -131,7 +137,7 @@ class Indy
       io
     end
 
-    
+
 
     #
     # the number of lines in the source
@@ -156,6 +162,7 @@ class Indy
       self.open if @io.nil?
       @lines = @io.readlines
       @io.rewind
+      @lines.delete_if {|line| line.match(/^\s*$/)}
       @num_lines = @lines.count
     end
 
