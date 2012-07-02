@@ -204,7 +204,7 @@ describe 'Indy' do
     end
 
     it "should find three INFO rows" do
-      results = @indy.for(severity: 'INFO').count.should == 3
+      results = @indy.for(:severity => 'INFO').count.should == 3
     end
 
     it "should find the last row" do
