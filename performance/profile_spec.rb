@@ -2,7 +2,7 @@ require "#{File.dirname(__FILE__)}/helper"
 
 describe "Search Performance" do
 
-  context "with a 10000 line log file" do
+  context "with a 50000 line log file" do
 
     large_file = File.open("#{File.dirname(__FILE__)}/large.log", 'r')
     before(:all) do
@@ -31,7 +31,7 @@ describe "Search Performance" do
 
   end
 
-  context "with a 10000 line log file" do
+  context "with a 50000 line log file" do
 
     large_file = File.open("#{File.dirname(__FILE__)}/large.log", 'r')
     before(:all) do
