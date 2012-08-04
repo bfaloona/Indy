@@ -200,21 +200,25 @@ describe 'Indy' do
     end
 
     it "should find the first row" do
+      pending
       results = @indy.for(:all)
       results.first.message.should match(/first Application data.$/)
     end
 
     it "should find three INFO rows" do
+      pending
       results = @indy.for(:severity => 'INFO').count.should == 3
     end
 
     it "should find the last row" do
+      pending
       results = @indy.for(:all)
       results.last.message.should match(/\tlast Application data.$/)
       results.length.should == 5
     end
 
     it "should find using time based search" do
+      pending
       results = @indy.before(:time => '2000-09-07 14:07:42', :inclusive => false).for(:all)
       results.length.should == 2
     end
