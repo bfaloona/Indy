@@ -179,7 +179,7 @@ describe Indy do
         :log_format => [pattern, :time, :message])
     end
 
-    it "should parse a US style date when given a time format by using DateTime" do
+    it "should parse a US style date" do
       line_hash = {:time => '1-13-2002', :message => 'message'}
       time = @indy.send(:parse_date, line_hash)
       time.class.should == DateTime

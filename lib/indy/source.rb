@@ -104,7 +104,7 @@ class Indy
       return start if start == stop
       mid = ((stop - start) / 2) + start
       mid_time = Time.parse(@lines[mid])
-      puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid #{mid}:#{mid_time}]"
+      # puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid #{mid}:#{mid_time}]"
       if mid_time == value
         case boundary
         when :first
