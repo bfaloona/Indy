@@ -6,8 +6,7 @@ rescue Exception => e
 end
 
 def is_windows?
-  processor, platform, *rest = RUBY_PLATFORM.split("-")
-  platform == 'mswin32'
+  RUBY_PLATFORM =~ /mingw|mswin/
 end
 
 require File.expand_path("#{File.dirname(__FILE__)}/../lib/indy") unless
