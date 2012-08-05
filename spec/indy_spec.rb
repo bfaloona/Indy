@@ -200,18 +200,18 @@ describe 'Indy' do
     end
 
     it "should find the first row" do
-      pending
+      # pending
       results = @indy.for(:all)
       results.first.message.should match(/first Application data.$/)
     end
 
     it "should find three INFO rows" do
-      pending
+      # pending
       results = @indy.for(:severity => 'INFO').count.should == 3
     end
 
     it "should find the last row" do
-      pending
+      # pending
       results = @indy.for(:all)
       results.last.message.should match(/\tlast Application data.$/)
       results.length.should == 5
