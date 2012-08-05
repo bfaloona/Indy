@@ -2,13 +2,6 @@ require 'active_support/core_ext'
 
 class Indy
 
-  def self.suppress_warnings(&block)
-    verbose = $VERBOSE
-    $VERBOSE = nil
-    yield block
-    $VERBOSE = verbose
-  end
-
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
   attr_accessor :source
 
@@ -188,7 +181,7 @@ class Indy
       
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
-        starttime = parse_date(last_entry[:_time]) - span
+        starttime = parse_date(last_entries(1)) - span
 
         within(:time => [starttime, forever])
       end
@@ -331,47 +324,25 @@ class Indy
   # This method is supposed to be used internally.
   #
   def _search(&block)
-
-    line_matched = nil
     time_search = use_time_criteria?
-
     if @multiline
       source_io = StringIO.new( (time_search ? @source.open([@start_time,@end_time]) : @source.open).join("\n") )
       results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
-
         hash = parse_line(entry)
-        hash ? (line_matched = true) : next
-
-        if time_search
-          set_time(hash)
-          next unless inside_time_window?(hash)
-        else
-          hash[:_time] = nil if hash
-        end
-
-        block_given? ? block.call(hash) : nil
+        next unless hash
+        next if time_search && !inside_time_window?(hash)
+        block.call(hash) if block_given?
       end
-
     else
+      results = ResultSet.new
       source_lines = (time_search ? @source.open([@start_time,@end_time]) : @source.open)
-      results = source_lines.collect do |line|
+      source_lines.each do |line|
         hash = parse_line(line)
-        hash ? (line_matched = true) : next
-
-        if time_search
-          set_time(hash)
-          next unless inside_time_window?(hash)
-        else
-          hash[:_time] = nil if hash
-        end
-
-        block_given? ? block.call(hash) : nil
+        next unless hash
+        next if time_search && !inside_time_window?(hash)
+        results << (block.call(hash) if block_given?)
       end
-
     end
-
-#    warn "No matching lines found in source: #{source_io.class}" unless line_matched
-
     results.compact
   end
 
@@ -385,8 +356,7 @@ class Indy
   def parse_line( line )
 
     if line.kind_of? String
-      match_data = nil
-      Indy.suppress_warnings { match_data = /#{@log_regexp}/.match(line) }
+      match_data = /#{@log_regexp}/.match(line)
       return nil unless match_data
 
       values = match_data.captures
@@ -402,7 +372,6 @@ class Indy
 
     hash = Hash[ *@log_fields.zip( values ).flatten ]
     hash[:line] = entire_line.strip
-
     hash
   end
 
@@ -415,18 +384,7 @@ class Indy
       @start_time = @start_time || forever_ago
       @end_time = @end_time || forever
     end
-
-    return (@time_field && @start_time && @end_time)
-  end
-
-
-  #
-  # Set the :_time value in the hash
-  #
-  # @param [Hash] hash The log line hash to modify
-  #
-  def set_time(hash)
-    hash[:_time] = parse_date( hash ) if hash
+    @time_field && @start_time && @end_time
   end
 
   #
@@ -435,15 +393,13 @@ class Indy
   # @param [Hash] line_hash The log line hash to be evaluated
   #
   def inside_time_window?( line_hash )
-
-    if line_hash && line_hash[:_time]
-      if @inclusive
-        true unless line_hash[:_time] > @end_time or line_hash[:_time] < @start_time
-      else
-        true unless line_hash[:_time] >= @end_time or line_hash[:_time] <= @start_time
-      end
+    time = parse_date( line_hash )
+    return false unless time && line_hash
+    if @inclusive
+      true unless time > @end_time or time < @start_time
+    else
+      true unless time >= @end_time or time <= @start_time
     end
-
   end
 
   #
@@ -498,23 +454,11 @@ class Indy
   # Define Struct::Line with the fields configured with @pattern
   #
   def define_struct
-    fields = (@log_fields + [:_time, :line]).sort_by{|e|e.to_s}
-    Indy.suppress_warnings { Struct.new( "Line", *fields ) }
-  end
-
-  #
-  # Return a Struct::Line for the last valid entry from the source
-  #
-  def last_entry
-    last_entries(1)
-  end
-
-  #
-  # Return a Struct::Line for the middle valid entry from the source,
-  # given the file offset parameters
-  #
-  def middle_entry(begin_offset=nil,end_offset=nil)
-    OpenStruct.new(:message=>'Middle Entry')
+    fields = (@log_fields + [:line]).sort_by{|e|e.to_s}
+    verbose = $VERBOSE
+    $VERBOSE = nil
+    Struct.new( "Line", *fields )
+    $VERBOSE = verbose
   end
 
   #
@@ -532,8 +476,6 @@ class Indy
     source_io.reverse_each do |line|
 
       hash = parse_line(line)
-
-      set_time(hash) if @time_field
 
       if hash
         num_entries += 1

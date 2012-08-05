@@ -331,22 +331,6 @@ describe 'Indy' do
     end
   end
 
-  context 'last_entry method' do
-
-    before(:all) do
-      @indy = Indy.search("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n2000-09-07 14:07:42 INFO  MyApp - Entering APPLICATION.")
-    end
-
-    it "should return a Struct::Line object" do
-      @indy.send(:last_entry).class.should == Struct::Line
-    end
-
-    it "should return correct Struct::Line objects" do
-      @indy.send(:last_entry).time.should == '2000-09-07 14:07:42'
-    end
-
-  end
-
   context 'last_entries method' do
 
     before(:all) do

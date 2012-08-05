@@ -81,8 +81,6 @@ describe Indy do
       results.last.severity.should == 'INFO'
       results.last.application.should == 'MyApp'
       results.last.message.should == 'Exiting APPLICATION.'
-      results.last._time.class.should_not be_nil
-
     end
 
     it "should execute cmd on each successive search" do

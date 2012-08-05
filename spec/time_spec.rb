@@ -193,31 +193,4 @@ describe Indy do
     end
 
   end
-
-  context "built-in _time field" do
-
-    before(:all) do
-      log_string = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
-        "2000-09-07 14:08:41 INFO  MyApp - Exiting APPLICATION.",
-        "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."].join("\n")
-      @search_result = Indy.search(log_string).for(:application => 'MyApp')
-      @time_search_result = Indy.search(log_string).before(:time => "2020-09-07").for(:application => 'MyApp')
-    end
-
-    it "should not exist as an attribute unless performing a time search" do
-      @search_result.first._time.class.should == NilClass
-      @time_search_result.first._time.class.should == Time
-    end
-
-    it "should be accurate" do
-      @time_search_result.first._time.strftime("%a %b %d %H:%M:%S %Z").should match(/^Thu Sep 07 14:07:41 .{3}/)
-    end
-
-    it "should allow for time range calculations" do
-      seconds = @time_search_result.last._time - @time_search_result.first._time
-      seconds.should == 194
-    end
-
-  end
-
 end

@@ -33,7 +33,7 @@ class Indy
     COMBINED_REGEXP = /^#{IPV4_REGEXP} #{SPACE_DELIM_REGEXP} #{SPACE_DELIM_REGEXP} #{BRACKET_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP} #{HTTP_STATUS_REGEXP} #{NUMBER_REGEXP} #{DQUOTE_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP}$/
 
     LOG4R_DEFAULT_FIELDS = [:level, :application, :message]
-    LOG4R_DEFAULT_REGEXP = /(?:\s+)?([A-Z]+) (\S+): (.*)$/
+    LOG4R_DEFAULT_REGEXP = /(?:\s*)([A-Z]+) (\S+): (.*)$/
   end
 
   #
