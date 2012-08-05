@@ -25,19 +25,29 @@ class Indy
     def initialize(param)
       raise Indy::Source::Invalid if param.nil?
       if param.respond_to?(:keys)
-        set_connection(:cmd, param[:cmd]) if param[:cmd]
-        set_connection(:file, param[:file]) if ( param[:file] and File.size(param[:file].path) > 0 )
-        set_connection(:string, param[:string]) if param[:string]
-      elsif param.respond_to?(:read) and param.respond_to?(:rewind)
+        if param[:cmd] # and param[:cmd].length > 0
+          set_connection(:cmd, param[:cmd])
+        elsif param[:file] # and File.size(param[:file].path) > 0
+          set_connection(:file, param[:file])
+        elsif param[:string]
+          set_connection(:string, param[:string])
+        end
+      else
+        discover_connection(param)
+      end
+    end
+
+    #
+    # Support source being passed in without key indicating type
+    #
+    def discover_connection(param)
+      if param.respond_to?(:read) and param.respond_to?(:rewind)
         set_connection(:file, param)
       elsif param.respond_to?(:to_s) and param.respond_to?(:length)
-        # fall back to source being the string passed in
         set_connection(:string, param)
       else
         raise Indy::Source::Invalid
       end
-
-
     end
 
     #
@@ -74,11 +84,14 @@ class Indy
       @lines
     end
 
+    #
+    # Return entries that meet time criteria
+    #
     def scope_by_time(time_boundaries)
       start_time, end_time = time_boundaries
       scope_end = num_lines - 1
       # short circuit the search if possible
-      if (Time.parse(@lines[0]) > end_time) or (Time.parse(@lines[-1]) < start_time)
+      if (time_at(0) > end_time) or (time_at(-1) < start_time)
         @lines = []
         return @lines
       end
@@ -87,40 +100,67 @@ class Indy
       @lines = @lines[scope_begin..scope_end]
     end
 
+    #
     # find index of first record to match value
+    #
     def find_first(value,start,stop)
-      return start if Time.parse(@lines[start]) > value
+      return start if time_at(start) > value
       find(:first,value,start,stop)
     end
 
+    #
     # find index of last record to match value
+    #
     def find_last(value,start,stop)
-      return stop if Time.parse(@lines[stop])< value
+      return stop if time_at(stop) < value
       find(:last,value,start,stop)
     end
 
-    def find(boundary,value,start,stop)
-      sleep 0.5 if  boundary == :last
-      return start if start == stop
-      mid = ((stop - start) / 2) + start
-      mid_time = Time.parse(@lines[mid])
-      # puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid #{mid}:#{mid_time}]"
-      if mid_time == value
-        case boundary
-        when :first
-          (Time.parse(@lines[mid-1]) == value) ? find_first(value,start-1,stop) : mid
-        when :last
-          (Time.parse(@lines[mid+1]) == value) ? find_last(value,start,stop+1) : mid
-        end
-      elsif mid_time > value
-        mid -= 1 if mid == stop
-        find(boundary, value, start, mid)
-      elsif mid_time < value
-        mid += 1 if mid == start
-        find(boundary, value, mid, stop)
+    #
+    # Find index and time at mid point
+    #
+    def find_middle(start, stop)
+      index = ((stop - start) / 2) + start
+      time = time_at(index)
+      [index, time]
+    end
+
+    #
+    # Step forward or backward by one, looking for the boundary of the value
+    #
+    def find_adjacent(boundary,value,start,stop,mid_index)
+      case boundary
+      when :first
+        (time_at(mid_index,-1) == value) ? find_first(value,start-1,stop) : mid_index
+      when :last
+        (time_at(mid_index,1) == value) ? find_last(value,start,stop+1) : mid_index
       end
     end
 
+    #
+    # Return the time of a log entry index, with an optional offset
+    #
+    def time_at(index, delta=0)
+      Time.parse(@lines[index + delta])
+    end
+
+    #
+    # Binary search for a time condition
+    #
+    def find(boundary,value,start,stop)
+      return start if start == stop
+      mid_index, mid_time = find_middle(start,stop)
+      # puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid_index #{mid_index}:#{mid_time}]"
+      if mid_time == value
+        find_adjacent(boundary,value,start,stop,mid_index)
+      elsif mid_time > value
+        mid_index -= 1 if mid_index == stop
+        find(boundary, value, start, mid_index)
+      elsif mid_time < value
+        mid_index += 1 if mid_index == start
+        find(boundary, value, mid_index, stop)
+      end
+    end
 
     #
     # Execute the source's connection string, returning an IO object
@@ -128,16 +168,10 @@ class Indy
     # @param [String] command_string string of command that will return log contents
     #
     def exec_command(command_string)
-      begin
-        io = IO.popen(command_string)
-        raise Indy::Source::Invalid, "No data returned from command string execution" if io.eof?
-      rescue
-        nil
-      end
+      io = IO.popen(command_string)
+      raise Indy::Source::Invalid, "No data returned from command string execution" if io.eof?
       io
     end
-
-
 
     #
     # the number of lines in the source

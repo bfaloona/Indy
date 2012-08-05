@@ -28,13 +28,10 @@ class Indy
   #
   def initialize(args)
     @source = @log_format = @time_format = @log_regexp = @log_fields = @multiline = nil
-
     while (arg = args.shift) do
       send("#{arg.first}=",arg.last)
     end
-
     update_log_format( @log_format )
-
   end
 
   #
@@ -71,7 +68,6 @@ class Indy
     #   Indy.search(:source => {:cmd => "cat apache.log"}, :log_format => LOG_FORMAT, :time_format => MY_TIME_FORMAT).for(:all)
     #
     def search(params=nil)
-  
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
@@ -119,22 +115,15 @@ class Indy
   #
   def for(search_criteria)
     results = ResultSet.new
-    case search_criteria
-    when Enumerable
-      results += _search do |result|
-        result_struct = Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
-        yield result_struct if block_given? and result_struct
-        result_struct
-      end
-
-    when :all
-      results += _search do |result|
+    results += _search do |result|
+      if search_criteria == :all
         result_struct = Indy.create_struct(result)
-        yield result_struct if block_given?
-        result_struct
+      elsif search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+        result_struct = Indy.create_struct(result)
       end
+      yield result_struct if block_given? and result_struct
+      result_struct
     end
-
     results.compact
   end
 
@@ -151,13 +140,13 @@ class Indy
   #
   def like(search_criteria)
     results = ResultSet.new
-
     results += _search do |result|
-      result_struct = Indy.create_struct(result) if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
-      yield result_struct if block_given? and result_struct
+      if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
+        result_struct = Indy.create_struct(result)
+        yield result_struct if block_given?
+      end
       result_struct
     end
-
     results.compact
   end
 
@@ -175,20 +164,11 @@ class Indy
   #   Indy.search(LOG_FILE).last(:span => 100).for(:all)
   #
   def last(scope_criteria)
-    case scope_criteria
-    when Enumerable
-      raise ArgumentError unless scope_criteria[:span] || scope_criteria[:rows]
-      
-      if scope_criteria[:span]
-        span = (scope_criteria[:span].to_i * 60).seconds
-        starttime = parse_date(last_entries(1)) - span
+    raise ArgumentError, "Unsupported parameter to last(): #{scope_criteria.inspect}" unless scope_criteria.respond_to?(:keys) and scope_criteria[:span]
+    span = (scope_criteria[:span].to_i * 60).seconds
+    starttime = parse_date(last_entries(1)) - span
 
-        within(:time => [starttime, forever])
-      end
-    else
-      raise ArgumentError, "Invalid parameter: #{scope_criteria.inspect}"
-    end
-
+    within(:time => [starttime, forever])
     self
   end
 
@@ -207,7 +187,6 @@ class Indy
     if scope_criteria[:time]
       time = parse_date(scope_criteria[:time])
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
-
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
         within(:time => [time, time + span])
@@ -215,7 +194,6 @@ class Indy
         @start_time = time
       end
     end
-
     self
   end
 
@@ -242,7 +220,6 @@ class Indy
     if scope_criteria[:time]
       time = parse_date(scope_criteria[:time])
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
-
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
         within(:time => [time - span, time], :inclusive => scope_criteria[:inclusive])
@@ -250,21 +227,20 @@ class Indy
         @end_time = time
       end
     end
-
     self
   end
 
+  #
+  # Scopes the eventual search to all entries near this point.
+  #
+  # @param [Hash] scope_criteria the hash containing :time and :span (in minutes) to scope the log
+  #
   def around(scope_criteria)
-    if scope_criteria[:time]
-      time = parse_date(scope_criteria[:time])
-
-      @inclusive = nil
-      warn "Ignoring inclusive scope_criteria" if scope_criteria[:inclusive]
-
-      half_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
-      within(:time => [time - half_span, time + half_span])
-    end
-
+    raise ArgumentError unless scope_criteria.respond_to?(:keys) and scope_criteria[:time]
+    time = parse_date(scope_criteria[:time])
+    @inclusive = nil
+    mid_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
+    within(:time => [time - mid_span, time + mid_span])
     self
   end
 
@@ -282,10 +258,8 @@ class Indy
   def within(scope_criteria)
     if scope_criteria[:time]
       @start_time, @end_time = scope_criteria[:time].collect {|str| parse_date(str) }
-
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
     end
-
     self
   end
 
@@ -300,21 +274,16 @@ class Indy
   #        to use for comparison against each log line.
   #
   def update_log_format( log_format )
-
     case log_format
     when :default, nil
       @log_format = DEFAULT_LOG_FORMAT
     else
       @log_format = log_format
     end
-
     @log_regexp, *@log_fields = @log_format
-
     @time_field = ( @log_fields.include?(:time) ? :time : nil )
-
     # now that we know the fields
     define_struct
-
   end
 
   #
@@ -324,24 +293,40 @@ class Indy
   # This method is supposed to be used internally.
   #
   def _search(&block)
-    time_search = use_time_criteria?
     if @multiline
-      source_io = StringIO.new( (time_search ? @source.open([@start_time,@end_time]) : @source.open).join("\n") )
-      results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
-        hash = parse_line(entry)
-        next unless hash
-        next if time_search && !inside_time_window?(hash)
-        block.call(hash) if block_given?
-      end
+      multiline_search(&block)
     else
-      results = ResultSet.new
-      source_lines = (time_search ? @source.open([@start_time,@end_time]) : @source.open)
-      source_lines.each do |line|
-        hash = parse_line(line)
-        next unless hash
-        next if time_search && !inside_time_window?(hash)
-        results << (block.call(hash) if block_given?)
-      end
+      standard_search(&block)
+    end
+  end
+
+  #
+  # Performs #_search for line based entries
+  #
+  def standard_search(&block)
+    is_time_search = use_time_criteria?
+    results = ResultSet.new
+    source_lines = (is_time_search ? @source.open([@start_time,@end_time]) : @source.open)
+    source_lines.each do |line|
+      hash = parse_line(line)
+      next unless hash
+      next unless inside_time_window?(hash) if is_time_search
+      results << (block.call(hash) if block_given?)
+    end
+    results.compact
+  end
+
+  #
+  # Performs #_search for multi-line based entries
+  #
+  def multiline_search(&block)
+    is_time_search = use_time_criteria?
+    source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
+    results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
+      hash = parse_line_captures(entry)
+      next unless hash
+      next unless inside_time_window?(hash) if is_time_search
+      block.call(hash) if block_given?
     end
     results.compact
   end
@@ -350,29 +335,42 @@ class Indy
   # Return a hash of field=>value pairs for the log line
   #
   # @param [String] line The log line
-  # @param [Array] pattern_array The match regexp string, followed by log fields
-  #   see Class method search
   #
-  def parse_line( line )
+  def parse_line(line)
+    match_data = /#{@log_regexp}/.match(line)
+    return nil unless match_data
+    values = match_data.captures
+    assert_valid_field_list(values)
+    make_line_hash([line, values].flatten)
+  end
 
-    if line.kind_of? String
-      match_data = /#{@log_regexp}/.match(line)
-      return nil unless match_data
+  #
+  # Return a hash of field=>value pairs for the captured values from a log line
+  #
+  # @param [String] capture_array The array of values captured by the @log_regexp
+  #
+  def parse_line_captures( capture_array )
+    entire_line = capture_array.shift
+    values = capture_array
+    assert_valid_field_list(capture_array)
+    make_line_hash([entire_line, values].flatten)
+  end
 
-      values = match_data.captures
-      entire_line = line.strip
-
-    elsif line.kind_of? Enumerable
-
-      entire_line = line.shift
-      values = line 
-    end
-    
-    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
-
+  #
+  # Convert log entry into hash
+  #
+  def make_line_hash(values)
+    entire_line = values.shift
     hash = Hash[ *@log_fields.zip( values ).flatten ]
-    hash[:line] = entire_line.strip
+    hash[:line] = entire_line
     hash
+  end
+
+  #
+  # Ensure number of fields is expected
+  #
+  def assert_valid_field_list(values)
+    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
   end
 
   #
@@ -410,9 +408,7 @@ class Indy
   def parse_date(param)
     return nil unless @time_field
     return param if param.kind_of? Time or param.kind_of? DateTime
-    
     time_string = param.is_a?(Hash) ? param[@time_field] : param.to_s
-
     if @time_format
       begin
         # Attempt the appropriate parse method
@@ -428,7 +424,6 @@ class Indy
         raise "Failed to create time object. The error was: #{e.message}"
       end
     end
-
   end
 
   #
@@ -451,7 +446,7 @@ class Indy
   end
 
   #
-  # Define Struct::Line with the fields configured with @pattern
+  # Define Struct::Line with the fields configured with @pattern. Ignore warnings.
   #
   def define_struct
     fields = (@log_fields + [:line]).sort_by{|e|e.to_s}
@@ -467,25 +462,18 @@ class Indy
   # @param [Fixnum] num the number of rows to retrieve
   #
   def last_entries(num)
-
     num_entries = 0
     result = []
-
     source_io = @source.open
-
     source_io.reverse_each do |line|
-
       hash = parse_line(line)
-
       if hash
         num_entries += 1
         result << hash
         break if num_entries >= num
       end
     end
-
     warn "#last_entries found no matching lines in source." if result.empty?
-
     num == 1 ? Indy.create_struct(result.first) : result.collect{|e| Indy.create_struct(e)}
   end
 
