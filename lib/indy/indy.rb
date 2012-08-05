@@ -362,7 +362,7 @@ class Indy
   def make_line_hash(values)
     entire_line = values.shift
     hash = Hash[ *@log_fields.zip( values ).flatten ]
-    hash[:line] = entire_line
+    hash[:line] = entire_line.strip
     hash
   end
 
