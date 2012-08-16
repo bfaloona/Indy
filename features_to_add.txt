@@ -1,0 +1,7 @@
+1) on open, discover avg entry length
+
+2) on open, discover timestamp of first, middle and last entry
+
+3) DONE: [] access with buffered reads to avoid sucking in entire file
+
+4) DONE: add each_entry with buffered reads to avoid sucking in entire file
