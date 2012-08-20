@@ -36,7 +36,7 @@ class BufferedFile
 
   def reverse_entry_seek_index(entry_seek_index)
     buffer_entry_index = 0
-    @buffer_byte_offset = @file.size
+    @buffer_byte_offset = @file_size
     while entry_seek_index < buffer_entry_index do
       buffer_entry_index -= load_buffer :reverse
     end

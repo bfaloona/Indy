@@ -27,9 +27,11 @@ Gem::Specification.new do |s|
     s.add_development_dependency('yard-cucumber', '>= 2.1.1')
     s.add_development_dependency('flog', '>= 2.5.0')
     s.add_development_dependency('guard')
-    s.add_development_dependency('guard-rspec')
-    s.add_development_dependency('rspec-prof', '>= 0.0.3')
-    s.add_development_dependency('simplecov', '>= 0.4.0')
+    unless ENV['RUBY_VERSION'].match /jruby|rbx/
+      s.add_development_dependency('guard-rspec')
+      s.add_development_dependency('rspec-prof', '>= 0.0.3')
+      s.add_development_dependency('simplecov', '>= 0.4.0')
+    end
   end
 
   changes = Indy.show_version_changes(::Indy::VERSION)
