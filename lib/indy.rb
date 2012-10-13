@@ -1,6 +1,12 @@
 begin
   require 'simplecov'
-  SimpleCov.start if ENV["COVERAGE"]
+  if ENV["COVERAGE"]
+    SimpleCov.start do
+      add_filter "/spec/"
+      add_filter "/performance/"
+      add_filter "/features/"
+    end
+  end
 rescue Exception => e
   # ignore
 end

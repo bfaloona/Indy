@@ -20,6 +20,13 @@ RSpec::Core::RakeTask.new(:perf) do |t|
   t.rspec_opts = ['-f d']
 end
 
+desc "Run code coverage"
+task :coverage do
+  ENV['COVERAGE'] = '1'
+  Rake::Task['spec'].invoke
+  Rake::Task['features'].invoke
+end
+
 desc "Run features"
 Cucumber::Rake::Task.new(:features) do |task|
   task.cucumber_opts = ["features", "-f progress"]
