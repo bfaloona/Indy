@@ -18,7 +18,7 @@ To install Indy use the following command:
 Compatibility
 -------------
 
-[![build status](http://travis-ci.org/bfaloona/Indy.png)](http://travis-ci.org/bfaloona/Indy)
+[![build status](https://travis-ci.org/bfaloona/Indy.png)](http://travis-ci.org/bfaloona/Indy)
 
 Indy supports MacOS, *nix, and MS Windows and runs on the following ruby flavors:
 
