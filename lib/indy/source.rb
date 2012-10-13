@@ -63,19 +63,8 @@ class Indy
     #
     def open(time_boundaries=nil)
       begin
-        case @type
-        when :cmd
-          @io = StringIO.new( exec_command(@connection).read )
-          raise "Failed to execute command (#{@connection})" if @io.nil?
-        when :file
-          @connection.rewind
-          @io = StringIO.new(@connection.read)
-          raise "Failed to open file: #{@connection}" if @io.nil?
-        when :string
-          @io = StringIO.new( @connection )
-        else
-          raise RuntimeError, "Invalid log source type: #{@type.inspect}"
-        end
+        open_method = ('open_' + @type.to_s).intern
+        self.send(open_method)
       rescue Exception => e
         raise Indy::Source::Invalid, "Unable to open log source. (#{e.message})"
       end
@@ -83,6 +72,23 @@ class Indy
       scope_by_time(time_boundaries) if time_boundaries
       @lines
     end
+
+    def open_cmd
+      @io = StringIO.new(exec_command(@connection).read)
+      raise "Failed to execute command (#{@connection.inspect})" if @io.nil?
+    end
+
+    def open_file
+      @connection.rewind
+      @io = StringIO.new(@connection.read)
+      raise "Failed to open file: #{@connection.inspect}" if @io.nil?
+    end
+
+    def open_string
+      @io = StringIO.new(@connection)
+      raise "Failed to create StringIO from source (#{@connection.inspect})" if @io.nil?
+    end
+
 
     #
     # Return entries that meet time criteria
