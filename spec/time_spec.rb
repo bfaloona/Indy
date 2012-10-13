@@ -25,7 +25,7 @@ describe Indy do
         "17-03-2000 message9"].join("\n")
       @indy = Indy.new(
         :source => logdata,
-        :log_format => ['^(\d[^\s]+\d) (.+)$', :time, :message])
+        :log_format => [/^(\d[^\s]+\d) (.+)$/, :time, :message])
       @indy.after(:time => '13-03-2000')
       @indy.for(:all).length.should == 4
     end
@@ -186,8 +186,8 @@ describe Indy do
       time.day.should == 13
     end
 
-    it "should search within time scope using a different format" do
-      pending
+    it "should search within time scope using a different format than explicitly set" do
+      pending 'Flexible time date time formatting is not implemented'
       @indy.after(:time => 'Jan 13 2002').for(:all).length.should == 2
       @indy.after(:time => 'Jan 14 2002').for(:all).last._time.mday.should == 15
     end

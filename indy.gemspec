@@ -1,12 +1,11 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require 'indy/version'
 
-
 Gem::Specification.new do |s|
   s.name        = 'indy'
   s.version     = ::Indy::VERSION
   s.authors     = ["Franklin Webber","Brandon Faloona"]
-  s.description = %{ Indy is a log archelogy library that treats logs like data structures. Search fixed format or custom logs by field and/or time. }
+  s.description = %{ Indy is a log archaeology library that treats logs like data structures. Search standard or custom log formats by field and/or time. }
   s.summary     = "indy-#{s.version}"
   s.email       = 'brandon@faloona.net'
   s.homepage    = "http://github.com/bfaloona/Indy"
@@ -22,14 +21,19 @@ Gem::Specification.new do |s|
   s.add_development_dependency('yard', '>= 0.7.2')
   s.add_development_dependency('rspec', '>= 2.9.0')
   s.add_development_dependency('rspec-mocks', '>= 2.9.0')
+  s.add_development_dependency('rb-fsevent')
+  s.add_development_dependency('ruby_gntp')
+  s.add_development_dependency('growl')
 
   unless ENV['TRAVIS'] == 'true'
     s.add_development_dependency('yard-cucumber', '>= 2.1.1')
     s.add_development_dependency('flog', '>= 2.5.0')
     s.add_development_dependency('guard')
-    s.add_development_dependency('guard-rspec')
-    s.add_development_dependency('rspec-prof', '>= 0.0.3')
-    s.add_development_dependency('simplecov', '>= 0.4.0')
+    unless ENV['RUBY_VERSION'].match /jruby|rbx/
+      s.add_development_dependency('guard-rspec')
+      s.add_development_dependency('rspec-prof', '>= 0.0.3')
+      s.add_development_dependency('simplecov', '>= 0.4.0')
+    end
   end
 
   changes = Indy.show_version_changes(::Indy::VERSION)
@@ -47,8 +51,7 @@ Gem::Specification.new do |s|
 
   }
 
-  
-  s.rubygems_version  = "1.6.1"
+  # s.rubygems_version  = "1.6.1"
 
   exclusions          = [File.join("performance", "large.log")]
   s.files             = `git ls-files`.split("\n") - exclusions
