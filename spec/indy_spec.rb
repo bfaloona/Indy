@@ -4,31 +4,39 @@ describe 'Indy' do
 
   context ':initialize' do
 
+    it "should accept v0.3.4 initialization params" do
+      i = Indy.new(:source => "foo\nbar\n", :log_format => Indy::DEFAULT_LOG_FORMAT)
+      i.log_definition.class.should eq LogDefinition
+      i.log_definition.entry_regexp.class.should eq Regexp
+      i.log_definition.entry_fields.class.should eq Array
+    end
+
     # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
     it "should accept a log4r pattern string without error" do
-      Indy.new(:log_format => ["(%d) (%i) (%c) - (%m)", :time, :info, :class, :message]).class.should == Indy
+      Indy.new(:entry_regexp => "(%d) (%i) (%c) - (%m)", :entry_fields => [:time, :info, :class, :message]).class.should == Indy
     end
 
     # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
     it "should accept a log4j pattern string without error" do
-      Indy.new(:log_format => ["%d [%M] %p %C{1} - %m", :time, :info, :class, :message]).class.should == Indy
+      Indy.new(:entry_regexp => "%d [%M] %p %C{1} - %m", :entry_fields => [:time, :info, :class, :message]).class.should == Indy
     end
 
     it "should not raise error with non-conforming data" do
-      @indy = Indy.new(:source => " \nfoobar\n\n baz", :log_format => ['([^\s]+) (\w+)', :time, :message])
+      @indy = Indy.new(:source => " \nfoobar\n\n baz", :entry_regexp => '([^\s]+) (\w+)', :entry_fields => [:time, :message])
       @indy.for(:all).class.should == Array
     end
 
     it "should accept time_format parameter" do
-      @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :log_format => ['^([^\s]+) (\w+)$', :time, :message])
+      @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :entry_regexp => '^([^\s]+) (\w+)$', :entry_fields => [:time, :message])
       @indy.for(:all).class.should == Array
-      @indy.instance_variable_get(:@time_format).should == '%d-%m-%Y'
+      @indy.log_definition.time_format.should == '%d-%m-%Y'
     end
 
     it "should accept an initialization hash passed to #search" do
       hash = {:time_format => '%d-%m-%Y',
         :source => "1-13-2000 yes",
-        :log_format => ['^([^\s]+) (\w+)$', :time, :message]}
+        :entry_regexp => '^([^\s]+) (\w+)$',
+        :entry_fields => [:time, :message]}
       @indy = Indy.search(hash)
       @indy.class.should == Indy
       @indy.for(:all).length.should == 1
@@ -40,7 +48,7 @@ describe 'Indy' do
   context 'instance' do
 
     before(:all) do
-      @indy = Indy.new(:source => '1/2/2002 string', :log_format => ['([^\s]+) (\w+)', :time, :message])
+      @indy = Indy.new(:source => '1/2/2002 string', :entry_regexp => '([^\s]+) (\w+)', :entry_fields => [:time, :message])
     end
 
     context "method" do

@@ -23,8 +23,8 @@ class Indy
     DEFAULT_APPLICATION = '\w+'
     DEFAULT_MESSAGE = '.+'
 
-    DEFAULT_LOG_REGEXP = /^(#{DEFAULT_DATE_TIME})\s+(#{DEFAULT_SEVERITY_PATTERN})\s+(#{DEFAULT_APPLICATION})\s+-\s+(#{DEFAULT_MESSAGE})$/
-    DEFAULT_LOG_FIELDS = [:time,:severity,:application,:message]
+    DEFAULT_ENTRY_FIELDS = [:time,:severity,:application,:message]
+    DEFAULT_ENTRY_REGEXP = /^(#{DEFAULT_DATE_TIME})\s+(#{DEFAULT_SEVERITY_PATTERN})\s+(#{DEFAULT_APPLICATION})\s+-\s+(#{DEFAULT_MESSAGE})$/
 
     COMMON_FIELDS = [:host, :ident, :authuser, :time, :request, :status, :bytes]
     COMMON_REGEXP = /^#{IPV4_REGEXP} #{SPACE_DELIM_REGEXP} #{SPACE_DELIM_REGEXP} #{BRACKET_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP} #{HTTP_STATUS_REGEXP} #{NUMBER_REGEXP}$/
@@ -33,7 +33,7 @@ class Indy
     COMBINED_REGEXP = /^#{IPV4_REGEXP} #{SPACE_DELIM_REGEXP} #{SPACE_DELIM_REGEXP} #{BRACKET_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP} #{HTTP_STATUS_REGEXP} #{NUMBER_REGEXP} #{DQUOTE_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP}$/
 
     LOG4R_DEFAULT_FIELDS = [:level, :application, :message]
-    LOG4R_DEFAULT_REGEXP = /(?:\s*)([A-Z]+) (\S+): (.*)$/
+    LOG4R_DEFAULT_REGEXP = /^(?:\s*)([A-Z]+) (\S+): (.*)$/
   end
 
   #
@@ -41,7 +41,7 @@ class Indy
   # e.g.:
   # INFO 2000-09-07 MyApp - Entering APPLICATION.
   #
-  DEFAULT_LOG_FORMAT = [LogFormats::DEFAULT_LOG_REGEXP, LogFormats::DEFAULT_LOG_FIELDS].flatten
+  DEFAULT_LOG_FORMAT = [LogFormats::DEFAULT_ENTRY_REGEXP, LogFormats::DEFAULT_ENTRY_FIELDS].flatten
 
   #
   # Uncustomized Log4r log format

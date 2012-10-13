@@ -5,15 +5,8 @@ class Indy
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
   attr_accessor :source
 
-  # array with regexp string and capture groups followed by log field
-  # name symbols. :time field is required to use time scoping
-  attr_accessor :log_format
-
-  # format string for explicit date/time format (optional)
-  attr_accessor :time_format
-
-  # initialization flag (true || nil) to enable multiline log entries. See README
-  attr_accessor :multiline
+  # LogDefinition holds information about the log file
+  attr_accessor :log_definition
 
   #
   # Initialize Indy. Also see class method Indy.search()
@@ -23,15 +16,17 @@ class Indy
   #  Indy.new(:source => LOG_FILE)
   #  Indy.new(:source => LOG_CONTENTS_STRING)
   #  Indy.new(:source => {:cmd => LOG_COMMAND_STRING})
-  #  Indy.new(:log_format => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILE)
-  #  Indy.new(:time_format => '%m-%d-%Y',:pattern => [LOG_REGEX_PATTERN,:time,:application,:message],:source => LOG_FILE)
+  #  Indy.new(:entry_regexp => LOG_REGEX_PATTERN, :entry_fields => [:time,:application,:message], :source => LOG_FILE)
+  #  Indy.new(:time_format => '%m-%d-%Y', :entry_regexp => LOG_REGEX_PATTERN, :entry_fields => [:time,:application,:message], :source => LOG_FILE)
   #
   def initialize(args)
-    @source = @log_format = @time_format = @log_regexp = @log_fields = @multiline = nil
-    while (arg = args.shift) do
-      send("#{arg.first}=",arg.last)
+    params_hash = args.dup
+    @source = @time_format = nil
+    if params_hash.keys.include? :source
+      self.source = params_hash[:source]
+      params_hash.delete :source
     end
-    update_log_format( @log_format )
+    set_log_definition(params_hash)
   end
 
   #
@@ -64,14 +59,14 @@ class Indy
     # @example command source
     #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
     #
-    # @example source as well as other paramters
-    #   Indy.search(:source => {:cmd => "cat apache.log"}, :log_format => LOG_FORMAT, :time_format => MY_TIME_FORMAT).for(:all)
+    # @example source as well as other parameters
+    #   Indy.search(:source => {:cmd => "cat apache.log"}, :entry_regexp => REGEXP, :entry_fields => [:field_one, :field_two], :time_format => MY_TIME_FORMAT).for(:all)
     #
     def search(params=nil)
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
-        Indy.new(:source => params, :log_format => DEFAULT_LOG_FORMAT)
+        Indy.new(:source => params, :entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS, :time_field => :time)
       end
     end
 
@@ -93,7 +88,7 @@ class Indy
   # Specify the log format to use as the comparison against each line within
   # the log file that has been specified.
   #
-  # @param [Array] log_format an Array with the regular expression as the first element
+  # @param [Array,LogDefinition] log_definition either a LogDefinition object or an Array with the regular expression as the first element
   #        followed by list of fields (Symbols) in the log entry
   #        to use for comparison against each log line.
   #
@@ -101,8 +96,8 @@ class Indy
   #
   #  Indy.search(LOG_FILE).with(/^(\d{2}.\d{2}.\d{2})\s*(.+)$/,:time,:message)
   #
-  def with(log_format = :default)
-    update_log_format( log_format )
+  def with(log_definition=:default)
+    set_log_definition(log_definition)
     self
   end
   
@@ -267,21 +262,21 @@ class Indy
   private
 
   #
-  # Set @pattern as well as @log_regexp, @log_fields, and @time_field
-  #
-  # @param [Array] pattern_array an Array with the regular expression as the first element
+  # @param [LogDefinition,Array,Symbol] args the symbol :default, a LogDefinition object, or an Array containing the regular expression as the first element
   #        followed by list of fields (Symbols) in the log entry
-  #        to use for comparison against each log line.
+  #        to use for comparison against each log entry.
   #
-  def update_log_format( log_format )
-    case log_format
+  def set_log_definition(args)
+    case args
     when :default, nil
-      @log_format = DEFAULT_LOG_FORMAT
+      @log_definition = LogDefinition.new(:entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS, :time_field => :time)
+    when Array
+      regexp = args[0]
+      fields = args[1..-1]
+      @log_definition = LogDefinition.new(:entry_regexp => regexp, :entry_fields => fields)
     else
-      @log_format = log_format
+      @log_definition = LogDefinition.new(args)
     end
-    @log_regexp, *@log_fields = @log_format
-    @time_field = ( @log_fields.include?(:time) ? :time : nil )
     # now that we know the fields
     define_struct
   end
@@ -293,7 +288,7 @@ class Indy
   # This method is supposed to be used internally.
   #
   def _search(&block)
-    if @multiline
+    if @log_definition.multiline
       multiline_search(&block)
     else
       standard_search(&block)
@@ -322,7 +317,7 @@ class Indy
   def multiline_search(&block)
     is_time_search = use_time_criteria?
     source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
-    results = source_io.read.scan(Regexp.new(@log_regexp, Regexp::MULTILINE)).collect do |entry|
+    results = source_io.read.scan(Regexp.new(@log_definition.entry_regexp, Regexp::MULTILINE)).collect do |entry|
       hash = parse_line_captures(entry)
       next unless hash
       next unless inside_time_window?(hash) if is_time_search
@@ -337,7 +332,7 @@ class Indy
   # @param [String] line The log line
   #
   def parse_line(line)
-    match_data = /#{@log_regexp}/.match(line)
+    match_data = /#{@log_definition.entry_regexp}/.match(line)
     return nil unless match_data
     values = match_data.captures
     assert_valid_field_list(values)
@@ -361,7 +356,7 @@ class Indy
   #
   def make_line_hash(values)
     entire_line = values.shift
-    hash = Hash[ *@log_fields.zip( values ).flatten ]
+    hash = Hash[ *@log_definition.entry_fields.zip( values ).flatten ]
     hash[:line] = entire_line.strip
     hash
   end
@@ -370,7 +365,7 @@ class Indy
   # Ensure number of fields is expected
   #
   def assert_valid_field_list(values)
-    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_fields.length
+    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_definition.entry_fields.length
   end
 
   #
@@ -382,7 +377,7 @@ class Indy
       @start_time = @start_time || forever_ago
       @end_time = @end_time || forever
     end
-    @time_field && @start_time && @end_time
+    @log_definition.time_field && @start_time && @end_time
   end
 
   #
@@ -406,13 +401,13 @@ class Indy
   # @param [String, Hash] param The log line hash, or string to be evaluated
   #
   def parse_date(param)
-    return nil unless @time_field
+    return nil unless @log_definition.time_field
     return param if param.kind_of? Time or param.kind_of? DateTime
-    time_string = param.is_a?(Hash) ? param[@time_field] : param.to_s
-    if @time_format
+    time_string = param.is_a?(Hash) ? param[@log_definition.time_field] : param.to_s
+    if @log_definition.time_format
       begin
         # Attempt the appropriate parse method
-        DateTime.strptime(time_string, @time_format)
+        DateTime.strptime(time_string, @log_definition.time_format)
       rescue
         # If appropriate, fall back to simple parse method
         DateTime.parse(time_string) rescue nil
@@ -430,7 +425,7 @@ class Indy
   # Return a time or datetime object way in the future
   #
   def forever
-    @time_format ? DateTime.new(4712) : Time.at(0x7FFFFFFF)
+    @log_definition.time_format ? DateTime.new(4712) : Time.at(0x7FFFFFFF)
   end
 
   #
@@ -438,10 +433,10 @@ class Indy
   #
   def forever_ago
     begin
-      @time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
+      @log_definition.time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
     rescue
       # Windows Ruby Time can't handle dates prior to 1969
-      @time_format ? DateTime.new(-4712) : Time.at(0)
+      @log_definition.time_format ? DateTime.new(-4712) : Time.at(0)
     end
   end
 
@@ -449,7 +444,7 @@ class Indy
   # Define Struct::Line with the fields configured with @pattern. Ignore warnings.
   #
   def define_struct
-    fields = (@log_fields + [:line]).sort_by{|e|e.to_s}
+    fields = (@log_definition.entry_fields + [:line]).sort_by{|e|e.to_s}
     verbose = $VERBOSE
     $VERBOSE = nil
     Struct.new( "Line", *fields )
