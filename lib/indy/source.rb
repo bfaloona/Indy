@@ -23,7 +23,7 @@ class Indy
     # @param [String, Hash] param The source content String, filepath String, or :cmd => 'command' Hash
     #
     def initialize(param)
-      raise Indy::Source::Invalid if param.nil?
+      raise Indy::Source::Invalid, "No source specified." if param.nil?
       if param.respond_to?(:keys)
         if param[:cmd] # and param[:cmd].length > 0
           set_connection(:cmd, param[:cmd])

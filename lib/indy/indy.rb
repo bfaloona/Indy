@@ -9,11 +9,10 @@ class Indy
   attr_accessor :log_definition
 
   #
-  # Initialize Indy. Also see class method Indy.search()
+  # Initialize Indy. Also see class method Indy#search.
   #
   # @example
   #
-  #  Indy.new(:source => LOG_FILE)
   #  Indy.new(:source => LOG_CONTENTS_STRING)
   #  Indy.new(:source => {:cmd => LOG_COMMAND_STRING})
   #  Indy.new(:entry_regexp => LOG_REGEX_PATTERN, :entry_fields => [:time,:application,:message], :source => LOG_FILE)
@@ -41,23 +40,21 @@ class Indy
   class << self
 
     #
-    # Create a new instance of Indy with @source, or multiple, parameters
-    # specified.  This allows for a more fluent creation that moves 
-    # into the execution.
+    # Create a new instance of Indy specifying source, or multiple parameters.
     #
-    # @param [String,Hash] params To specify @source, provide a filename or
-    #   log contents as a string. To specify a command, use a :cmd => STRING hash.
-    #   Alternately, a Hash with a :source key (amoung others) can be used to
-    #   provide multiple initialization parameters.
+    # @param [String,Hash] params To specify @source directly, provide log contents
+    #   as a string. Using a hash you can specify source with a :cmd or :file key.
+    #   Alternately, a hash with a :source key (among others) can be used to
+    #   provide multiple initialization parameters. See Indy#new.
     #
-    # @example filename source
-    #   Indy.search("apache.log").for(:severity => "INFO")
-    #   
     # @example string source
     #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").for(:all)
     #
     # @example command source
-    #   Indy.search(:cmd => "cat apache.log").for(:severity => "INFO")
+    #   Indy.search(:cmd => "cat apache.log").for(:all)
+    #
+    # @example file source
+    #   Indy.search(:file => "apache.log").for(:all)
     #
     # @example source as well as other parameters
     #   Indy.search(:source => {:cmd => "cat apache.log"}, :entry_regexp => REGEXP, :entry_fields => [:field_one, :field_two], :time_format => MY_TIME_FORMAT).for(:all)
@@ -82,7 +79,6 @@ class Indy
     end
 
   end
-
 
   #
   # Specify the log format to use as the comparison against each line within
@@ -149,14 +145,14 @@ class Indy
 
 
   #
-  # Scopes the eventual search to the last N entries, or last N minutes of entries.
+  # Scopes the eventual search to the last N minutes of entries.
   #
   # @param [Hash] scope_criteria hash describing the amount of time at
   # the last portion of the source
   #
   # @example For last 10 minutes worth of entries
   #
-  #   Indy.search(LOG_FILE).last(:span => 100).for(:all)
+  #   Indy.search(LOG_FILE).last(:span => 10).for(:all)
   #
   def last(scope_criteria)
     raise ArgumentError, "Unsupported parameter to last(): #{scope_criteria.inspect}" unless scope_criteria.respond_to?(:keys) and scope_criteria[:span]
@@ -454,7 +450,7 @@ class Indy
   #
   # Return an array of Struct::Line entries for the last N valid entries from the source
   #
-  # @param [Fixnum] num the number of rows to retrieve
+  # @param [Fixnum] num the number of entries to retrieve
   #
   def last_entries(num)
     num_entries = 0

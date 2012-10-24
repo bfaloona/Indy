@@ -4,43 +4,47 @@ class Indy
 
   describe Source do
 
-    it "should raise without parameter" do
-      lambda{ Source.new }.should raise_error( ArgumentError )
-    end
+    context "#new" do
 
-    it "should raise with nil parameter" do
-      lambda{ Source.new(nil) }.should raise_error( Indy::Source::Invalid )
-    end
+      it "should raise without parameter" do
+        lambda{ Source.new }.should raise_error( ArgumentError )
+      end
 
-    it "should raise with bad parameter" do
-      class NotString;end
-      lambda{ Source.new(NotString.new) }.should raise_error( Indy::Source::Invalid )
-    end
+      it "should raise with nil parameter" do
+        lambda{ Source.new(nil) }.should raise_error( Indy::Source::Invalid )
+      end
 
-    it "should raise if #execute_command returns empty string" do
-      IO.stub!(:popen).and_return('')
-      lambda{ Source.new(:cmd => 'a faux command').open }.should raise_error(Indy::Source::Invalid)
-    end
+      it "should raise with bad parameter" do
+        class NotString;end
+        lambda{ Source.new(NotString.new) }.should raise_error( Indy::Source::Invalid )
+      end
 
-    it "should return Indy::Source object" do
-      Source.new('logdata').class.should == Indy::Source
-    end
+      it "should raise if #execute_command returns empty string" do
+        IO.stub!(:popen).and_return('')
+        lambda{ Source.new(:cmd => 'a faux command').open }.should raise_error(Indy::Source::Invalid)
+      end
 
-    it "should respond to :open" do
-      Source.new('logdata').should respond_to(:open)
-    end
+      it "should return Indy::Source object" do
+        Source.new('logdata').class.should == Indy::Source
+      end
 
-    it "should respond to :num_lines" do
-      Source.new('logdata').should respond_to(:num_lines)
-    end
+      it "should respond to :open" do
+        Source.new('logdata').should respond_to(:open)
+      end
 
-    it "should respond to :lines" do
-      Source.new('logdata').should respond_to(:num_lines)
-    end
+      it "should respond to :num_lines" do
+        Source.new('logdata').should respond_to(:num_lines)
+      end
 
-    it "should handle Files" do
-      require 'tempfile'
-      Source.new(Tempfile.new('x')).class.should == Indy::Source
+      it "should respond to :lines" do
+        Source.new('logdata').should respond_to(:num_lines)
+      end
+
+      it "should handle Files" do
+        require 'tempfile'
+        Source.new(Tempfile.new('x')).class.should == Indy::Source
+      end
+
     end
 
     context "instance" do
@@ -86,5 +90,4 @@ class Indy
     end
 
   end
-
 end
