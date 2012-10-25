@@ -184,13 +184,13 @@ describe 'Indy' do
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n",
             " bad \n",
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"].join("\n")
-      @indy = Indy.search(log).for(:all).length.should == 3
+      Indy.search(log).for(:all).length.should == 3
     end
 
     it "should handle no matching entries" do
       log = ["2000-09-07   MyApp - Entering APPLICATION.\n \n",
             "2000-09-07 14:07:41\n"].join
-      @indy = Indy.search(log).for(:all).length.should == 0
+      Indy.search(log).for(:all).length.should == 0
     end
 
   end

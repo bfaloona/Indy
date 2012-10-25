@@ -70,7 +70,7 @@ class Indy
     #
     # Return a Struct::Entry object from a hash of values from a log entry
     #
-    # @param [Hash] line_hash a hash of :field_name => value pairs for one log line
+    # @param [Hash] entry_hash a hash of :field_name => value pairs for one log entry
     #
     def create_struct( entry_hash )
       values = entry_hash.keys.sort_by{|entry|entry.to_s}.collect {|key| entry_hash[key]}
@@ -81,12 +81,12 @@ class Indy
   end
 
   #
-  # Specify the log format to use as the comparison against each line within
+  # Specify the log format to use as the comparison against each entry within
   # the log file that has been specified.
   #
   # @param [Array,LogDefinition] log_definition either a LogDefinition object or an Array with the regular expression as the first element
   #        followed by list of fields (Symbols) in the log entry
-  #        to use for comparison against each log line.
+  #        to use for comparison against each log entry.
   #
   # @example Log formatted as - HH:MM:SS Message
   #
@@ -278,8 +278,8 @@ class Indy
   end
 
   #
-  # Search the @source and yield to the block the line that was found
-  # with @log_regexp and @log_fields
+  # Search the @source and yield to the block the entry that was found
+  # with @log_definition
   #
   # This method is supposed to be used internally.
   #
@@ -298,8 +298,8 @@ class Indy
     is_time_search = use_time_criteria?
     results = ResultSet.new
     source_lines = (is_time_search ? @source.open([@start_time,@end_time]) : @source.open)
-    source_lines.each do |line|
-      hash = parse_line(line)
+    source_lines.each do |single_line|
+      hash = parse_entry(single_line)
       next unless hash
       next unless inside_time_window?(hash) if is_time_search
       results << (block.call(hash) if block_given?)
@@ -314,7 +314,7 @@ class Indy
     is_time_search = use_time_criteria?
     source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
     results = source_io.read.scan(Regexp.new(@log_definition.entry_regexp, Regexp::MULTILINE)).collect do |entry|
-      hash = parse_line_captures(entry)
+      hash = parse_entry_captures(entry)
       next unless hash
       next unless inside_time_window?(hash) if is_time_search
       block.call(hash) if block_given?
@@ -323,37 +323,37 @@ class Indy
   end
 
   #
-  # Return a hash of field=>value pairs for the log line
+  # Return a hash of field=>value pairs for the log entry
   #
-  # @param [String] line The log line
+  # @param [String] entry The log entry
   #
-  def parse_line(line)
-    match_data = /#{@log_definition.entry_regexp}/.match(line)
+  def parse_entry(entry)
+    match_data = /#{@log_definition.entry_regexp}/.match(entry)
     return nil unless match_data
     values = match_data.captures
     assert_valid_field_list(values)
-    make_line_hash([line, values].flatten)
+    entry_hash([entry, values].flatten)
   end
 
   #
-  # Return a hash of field=>value pairs for the captured values from a log line
+  # Return a hash of field=>value pairs for the array of captured values from a log entry
   #
-  # @param [String] capture_array The array of values captured by the @log_regexp
+  # @param [Array] capture_array The array of values captured by the @log_definition.entry_regexp
   #
-  def parse_line_captures( capture_array )
-    entire_line = capture_array.shift
+  def parse_entry_captures( capture_array )
+    entire_entry = capture_array.shift
     values = capture_array
     assert_valid_field_list(capture_array)
-    make_line_hash([entire_line, values].flatten)
+    entry_hash([entire_entry, values].flatten)
   end
 
   #
   # Convert log entry into hash
   #
-  def make_line_hash(values)
-    entire_line = values.shift
+  def entry_hash(values)
+    entire_entry = values.shift
     hash = Hash[ *@log_definition.entry_fields.zip( values ).flatten ]
-    hash[:line] = entire_line.strip
+    hash[:entry] = entire_entry.strip
     hash
   end
 
@@ -377,13 +377,13 @@ class Indy
   end
 
   #
-  # Evaluate if a log line satisfies the configured time conditions
+  # Evaluate if a log entry satisfies the configured time conditions
   #
-  # @param [Hash] line_hash The log line hash to be evaluated
+  # @param [Hash] entry_hash The log entry's hash
   #
-  def inside_time_window?( line_hash )
-    time = parse_date( line_hash )
-    return false unless time && line_hash
+  def inside_time_window?( entry_hash )
+    time = parse_date( entry_hash )
+    return false unless time && entry_hash
     if @inclusive
       true unless time > @end_time or time < @start_time
     else
@@ -392,9 +392,9 @@ class Indy
   end
 
   #
-  # Return a valid DateTime object for the log line or string
+  # Return a valid DateTime object for the log entry string or hash
   #
-  # @param [String, Hash] param The log line hash, or string to be evaluated
+  # @param [String, Hash] param The log entry string or hash
   #
   def parse_date(param)
     return nil unless @log_definition.time_field
@@ -456,16 +456,16 @@ class Indy
     num_entries = 0
     result = []
     source_io = @source.open
-    source_io.reverse_each do |line|
-      hash = parse_line(line)
+    source_io.reverse_each do |entry|
+      hash = parse_entry(entry)
       if hash
         num_entries += 1
         result << hash
         break if num_entries >= num
       end
     end
-    warn "#last_entries found no matching lines in source." if result.empty?
-    num == 1 ? Indy.create_struct(result.first) : result.collect{|e| Indy.create_struct(e)}
+    warn "#last_entries found no entries in source." if result.empty?
+    num == 1 ? Indy.create_struct(result.first) : result.collect{|entry| Indy.create_struct(entry)}
   end
 
 end

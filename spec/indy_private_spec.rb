@@ -20,14 +20,14 @@ describe 'Indy' do
       @indy.send(:last_entries, 2).first.time.should == '2000-09-07 14:07:43'
     end
 
-    it "#parse_line should return a hash" do
-      @indy.send(:parse_line, "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.").class.should == Hash
+    it "#parse_entry should return a hash" do
+      @indy.send(:parse_entry, "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.").class.should == Hash
     end
 
-    it "#parse_line hash should have fields as key/value pairs" do
-      hash = @indy.send(:parse_line, "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.")
-      hash[:time] == "2000-09-07 14:07:41"
-      hash[:message] == "Entering APPLICATION."
+    it "#parse_entry hash should contain key/value pairs" do
+      hash = @indy.send(:parse_entry, "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION.")
+      hash[:time].should == "2000-09-07 14:07:41"
+      hash[:message].should == "Entering APPLICATION."
     end
 
   end

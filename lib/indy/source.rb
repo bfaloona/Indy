@@ -3,6 +3,8 @@ class Indy
   # 
   # A StringIO interface to the underlying log source.
   # 
+  # TODO: Only supports single line log formats.
+  #
   class Source
 
     # log source type. :cmd, :file, or :string
