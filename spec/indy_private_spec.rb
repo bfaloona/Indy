@@ -11,12 +11,12 @@ describe 'Indy' do
       @indy = Indy.search(log)
     end
 
-    it "#last_entries should return an array of Struct::Line object" do
+    it "#last_entries should return an array of Struct::Entry object" do
       @indy.send(:last_entries, 2).class.should == Array
-      @indy.send(:last_entries, 2).first.class.should == Struct::Line
+      @indy.send(:last_entries, 2).first.class.should == Struct::Entry
     end
 
-    it "#last_entries should return correct Struct::Line objects" do
+    it "#last_entries should return correct Struct::Entry objects" do
       @indy.send(:last_entries, 2).first.time.should == '2000-09-07 14:07:43'
     end
 

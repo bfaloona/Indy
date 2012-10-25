@@ -236,9 +236,9 @@ describe 'Indy' do
         "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
     end
     
-    it "with #for should yield Struct::Line" do
+    it "with #for should yield Struct::Entry" do
       Indy.search(log).for(:all) do |result|
-        result.should be_kind_of(Struct::Line)
+        result.should be_kind_of(Struct::Entry)
       end
     end
 

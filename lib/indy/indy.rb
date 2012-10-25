@@ -68,13 +68,13 @@ class Indy
     end
 
     #
-    # Return a Struct::Line object from a hash of values from a log entry
+    # Return a Struct::Entry object from a hash of values from a log entry
     #
     # @param [Hash] line_hash a hash of :field_name => value pairs for one log line
     #
-    def create_struct( line_hash )
-      params = line_hash.keys.sort_by{|e|e.to_s}.collect {|k| line_hash[k]}
-      result = Struct::Line.new( *params )
+    def create_struct( entry_hash )
+      values = entry_hash.keys.sort_by{|entry|entry.to_s}.collect {|key| entry_hash[key]}
+      result = Struct::Entry.new( *values )
       result
     end
 
@@ -437,18 +437,18 @@ class Indy
   end
 
   #
-  # Define Struct::Line with the fields configured with @pattern. Ignore warnings.
+  # Define Struct::Entry with the fields from @log_definition. Ignore warnings.
   #
   def define_struct
-    fields = (@log_definition.entry_fields + [:line]).sort_by{|e|e.to_s}
+    fields = (@log_definition.entry_fields + [:entry]).sort_by{|e|e.to_s}
     verbose = $VERBOSE
     $VERBOSE = nil
-    Struct.new( "Line", *fields )
+    Struct.new( "Entry", *fields )
     $VERBOSE = verbose
   end
 
   #
-  # Return an array of Struct::Line entries for the last N valid entries from the source
+  # Return an array of Struct::Entry objects for the last N valid entries from the source
   #
   # @param [Fixnum] num the number of entries to retrieve
   #
