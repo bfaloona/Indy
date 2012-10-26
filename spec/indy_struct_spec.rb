@@ -8,7 +8,7 @@ describe 'Indy' do
       log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
-      @entry_struct = Indy.search(log).for(:all)[1]
+      @entry_struct = Indy.search(log).all[1]
     end
 
     it "should be returned by #for search" do

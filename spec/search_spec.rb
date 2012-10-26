@@ -13,7 +13,7 @@ describe Indy do
     end
 
     it "should return all entries" do
-      @indy.for(:all).length.should == 3
+      @indy.all.length.should == 3
     end
 
     it "should search entire string on each successive search" do

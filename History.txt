@@ -1,7 +1,8 @@
 === 0.4.0 / unreleased
 
 * Faster time scoped searches when using single line log formats
-* result[:line] has been replaced with result[:entry]
+* result[:entry] had replaced result[:line]
+* Indy#all has replaced Indy#for(:all)
 
 === 0.3.4 / 2011-08-07
 

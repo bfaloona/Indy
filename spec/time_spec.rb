@@ -27,7 +27,7 @@ describe Indy do
         :source => logdata,
         :log_format => [/^(\d[^\s]+\d) (.+)$/, :time, :message])
       @indy.after(:time => '13-03-2000')
-      @indy.for(:all).length.should == 4
+      @indy.all.length.should == 4
     end
 
   end
@@ -47,19 +47,19 @@ describe Indy do
     context "after method" do
 
       it "should find the correct entries" do
-        @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
+        @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
       end
 
       it "should find 0 entries with a time that is past the log" do
-        @indy.after(:time => '2000-09-07 14:07:46').for(:all).length.should == 0
+        @indy.after(:time => '2000-09-07 14:07:46').all.length.should == 0
       end
 
       it "should find all entries with a time that is before the log" do
-        @indy.after(:time => '2000-09-07 14:07:40').for(:all).length.should == 5
+        @indy.after(:time => '2000-09-07 14:07:40').all.length.should == 5
       end
 
       it "should find entries using inclusive" do
-        @indy.after(:time => '2000-09-07 14:07:42', :inclusive => true).for(:all).length.should == 4
+        @indy.after(:time => '2000-09-07 14:07:42', :inclusive => true).all.length.should == 4
       end
 
     end
@@ -67,19 +67,19 @@ describe Indy do
     context "before method" do
 
       it "should find the correct entries" do
-        @indy.before(:time => '2000-09-07 14:07:44').for(:all).length.should == 3
+        @indy.before(:time => '2000-09-07 14:07:44').all.length.should == 3
       end
 
       it "should find 0 entries with a time that is before the log" do
-        @indy.before(:time => '2000-09-07 14:07:40').for(:all).length.should == 0
+        @indy.before(:time => '2000-09-07 14:07:40').all.length.should == 0
       end
 
       it "should find all entries with a time that is after the log" do
-        @indy.before(:time => '2000-09-07 14:07:47').for(:all).length.should == 5
+        @indy.before(:time => '2000-09-07 14:07:47').all.length.should == 5
       end
 
       it "should find entries using inclusive" do
-        @indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).for(:all).length.should == 4
+        @indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).all.length.should == 4
       end
 
     end
@@ -87,11 +87,11 @@ describe Indy do
     context "within method" do
 
       it "should find the correct entries" do
-        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43']).for(:all).length.should == 1
+        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43']).all.length.should == 1
       end
 
       it "should find the correct entries using inclusive" do
-        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43'], :inclusive => true).for(:all).length.should == 3
+        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43'], :inclusive => true).all.length.should == 3
       end
 
     end
@@ -112,19 +112,19 @@ describe Indy do
     end
 
     it "using after should find the correct entries" do
-      @indy.after(:time => '2000-09-07 14:07:42', :span => 1).for(:all).length.should == 1
+      @indy.after(:time => '2000-09-07 14:07:42', :span => 1).all.length.should == 1
     end
 
     it "using before should find the correct entries" do
-      @indy.before(:time => '2000-09-07 14:12:00', :span => 4).for(:all).length.should == 4
+      @indy.before(:time => '2000-09-07 14:12:00', :span => 4).all.length.should == 4
     end
 
     it "using around should find the correct entries" do
-      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).for(:all).length.should == 2
+      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).all.length.should == 2
     end
 
     it "using after and inclusive should find the correct entries" do
-      @indy.after(:time => '2000-09-07 14:07:41', :span => 2, :inclusive => true).for(:all).length.should == 3
+      @indy.after(:time => '2000-09-07 14:07:41', :span => 2, :inclusive => true).all.length.should == 3
     end
 
   end
@@ -143,14 +143,14 @@ describe Indy do
 
     # Issue #3 (by design) assumed that the time scope.
     it "should each add scope criteria to the instance" do
-      @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
-      @indy.before(:time => '2000-09-07 14:07:45').for(:all).length.should == 2
+      @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
+      @indy.before(:time => '2000-09-07 14:07:45').all.length.should == 2
     end
 
     it "should specify the entire scope if #reset_scope was called" do
-      @indy.after(:time => '2000-09-07 14:07:42').for(:all).length.should == 3
+      @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
       @indy.reset_scope
-      @indy.before(:time => '2000-09-07 14:07:45').for(:all).length.should == 4
+      @indy.before(:time => '2000-09-07 14:07:45').all.length.should == 4
     end
 
   end
@@ -188,8 +188,8 @@ describe Indy do
 
     it "should search within time scope using a different format than explicitly set" do
       pending 'Flexible time date time formatting is not implemented'
-      @indy.after(:time => 'Jan 13 2002').for(:all).length.should == 2
-      @indy.after(:time => 'Jan 14 2002').for(:all).last._time.mday.should == 15
+      @indy.after(:time => 'Jan 13 2002').all.length.should == 2
+      @indy.after(:time => 'Jan 14 2002').all.last._time.mday.should == 15
     end
 
   end

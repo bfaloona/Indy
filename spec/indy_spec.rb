@@ -13,12 +13,12 @@ describe 'Indy' do
 
     it "should not raise error with non-conforming data" do
       @indy = Indy.new(:source => " \nfoobar\n\n baz", :entry_regexp => '([^\s]+) (\w+)', :entry_fields => [:time, :message])
-      @indy.for(:all).class.should == Array
+      @indy.all.class.should == Array
     end
 
     it "should accept time_format parameter" do
       @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :entry_regexp => '^([^\s]+) (\w+)$', :entry_fields => [:time, :message])
-      @indy.for(:all).class.should == Array
+      @indy.all.class.should == Array
       @indy.log_definition.time_format.should == '%d-%m-%Y'
     end
 
@@ -29,7 +29,7 @@ describe 'Indy' do
         :entry_fields => [:time, :message]}
       @indy = Indy.search(hash)
       @indy.class.should == Indy
-      @indy.for(:all).length.should == 1
+      @indy.all.length.should == 1
     end
 
   end
@@ -50,7 +50,7 @@ describe 'Indy' do
       end
 
       it "#with should use default log pattern when passed :default" do
-        @indy.with(:default).for(:all).length.should == 3
+        @indy.with(:default).all.length.should == 3
       end
 
       [:for, :like, :matching].each do |method|
@@ -72,7 +72,7 @@ describe 'Indy' do
       end
 
       it "#last should set the time scope to the correct number of minutes" do
-        @indy.last(:span => 1).for(:all).count.should == 2
+        @indy.last(:span => 1).all.count.should == 2
       end
 
       it "#last should raise an error if passed an invalid parameter" do
@@ -101,11 +101,11 @@ describe 'Indy' do
 
     it "should accept a hash with :file => filepath" do
       pending "Indy#search should be able to accept a :file => filepath hash"
-      Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").for(:all).length.should == 2
+      Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").all.length.should == 2
     end
 
     it "should accept a hash with :file => File" do
-      Indy.search(:file => File.open("#{File.dirname(__FILE__)}/data.log")).for(:all).length.should == 2
+      Indy.search(:file => File.open("#{File.dirname(__FILE__)}/data.log")).all.length.should == 2
     end
 
     it "should accept a valid :source hash" do
@@ -151,7 +151,7 @@ describe 'Indy' do
 
         it "should raise Source::Invalid for an invalid command" do
           IO.stub!(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
-          lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").for(:all) }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
+          lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").all }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
         end
 
       end
@@ -170,7 +170,7 @@ describe 'Indy' do
       end
 
       it "should raise error when given an invalid key" do
-        lambda{ Indy.search(:foo => "a string").for(:all) }.should raise_error( Indy::Source::Invalid )
+        lambda{ Indy.search(:foo => "a string").all }.should raise_error( Indy::Source::Invalid )
       end
 
     end
@@ -184,13 +184,13 @@ describe 'Indy' do
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n",
             " bad \n",
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"].join("\n")
-      Indy.search(log).for(:all).length.should == 3
+      Indy.search(log).all.length.should == 3
     end
 
     it "should handle no matching entries" do
       log = ["2000-09-07   MyApp - Entering APPLICATION.\n \n",
             "2000-09-07 14:07:41\n"].join
-      Indy.search(log).for(:all).length.should == 0
+      Indy.search(log).all.length.should == 0
     end
 
   end
@@ -209,7 +209,7 @@ describe 'Indy' do
     end
 
     it "should return all entries using #for(:all)" do
-      @indy.for(:all).count.should == 5
+      @indy.all.count.should == 5
     end
 
     it "should return correct number of entries with #for" do
@@ -222,7 +222,7 @@ describe 'Indy' do
 
     it "should return correct number of entries using #before time scope" do
       pending 'time scoped searches currently unsupported for multiline log formats'
-      results = @indy.before(:time => '2000-09-07 14:07:42', :inclusive => false).for(:all)
+      results = @indy.before(:time => '2000-09-07 14:07:42', :inclusive => false).all
       results.length.should == 2
     end
 
@@ -237,14 +237,14 @@ describe 'Indy' do
     end
     
     it "with #for should yield Struct::Entry" do
-      Indy.search(log).for(:all) do |result|
+      Indy.search(log).all do |result|
         result.should be_kind_of(Struct::Entry)
       end
     end
 
     it "with #for using :all should yield each entry" do
       actual_yield_count = 0
-      Indy.search(log).for(:all) do |result|
+      Indy.search(log).all do |result|
         actual_yield_count += 1
       end
       actual_yield_count.should == 3

@@ -96,7 +96,23 @@ class Indy
     set_log_definition(log_definition)
     self
   end
-  
+
+  #
+  # Return all entries
+  #
+  def all
+    results = ResultSet.new
+    results += _search do |result|
+      result_struct = Indy.create_struct(result)
+      if block_given?
+        yield result_struct
+      else
+        result_struct
+      end
+    end
+    results
+  end
+
   #
   # Search the source and make an == comparison
   #

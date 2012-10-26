@@ -31,9 +31,14 @@ Indy supports MacOS, *nix, and MS Windows and runs on the following ruby flavors
 Usage
 -----
 
-## Require Indy
+## Example
 
     require 'indy'
+    log = Indy.search(File.open('my_log.txt','r')).with(Indy::LOG4R_FORMAT)
+    puts log.all.first.entry
+    # => "2012-09-07 10:01:40 INFO MyApp - Entering APPLICATION."
+    puts log.after(:time => '2012-09-07 20:00:00').for(:application => 'MyApp').first.message
+    # => "Exiting Application"
 
 ## Specify your Source
 
@@ -140,7 +145,7 @@ By default, Indy tries to guess your time format (courtesy of DateTime#parse). I
 This is required when log data uses a non-standard date format, e.g.: U.S. format 12-31-2000
 
     # 12-31-2011 23:59:59
-    Indy.new(:time_format => '%m-%d-%Y %H:%M:%S', :source => LOG_FILE).for(:all)
+    Indy.new(:time_format => '%m-%d-%Y %H:%M:%S', :source => LOG_FILE).all
 
 ## Match Criteria
 
@@ -172,25 +177,25 @@ Multiple scope methods can be called on an instance. Use #reset_scope to remove 
     Indy.search(source).after(:time => '2010-12-01 23:59:59').for(:all)
 
     # 20 minutes Around New Year's eve
-    Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 20).for(:all)
+    Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 20).all
 
     # After Jan 1 but Before Feb 1
     @log = Indy.search(source)
     @log.after(:time => '2011-01-01 00:00:00').before(:time => '2011-02-01 00:00:00')
-    @log.for(:all)
+    @log.all
 
     # Within Jan 1 and Feb 1 (same time scope as above)
-    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).for(:all)
+    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).all
 
     # After Jan 1
     @log = Indy.search(source)
     @log.after(:time => '2011-01-01 00:00:00')
-    @log.for(:all)
+    @log.all)
     # Reset the time scope to include entries before Jan 1
     @log.reset_scope
     # Before Feb 1
     @log.before(:time => '2011-02-01 00:00:00')
-    @log.for(:all)
+    @log.all
 
 ## Process the Results
 
