@@ -102,8 +102,8 @@ class Indy
   #
   def all
     results = ResultSet.new
-    results += _search do |result|
-      result_struct = Indy.create_struct(result)
+    results += _search do |entry|
+      result_struct = Indy.create_struct(entry)
       if block_given?
         yield result_struct
       else
@@ -116,30 +116,30 @@ class Indy
   #
   # Search the source and make an == comparison
   #
-  # @param [Hash,Symbol] search_criteria the field to search for as the key and the
-  #        value to compare against the other log messages.  This function also
-  #        supports symbol :all to return all messages
+  # @param [Hash] search_criteria the field to search for as the key and the
+  #        value to compare against the log entries.
   #
   def for(search_criteria)
     results = ResultSet.new
-    results += _search do |result|
-      if search_criteria == :all
-        result_struct = Indy.create_struct(result)
-      elsif search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
-        result_struct = Indy.create_struct(result)
+    results += _search do |entry|
+      if exact_match?(entry,search_criteria)
+        result_struct = Indy.create_struct(entry)
+        if block_given?
+          yield result_struct
+        else
+          result_struct
+        end
       end
-      yield result_struct if block_given? and result_struct
-      result_struct
     end
     results.compact
   end
-
 
   #
   # Search the source and make a regular expression comparison
   #
   # @param [Hash] search_criteria the field to search for as the key and the
-  #        value to compare against the other log messages
+  #         value to compare against the log entries.
+  #         The value will be treated as a regular expression.
   #
   # @example For all applications that end with Service
   #
@@ -148,17 +148,39 @@ class Indy
   def like(search_criteria)
     results = ResultSet.new
     results += _search do |result|
-      if search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
+      if regexp_match?(result,search_criteria)
         result_struct = Indy.create_struct(result)
-        yield result_struct if block_given?
+        if block_given?
+          yield result_struct
+        else
+          result_struct
+        end
       end
-      result_struct
     end
     results.compact
   end
 
   alias_method :matching, :like
 
+  #
+  # Evaluates if field => value criteria is an exact match on entry
+  #
+  # @param [Hash] result The entry_hash
+  # @param [Hash] search_criteria The field => value criteria to match
+  #
+  def exact_match?(result, search_criteria)
+    search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+  end
+
+  #
+  # Evaluates if field => value criteria matches entry when value is treated as a regular expression
+  #
+  # @param [Hash] result The entry_hash
+  # @param [Hash] search_criteria The field => value criteria to match
+  #
+  def regexp_match?(result, search_criteria)
+    search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
+  end
 
   #
   # Scopes the eventual search to the last N minutes of entries.
