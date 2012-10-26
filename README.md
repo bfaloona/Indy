@@ -174,7 +174,7 @@ Multiple scope methods can be called on an instance. Use #reset_scope to remove 
 ### Time Scope
 
     # After Dec 1
-    Indy.search(source).after(:time => '2010-12-01 23:59:59').for(:all)
+    Indy.search(source).after(:time => '2010-12-01 23:59:59').all
 
     # 20 minutes Around New Year's eve
     Indy.search(source).around(:time => '2011-01-01 00:00:00', :span => 20).all

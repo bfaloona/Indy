@@ -12,7 +12,7 @@ describe "Search Performance" do
     profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
 
       it "should profile code using #for(:all)" do
-        @indy.for(:all)
+        @indy.all
       end
 
       it "should profile code using #for(:field => 'value')" do
@@ -24,7 +24,7 @@ describe "Search Performance" do
       end
 
       it "should profile code using #after()" do
-        @indy.after(:time => "29-12-2010 12:11:32").for(:all)
+        @indy.after(:time => "29-12-2010 12:11:32").all
       end
 
     end
@@ -44,7 +44,7 @@ describe "Search Performance" do
     profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
 
       it "should profile code using #after() and an explicit @time_format" do
-        @indy.after(:time => "29-12-2010 12:11:32").for(:all)
+        @indy.after(:time => "29-12-2010 12:11:32").all
       end
 
     end
