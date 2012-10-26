@@ -48,16 +48,16 @@ class Indy
     #   provide multiple initialization parameters. See Indy#new.
     #
     # @example string source
-    #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").for(:all)
+    #   Indy.search("INFO 2000-09-07 MyApp - Entering APPLICATION.\nINFO 2000-09-07 MyApp - Entering APPLICATION.").all
     #
     # @example command source
-    #   Indy.search(:cmd => "cat apache.log").for(:all)
+    #   Indy.search(:cmd => "cat apache.log").all
     #
     # @example file source
-    #   Indy.search(:file => "apache.log").for(:all)
+    #   Indy.search(:file => "apache.log").all
     #
     # @example source as well as other parameters
-    #   Indy.search(:source => {:cmd => "cat apache.log"}, :entry_regexp => REGEXP, :entry_fields => [:field_one, :field_two], :time_format => MY_TIME_FORMAT).for(:all)
+    #   Indy.search(:source => {:cmd => "cat apache.log"}, :entry_regexp => REGEXP, :entry_fields => [:field_one, :field_two], :time_format => MY_TIME_FORMAT).all
     #
     def search(params=nil)
       if params.respond_to?(:keys) && params[:source]
@@ -186,11 +186,11 @@ class Indy
   # Scopes the eventual search to the last N minutes of entries.
   #
   # @param [Hash] scope_criteria hash describing the amount of time at
-  # the last portion of the source
+  #         the last portion of the source
   #
   # @example For last 10 minutes worth of entries
   #
-  #   Indy.search(LOG_FILE).last(:span => 10).for(:all)
+  #   Indy.search(LOG_FILE).last(:span => 10).all
   #
   def last(scope_criteria)
     raise ArgumentError, "Unsupported parameter to last(): #{scope_criteria.inspect}" unless scope_criteria.respond_to?(:keys) and scope_criteria[:span]
@@ -210,7 +210,7 @@ class Indy
   #
   # @example For all messages after specified date
   #
-  #   Indy.search(LOG_FILE).after(:time => time).for(:all)
+  #   Indy.search(LOG_FILE).after(:time => time).all
   #
   def after(scope_criteria)
     if scope_criteria[:time]
@@ -242,8 +242,8 @@ class Indy
   #
   # @example For all messages before specified date
   #
-  #   Indy.search(LOG_FILE).before(:time => time).for(:all)
-  #   Indy.search(LOG_FILE).before(:time => time, :span => 10).for(:all)
+  #   Indy.search(LOG_FILE).before(:time => time).all
+  #   Indy.search(LOG_FILE).before(:time => time, :span => 10).all
   #
   def before(scope_criteria)
     if scope_criteria[:time]
@@ -282,7 +282,7 @@ class Indy
   #
   # @example For all messages within the specified dates
   #
-  #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).for(:all)
+  #   Indy.search(LOG_FILE).within(:time => [start_time,stop_time]).all
   #
   def within(scope_criteria)
     if scope_criteria[:time]
