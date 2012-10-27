@@ -25,7 +25,7 @@ class Indy
       self.source = params_hash[:source]
       params_hash.delete :source
     end
-    set_log_definition(params_hash)
+    @log_definition = LogDefinition.new(params_hash)
   end
 
   #
@@ -67,17 +67,6 @@ class Indy
       end
     end
 
-    #
-    # Return a Struct::Entry object from a hash of values from a log entry
-    #
-    # @param [Hash] entry_hash a hash of :field_name => value pairs for one log entry
-    #
-    def create_struct( entry_hash )
-      values = entry_hash.keys.sort_by{|entry|entry.to_s}.collect {|key| entry_hash[key]}
-      result = Struct::Entry.new( *values )
-      result
-    end
-
   end
 
   #
@@ -92,8 +81,8 @@ class Indy
   #
   #  Indy.search(LOG_FILE).with(/^(\d{2}.\d{2}.\d{2})\s*(.+)$/,:time,:message)
   #
-  def with(log_definition=:default)
-    set_log_definition(log_definition)
+  def with(params=:default)
+    @log_definition = LogDefinition.new(params)
     self
   end
 
@@ -103,7 +92,7 @@ class Indy
   def all
     results = ResultSet.new
     results += _search do |entry|
-      result_struct = Indy.create_struct(entry)
+      result_struct = @log_definition.create_struct(entry)
       if block_given?
         yield result_struct
       else
@@ -123,7 +112,7 @@ class Indy
     results = ResultSet.new
     results += _search do |entry|
       if exact_match?(entry,search_criteria)
-        result_struct = Indy.create_struct(entry)
+        result_struct = @log_definition.create_struct(entry)
         if block_given?
           yield result_struct
         else
@@ -149,7 +138,7 @@ class Indy
     results = ResultSet.new
     results += _search do |result|
       if regexp_match?(result,search_criteria)
-        result_struct = Indy.create_struct(result)
+        result_struct = @log_definition.create_struct(result)
         if block_given?
           yield result_struct
         else
@@ -296,26 +285,6 @@ class Indy
   private
 
   #
-  # @param [LogDefinition,Array,Symbol] args the symbol :default, a LogDefinition object, or an Array containing the regular expression as the first element
-  #        followed by list of fields (Symbols) in the log entry
-  #        to use for comparison against each log entry.
-  #
-  def set_log_definition(args)
-    case args
-    when :default, nil
-      @log_definition = LogDefinition.new(:entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS, :time_field => :time)
-    when Array
-      regexp = args[0]
-      fields = args[1..-1]
-      @log_definition = LogDefinition.new(:entry_regexp => regexp, :entry_fields => fields)
-    else
-      @log_definition = LogDefinition.new(args)
-    end
-    # now that we know the fields
-    define_struct
-  end
-
-  #
   # Search the @source and yield to the block the entry that was found
   # with @log_definition
   #
@@ -337,7 +306,7 @@ class Indy
     results = ResultSet.new
     source_lines = (is_time_search ? @source.open([@start_time,@end_time]) : @source.open)
     source_lines.each do |single_line|
-      hash = parse_entry(single_line)
+      hash = @log_definition.parse_entry(single_line)
       next unless hash
       next unless inside_time_window?(hash) if is_time_search
       results << (block.call(hash) if block_given?)
@@ -352,54 +321,12 @@ class Indy
     is_time_search = use_time_criteria?
     source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
     results = source_io.read.scan(Regexp.new(@log_definition.entry_regexp, Regexp::MULTILINE)).collect do |entry|
-      hash = parse_entry_captures(entry)
+      hash = @log_definition.parse_entry_captures(entry)
       next unless hash
       next unless inside_time_window?(hash) if is_time_search
       block.call(hash) if block_given?
     end
     results.compact
-  end
-
-  #
-  # Return a hash of field=>value pairs for the log entry
-  #
-  # @param [String] entry The log entry
-  #
-  def parse_entry(entry)
-    match_data = /#{@log_definition.entry_regexp}/.match(entry)
-    return nil unless match_data
-    values = match_data.captures
-    assert_valid_field_list(values)
-    entry_hash([entry, values].flatten)
-  end
-
-  #
-  # Return a hash of field=>value pairs for the array of captured values from a log entry
-  #
-  # @param [Array] capture_array The array of values captured by the @log_definition.entry_regexp
-  #
-  def parse_entry_captures( capture_array )
-    entire_entry = capture_array.shift
-    values = capture_array
-    assert_valid_field_list(capture_array)
-    entry_hash([entire_entry, values].flatten)
-  end
-
-  #
-  # Convert log entry into hash
-  #
-  def entry_hash(values)
-    entire_entry = values.shift
-    hash = Hash[ *@log_definition.entry_fields.zip( values ).flatten ]
-    hash[:entry] = entire_entry.strip
-    hash
-  end
-
-  #
-  # Ensure number of fields is expected
-  #
-  def assert_valid_field_list(values)
-    raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @log_definition.entry_fields.length
   end
 
   #
@@ -475,17 +402,6 @@ class Indy
   end
 
   #
-  # Define Struct::Entry with the fields from @log_definition. Ignore warnings.
-  #
-  def define_struct
-    fields = (@log_definition.entry_fields + [:entry]).sort_by{|e|e.to_s}
-    verbose = $VERBOSE
-    $VERBOSE = nil
-    Struct.new( "Entry", *fields )
-    $VERBOSE = verbose
-  end
-
-  #
   # Return an array of Struct::Entry objects for the last N valid entries from the source
   #
   # @param [Fixnum] num the number of entries to retrieve
@@ -495,15 +411,14 @@ class Indy
     result = []
     source_io = @source.open
     source_io.reverse_each do |entry|
-      hash = parse_entry(entry)
+      hash = @log_definition.parse_entry(entry)
       if hash
         num_entries += 1
         result << hash
         break if num_entries >= num
       end
     end
-    warn "#last_entries found no entries in source." if result.empty?
-    num == 1 ? Indy.create_struct(result.first) : result.collect{|entry| Indy.create_struct(entry)}
+    result.collect{|entry| @log_definition.create_struct(entry)}
   end
 
 end

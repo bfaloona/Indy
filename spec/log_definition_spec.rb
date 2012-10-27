@@ -34,4 +34,45 @@ describe 'LogDefinition' do
     end
 
   end
+
+  context 'private method' do
+
+    before(:each) do
+      @ld = LogDefinition.new(:entry_regexp => /^(\S+) (\S+) (.+)$/,
+                              :entry_fields => [:time, :severity, :message],
+                              :time_format => '%M-%d-%Y',
+                              :time_field => :time)
+    end
+
+    context "#parse_entry" do
+
+      it "should return a hash" do
+        @ld.send(:parse_entry, "2000-09-07 INFO The message!").class.should == Hash
+      end
+
+      it "should return correct key/value pairs" do
+        hash = @ld.send(:parse_entry, "2000-09-07 INFO The message!")
+        hash[:time].should == "2000-09-07"
+        hash[:message].should == "The message!"
+      end
+
+    end
+
+    context "#parse_entry_captures" do
+
+      let(:field_captures) {"2000-09-07 INFO The message!".match(@ld.entry_regexp).to_a}
+
+      it "should return a hash" do
+        @ld.send(:parse_entry_captures, field_captures).class.should == Hash
+      end
+
+      it "should contain key/value pairs" do
+        hash = @ld.send(:parse_entry_captures, field_captures)
+        hash[:time].should == "2000-09-07"
+        hash[:message].should == "The message!"
+      end
+
+    end
+
+  end
 end
