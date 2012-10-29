@@ -5,7 +5,7 @@ describe 'Indy' do
   context '#new' do
 
     it "should accept v0.3.4 initialization params" do
-      i = Indy.new(:source => "foo\nbar\n", :log_format => Indy::DEFAULT_LOG_FORMAT)
+      i = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
       i.log_definition.class.should eq LogDefinition
       i.log_definition.entry_regexp.class.should eq Regexp
       i.log_definition.entry_fields.class.should eq Array
@@ -109,7 +109,7 @@ describe 'Indy' do
     end
 
     it "should accept a valid :source hash" do
-      Indy.search(:source => {:cmd => 'ls'}, :log_format => Indy::DEFAULT_LOG_FORMAT).class.should == Indy
+      Indy.search(:source => {:cmd => 'ls'}).class.should == Indy
     end
 
     it "should create an instance of Indy::Source" do

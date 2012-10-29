@@ -4,8 +4,8 @@ class LogDefinition
   def initialize args
     params_hash = {}
     case args
-    when :default, nil
-      params_hash = set_defaults(params_hash)
+    when :default, {}, nil
+      params_hash = set_defaults
     when Array, Hash
       params_hash = parse_enumerable_params(args)
     end
@@ -17,7 +17,8 @@ class LogDefinition
 
   end
 
-  def set_defaults(params_hash)
+  def set_defaults
+    params_hash = {}
     params_hash[:entry_regexp] = Indy::LogFormats::DEFAULT_ENTRY_REGEXP
     params_hash[:entry_fields] = Indy::LogFormats::DEFAULT_ENTRY_FIELDS
     params_hash[:time_field] = :time
@@ -26,19 +27,12 @@ class LogDefinition
 
   def parse_enumerable_params(args)
     params_hash = {}
-    case args
-    when Array
-      # 0.3.4 compatibility
-      params_hash[:entry_regexp] = args[0]
-      params_hash[:entry_fields] = args[1..-1]
-    when Hash
-      params_hash.merge!(args)
-      if args.keys.include? :log_format
-        # support 0.3.4 params
-        params_hash[:entry_regexp] = args[:log_format][0]
-        params_hash[:entry_fields] = args[:log_format][1..-1]
-        params_hash.delete :log_format
-      end
+    params_hash.merge!(args)
+    if args.keys.include? :log_format
+      # support 0.3.4 params
+      params_hash[:entry_regexp] = args[:log_format][0]
+      params_hash[:entry_fields] = args[:log_format][1..-1]
+      params_hash.delete :log_format
     end
     params_hash
   end
@@ -58,7 +52,7 @@ class LogDefinition
   # Define Struct::Entry with the fields from @log_definition. Ignore warnings.
   #
   def define_struct
-    if !@time_field && entry_fields.include?(:time)
+    if !@time_field && @entry_fields.include?(:time)
       @time_field = :time
     end
     fields = (@entry_fields + [:entry]).sort_by{|key|key.to_s}

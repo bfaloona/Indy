@@ -41,21 +41,21 @@ class Indy
   # e.g.:
   # INFO 2000-09-07 MyApp - Entering APPLICATION.
   #
-  DEFAULT_LOG_FORMAT = [LogFormats::DEFAULT_ENTRY_REGEXP, LogFormats::DEFAULT_ENTRY_FIELDS].flatten
+  DEFAULT_LOG_FORMAT = {:entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS}
 
   #
   # Uncustomized Log4r log format
   #
-  LOG4R_DEFAULT_FORMAT = [LogFormats::LOG4R_DEFAULT_REGEXP, LogFormats::LOG4R_DEFAULT_FIELDS].flatten
+  LOG4R_DEFAULT_FORMAT = {:entry_regexp => LogFormats::LOG4R_DEFAULT_REGEXP, :entry_fields => LogFormats::LOG4R_DEFAULT_FIELDS}
 
   #
   # NCSA Common Log Format log format
   #
-  COMMON_LOG_FORMAT = [LogFormats::COMMON_REGEXP, LogFormats::COMMON_FIELDS].flatten
+  COMMON_LOG_FORMAT = {:entry_regexp => LogFormats::COMMON_REGEXP, :entry_fields => LogFormats::COMMON_FIELDS}
 
   #
   # NCSA Combined Log Format log format
   #
-  COMBINED_LOG_FORMAT = [LogFormats::COMBINED_REGEXP, LogFormats::COMBINED_FIELDS].flatten
+  COMBINED_LOG_FORMAT = {:entry_regexp => LogFormats::COMBINED_REGEXP, :entry_fields => LogFormats::COMBINED_FIELDS}
 
 end
