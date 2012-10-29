@@ -11,7 +11,7 @@ describe "Search Performance" do
 
     profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
 
-      it "should profile code using #for(:all)" do
+      it "should profile code using #all" do
         @indy.all
       end
 

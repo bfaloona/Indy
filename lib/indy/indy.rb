@@ -199,7 +199,8 @@ class Indy
   #
   # Scopes the eventual search to all entries near this point.
   #
-  # @param [Hash] scope_criteria the hash containing :time and :span (in minutes) to scope the log
+  # @param [Hash] scope_criteria the hash containing :time and :span (in minutes) to scope the log.
+  #               :span defaults to 5 minutes.
   #
   def around(scope_criteria)
     raise ArgumentError unless scope_criteria.respond_to?(:keys) and scope_criteria[:time]

@@ -158,7 +158,6 @@ class Indy
     def find(boundary,value,start,stop)
       return start if start == stop
       mid_index, mid_time = find_middle(start,stop)
-      # puts "+ find_#{boundary} (#{value}, #{start}, #{stop}) [mid_index #{mid_index}:#{mid_time}]"
       if mid_time == value
         find_adjacent(boundary,value,start,stop,mid_index)
       elsif mid_time > value

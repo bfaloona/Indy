@@ -208,7 +208,7 @@ describe 'Indy' do
       @indy = Indy.new(:source => log, :log_format => [regexp, :time,:severity,:application,:message], :multiline => true  )
     end
 
-    it "should return all entries using #for(:all)" do
+    it "should return all entries using #all" do
       @indy.all.count.should == 5
     end
 
