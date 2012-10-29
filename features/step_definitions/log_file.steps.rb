@@ -8,5 +8,5 @@ Given /^the following log:$/ do |string|
 end
 
 And /^the custom pattern \(([^\)]+)\):$/ do |fields,pattern|
-  @indy = @indy.with( [ pattern, fields.split(',').map{|f| f.to_sym} ].flatten)
+  @indy = @indy.with({ :entry_regexp => pattern, :entry_fields => fields.split(',').map{|f| f.to_sym} })
 end
