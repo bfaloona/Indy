@@ -89,17 +89,8 @@ class Indy
   #
   # Return all entries
   #
-  def all
-    results = ResultSet.new
-    results += _search do |entry|
-      result_struct = @log_definition.create_struct(entry)
-      if block_given?
-        yield result_struct
-      else
-        result_struct
-      end
-    end
-    results
+  def all(&block)
+    _iterate_and_compare(:all,nil,&block)
   end
 
   #
@@ -108,19 +99,8 @@ class Indy
   # @param [Hash] search_criteria the field to search for as the key and the
   #        value to compare against the log entries.
   #
-  def for(search_criteria)
-    results = ResultSet.new
-    results += _search do |entry|
-      if exact_match?(entry,search_criteria)
-        result_struct = @log_definition.create_struct(entry)
-        if block_given?
-          yield result_struct
-        else
-          result_struct
-        end
-      end
-    end
-    results.compact
+  def for(search_criteria,&block)
+    _iterate_and_compare(:for, search_criteria,&block)
   end
 
   #
@@ -134,42 +114,10 @@ class Indy
   #
   #  Indy.search(LOG_FILE).like(:application => '.+service')
   #
-  def like(search_criteria)
-    results = ResultSet.new
-    results += _search do |result|
-      if regexp_match?(result,search_criteria)
-        result_struct = @log_definition.create_struct(result)
-        if block_given?
-          yield result_struct
-        else
-          result_struct
-        end
-      end
-    end
-    results.compact
+  def like(search_criteria,&block)
+    _iterate_and_compare(:like, search_criteria,&block)
   end
-
   alias_method :matching, :like
-
-  #
-  # Evaluates if field => value criteria is an exact match on entry
-  #
-  # @param [Hash] result The entry_hash
-  # @param [Hash] search_criteria The field => value criteria to match
-  #
-  def exact_match?(result, search_criteria)
-    search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
-  end
-
-  #
-  # Evaluates if field => value criteria matches entry when value is treated as a regular expression
-  #
-  # @param [Hash] result The entry_hash
-  # @param [Hash] search_criteria The field => value criteria to match
-  #
-  def regexp_match?(result, search_criteria)
-    search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
-  end
 
   #
   # Scopes the eventual search to the last N minutes of entries.
@@ -353,6 +301,43 @@ class Indy
       true unless time > @end_time or time < @start_time
     else
       true unless time >= @end_time or time <= @start_time
+    end
+  end
+
+  #
+  # Helper function called by #for, #like and #all
+  #
+  # @param [Symbol] type The symbol :for, :like or :all
+  #
+  # @param [Hash] search_criteria the field to search for as the key and the
+  #        value to compare against the log entries.
+  #
+  def _iterate_and_compare(type,search_criteria,&block)
+    results = ResultSet.new
+    results += _search do |entry|
+      if type == :all || is_match?(type,entry,search_criteria)
+        result_struct = @log_definition.create_struct(entry)
+        if block_given?
+          block.call(result_struct)
+        else
+          result_struct
+        end
+      end
+    end
+    results.compact
+  end
+
+  #
+  # Evaluates if field => value criteria is an exact match on entry
+  #
+  # @param [Hash] result The entry_hash
+  # @param [Hash] search_criteria The field => value criteria to match
+  #
+  def is_match?(type, result, search_criteria)
+    if type == :for
+      search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
+    elsif type == :like
+      search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
     end
   end
 
