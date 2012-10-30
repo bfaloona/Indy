@@ -1,13 +1,13 @@
 require File.expand_path("#{File.dirname(__FILE__)}/../lib/indy/log_definition")
 
-describe 'LogDefinition' do
+describe 'Indy::LogDefinition' do
 
   context '#new' do
 
     context "with a valid hash" do
 
       before(:each) do
-        @ld = LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time)
+        @ld = Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time)
       end
 
       it "should set entry_regexp" do
@@ -30,7 +30,7 @@ describe 'LogDefinition' do
 
     it "should raise ArgumentError when missing entry_fields" do
       pending "LogDefinition initialization should be more strict"
-      lambda{ LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time) }.should raise_error ArgumentError
+      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time) }.should raise_error ArgumentError
     end
 
   end
@@ -38,7 +38,7 @@ describe 'LogDefinition' do
   context 'private method' do
 
     before(:each) do
-      @ld = LogDefinition.new(:entry_regexp => /^(\S+) (\S+) (.+)$/,
+      @ld = Indy::LogDefinition.new(:entry_regexp => /^(\S+) (\S+) (.+)$/,
                               :entry_fields => [:time, :severity, :message],
                               :time_format => '%M-%d-%Y',
                               :time_field => :time)

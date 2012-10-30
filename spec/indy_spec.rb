@@ -6,7 +6,7 @@ describe 'Indy' do
 
     it "should accept v0.3.4 initialization params" do
       i = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
-      i.log_definition.class.should eq LogDefinition
+      i.log_definition.class.should eq Indy::LogDefinition
       i.log_definition.entry_regexp.class.should eq Regexp
       i.log_definition.entry_fields.class.should eq Array
     end
