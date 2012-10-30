@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency('guard')
     unless ENV['RUBY_VERSION'].match /jruby|rbx/
       s.add_development_dependency('guard-rspec')
+      s.add_development_dependency('guard-cucumber')
       s.add_development_dependency('rspec-prof', '>= 0.0.3')
       s.add_development_dependency('simplecov', '>= 0.4.0')
     end
