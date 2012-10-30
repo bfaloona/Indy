@@ -1,5 +1,3 @@
-require 'active_support/core_ext'
-
 class Indy
 
   # hash with one key (:string, :file, or :cmd) set to the string that defines the log
@@ -132,9 +130,10 @@ class Indy
   def last(scope_criteria)
     raise ArgumentError, "Unsupported parameter to last(): #{scope_criteria.inspect}" unless scope_criteria.respond_to?(:keys) and scope_criteria[:span]
     span = (scope_criteria[:span].to_i * 60).seconds
-    starttime = parse_date(last_entries(1)) - span
+    entry = last_entries(1)[0]
+    starttime = Indy::Time.parse_date(entry[:time],@log_definition.time_format) - span
 
-    within(:time => [starttime, forever])
+    within(:time => [starttime,Indy::Time.forever(@log_definition.time_format)])
     self
   end
 
@@ -151,7 +150,7 @@ class Indy
   #
   def after(scope_criteria)
     if scope_criteria[:time]
-      time = parse_date(scope_criteria[:time])
+      time = Indy::Time.parse_date(scope_criteria[:time])
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
@@ -184,7 +183,7 @@ class Indy
   #
   def before(scope_criteria)
     if scope_criteria[:time]
-      time = parse_date(scope_criteria[:time])
+      time = Indy::Time.parse_date(scope_criteria[:time])
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
       if scope_criteria[:span]
         span = (scope_criteria[:span].to_i * 60).seconds
@@ -204,7 +203,7 @@ class Indy
   #
   def around(scope_criteria)
     raise ArgumentError unless scope_criteria.respond_to?(:keys) and scope_criteria[:time]
-    time = parse_date(scope_criteria[:time])
+    time = Indy::Time.parse_date(scope_criteria[:time])
     @inclusive = nil
     mid_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
     within(:time => [time - mid_span, time + mid_span])
@@ -224,7 +223,7 @@ class Indy
   #
   def within(scope_criteria)
     if scope_criteria[:time]
-      @start_time, @end_time = scope_criteria[:time].collect {|str| parse_date(str) }
+      @start_time, @end_time = scope_criteria[:time].collect {|time_string| Indy::Time.parse_date(time_string) }
       @inclusive = @inclusive || scope_criteria[:inclusive] || nil
     end
     self
@@ -257,7 +256,7 @@ class Indy
     source_lines.each do |single_line|
       hash = @log_definition.parse_entry(single_line)
       next unless hash
-      next unless inside_time_window?(hash) if is_time_search
+      next unless Indy::Time.inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
       results << (block.call(hash) if block_given?)
     end
     results.compact
@@ -272,7 +271,7 @@ class Indy
     results = source_io.read.scan(Regexp.new(@log_definition.entry_regexp, Regexp::MULTILINE)).collect do |entry|
       hash = @log_definition.parse_entry_captures(entry)
       next unless hash
-      next unless inside_time_window?(hash) if is_time_search
+      next unless Indy::Time.inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
       block.call(hash) if block_given?
     end
     results.compact
@@ -284,25 +283,10 @@ class Indy
   def use_time_criteria?
     if @start_time || @end_time
       # ensure both boundaries are set
-      @start_time = @start_time || forever_ago
-      @end_time = @end_time || forever
+      @start_time ||= Indy::Time.forever_ago(@log_definition.time_format)
+      @end_time ||= Indy::Time.forever(@log_definition.time_format)
     end
     @log_definition.time_field && @start_time && @end_time
-  end
-
-  #
-  # Evaluate if a log entry satisfies the configured time conditions
-  #
-  # @param [Hash] entry_hash The log entry's hash
-  #
-  def inside_time_window?( entry_hash )
-    time = parse_date( entry_hash )
-    return false unless time && entry_hash
-    if @inclusive
-      true unless time > @end_time or time < @start_time
-    else
-      true unless time >= @end_time or time <= @start_time
-    end
   end
 
   #
@@ -339,51 +323,6 @@ class Indy
       search_criteria.reject {|criteria,value| result[criteria] == value }.empty?
     elsif type == :like
       search_criteria.reject {|criteria,value| result[criteria] =~ /#{value}/i }.empty?
-    end
-  end
-
-  #
-  # Return a valid DateTime object for the log entry string or hash
-  #
-  # @param [String, Hash] param The log entry string or hash
-  #
-  def parse_date(param)
-    return nil unless @log_definition.time_field
-    return param if param.kind_of? Time or param.kind_of? DateTime
-    time_string = param.is_a?(Hash) ? param[@log_definition.time_field] : param.to_s
-    if @log_definition.time_format
-      begin
-        # Attempt the appropriate parse method
-        DateTime.strptime(time_string, @log_definition.time_format)
-      rescue
-        # If appropriate, fall back to simple parse method
-        DateTime.parse(time_string) rescue nil
-      end
-    else
-      begin
-        Time.parse(time_string)
-      rescue Exception => e
-        raise "Failed to create time object. The error was: #{e.message}"
-      end
-    end
-  end
-
-  #
-  # Return a time or datetime object way in the future
-  #
-  def forever
-    @log_definition.time_format ? DateTime.new(4712) : Time.at(0x7FFFFFFF)
-  end
-
-  #
-  # Return a time or datetime object way in the past
-  #
-  def forever_ago
-    begin
-      @log_definition.time_format ? DateTime.new(-4712) : Time.at(-0x7FFFFFFF)
-    rescue
-      # Windows Ruby Time can't handle dates prior to 1969
-      @log_definition.time_format ? DateTime.new(-4712) : Time.at(0)
     end
   end
 

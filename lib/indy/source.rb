@@ -149,7 +149,7 @@ class Indy
     # Return the time of a log entry index, with an optional offset
     #
     def time_at(index, delta=0)
-      Time.parse(@lines[index + delta])
+      ::Time.parse(@lines[index + delta])
     end
 
     #
