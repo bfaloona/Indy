@@ -17,5 +17,4 @@ $:.unshift(File.dirname(__FILE__)) unless
 require 'indy/log_definition'
 require 'indy/source'
 require 'indy/indy'
-require 'indy/result_set'
 require 'indy/log_formats'

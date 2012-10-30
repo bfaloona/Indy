@@ -252,7 +252,7 @@ class Indy
   #
   def standard_search(&block)
     is_time_search = use_time_criteria?
-    results = ResultSet.new
+    results = []
     source_lines = (is_time_search ? @source.open([@start_time,@end_time]) : @source.open)
     source_lines.each do |single_line|
       hash = @log_definition.parse_entry(single_line)
@@ -314,7 +314,7 @@ class Indy
   #        value to compare against the log entries.
   #
   def _iterate_and_compare(type,search_criteria,&block)
-    results = ResultSet.new
+    results = []
     results += _search do |entry|
       if type == :all || is_match?(type,entry,search_criteria)
         result_struct = @log_definition.create_struct(entry)
