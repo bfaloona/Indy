@@ -108,12 +108,30 @@ class Indy
     end
 
     #
+    # Parse hash to set @start_time, @end_time and @inclusive
     #
     def time_scope(params_hash)
-      @inclusive = params_hash[:inclusive] if params_hash[:inclusive]
-      params_hash.delete :inclusive
-      while (param = params_hash.shift) do
-        send("#{param.first}=",Indy::Time.parse_date(param.last))
+      if params_hash[:time]
+        time_scope_from_direction(params_hash[:direction], params_hash[:span], params_hash[:time])
+      else
+        @start_time = Indy::Time.parse_date(params_hash[:start_time]) if params_hash[:start_time]
+        @end_time = Indy::Time.parse_date(params_hash[:end_time]) if params_hash[:end_time]
+      end
+      @inclusive = params_hash[:inclusive]
+    end
+
+    #
+    # Parse direction, span, and time to set @start_time and @end_time
+    #
+    def time_scope_from_direction(direction, span, time)
+       time = Indy::Time.parse_date(time)
+      span = (span.to_i * 60).seconds if span
+      if direction == :before
+        @end_time = time
+        @start_time = time - span if span
+      elsif direction == :after
+        @start_time = time
+        @end_time = time + span if span
       end
     end
 

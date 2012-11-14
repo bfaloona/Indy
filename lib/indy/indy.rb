@@ -147,15 +147,8 @@ class Indy
   #   Indy.search(LOG_FILE).after(:time => time).all
   #
   def after(scope_criteria)
-    if scope_criteria[:time]
-      time = Indy::Time.parse_date(scope_criteria[:time])
-      if scope_criteria[:span]
-        span = (scope_criteria[:span].to_i * 60).seconds
-        within(:start_time => time, :end_time => time + span, :inclusive => scope_criteria[:inclusive])
-      else
-        within(:start_time => time, :inclusive => scope_criteria[:inclusive])
-      end
-    end
+    params = scope_criteria.merge({:direction => :after})
+    within(params)
     self
   end
 
@@ -171,16 +164,8 @@ class Indy
   #   Indy.search(LOG_FILE).before(:time => time, :span => 10).all
   #
   def before(scope_criteria)
-    if scope_criteria[:time]
-      time = Indy::Time.parse_date(scope_criteria[:time])
-      if scope_criteria[:span]
-        span = (scope_criteria[:span].to_i * 60).seconds
-        within(:end_time => time, :start_time => time - span, :inclusive => scope_criteria[:inclusive])
-      else
-        within(:end_time => time, :inclusive => scope_criteria[:inclusive])
-      end
-    end
-    self
+    params = scope_criteria.merge({:direction => :before})
+    within(params)
   end
 
   #
