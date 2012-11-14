@@ -5,10 +5,11 @@ describe 'Indy' do
   context '#new' do
 
     it "should accept v0.3.4 initialization params" do
-      i = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
-      i.log_definition.class.should eq Indy::LogDefinition
-      i.log_definition.entry_regexp.class.should eq Regexp
-      i.log_definition.entry_fields.class.should eq Array
+      indy_obj = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
+      search_obj = indy_obj.search
+      search_obj.log_definition.class.should eq Indy::LogDefinition
+      search_obj.log_definition.entry_regexp.class.should eq Regexp
+      search_obj.log_definition.entry_fields.class.should eq Array
     end
 
     it "should not raise error with non-conforming data" do
@@ -19,7 +20,7 @@ describe 'Indy' do
     it "should accept time_format parameter" do
       @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :entry_regexp => '^([^\s]+) (\w+)$', :entry_fields => [:time, :message])
       @indy.all.class.should == Array
-      @indy.log_definition.time_format.should == '%d-%m-%Y'
+      @indy.search.log_definition.time_format.should == '%d-%m-%Y'
     end
 
     it "should accept an initialization hash passed to #search" do
@@ -112,8 +113,8 @@ describe 'Indy' do
       Indy.search(:source => {:cmd => 'ls'}).class.should == Indy
     end
 
-    it "should create an instance of Indy::Source" do
-      Indy.search("source string").source.should be_kind_of(Indy::Source)
+    it "should create an instance of Indy::Source in Search object" do
+      Indy.search("source string").search.source.should be_kind_of(Indy::Source)
     end
 
     it "should raise an exception when passed an invalid source: nil" do
@@ -182,6 +183,13 @@ describe 'Indy' do
   end
 
   context "data handling" do
+
+    it "should return all entries using #all" do
+      log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
+              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
+      Indy.search(log).all.length.should == 3
+    end
 
     it "should ignore invalid entries" do
       log = ["2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n \n",

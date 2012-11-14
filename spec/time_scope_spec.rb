@@ -57,11 +57,11 @@ describe Indy do
     context "within method" do
 
       it "should find the correct entries" do
-        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43']).all.length.should == 1
+        @indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43').all.length.should == 1
       end
 
       it "should find the correct entries using inclusive" do
-        @indy.within(:time => ['2000-09-07 14:07:41', '2000-09-07 14:07:43'], :inclusive => true).all.length.should == 3
+        @indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43', :inclusive => true).all.length.should == 3
       end
 
     end

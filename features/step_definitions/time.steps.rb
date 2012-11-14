@@ -12,7 +12,7 @@ When /^searching the log for all entries before( and including)? the time (.+)$/
 end
 
 When /^searching the log for all entries between( and including)? the times? (.+) and (.+)$/ do |inclusive,start,stop|
-  @results = @indy.within(:time => [start,stop], :inclusive => (inclusive ? true : false)).all
+  @results = @indy.within(:start_time => start,  :end_time => stop, :inclusive => (inclusive ? true : false)).all
 end
 
 When /^searching the log for all entries (\d+) minutes around( and including)? the time (.+)$/ do |time_span,inclusive,time|
