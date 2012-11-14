@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency('rspec-mocks', '>= 2.9.0')
   s.add_development_dependency('rb-fsevent')
   s.add_development_dependency('ruby_gntp')
-  s.add_development_dependency('growl')
+  s.add_development_dependency('growl')                                
 
   unless ENV['TRAVIS'] == 'true'
     s.add_development_dependency('yard-cucumber', '>= 2.1.1')
