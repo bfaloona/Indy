@@ -34,6 +34,9 @@ class Indy
 
     LOG4R_DEFAULT_FIELDS = [:level, :application, :message]
     LOG4R_DEFAULT_REGEXP = /^(?:\s*)([A-Z]+) (\S+): (.*)$/
+
+    LOG4J_DEFAULT_FIELDS = [:message]
+    LOG4J_DEFAULT_REGEXP = /^(.+?)$/
   end
 
   #
@@ -47,6 +50,11 @@ class Indy
   # Uncustomized Log4r log format
   #
   LOG4R_DEFAULT_FORMAT = {:entry_regexp => LogFormats::LOG4R_DEFAULT_REGEXP, :entry_fields => LogFormats::LOG4R_DEFAULT_FIELDS}
+
+  #
+  # Uncustomized Log4j log format (message field only!)
+  #
+  LOG4J_DEFAULT_FORMAT = {:entry_regexp => LogFormats::LOG4J_DEFAULT_REGEXP, :entry_fields => LogFormats::LOG4J_DEFAULT_FIELDS}
 
   #
   # NCSA Common Log Format log format

@@ -25,26 +25,46 @@ describe Indy do
     end
 
     it 'Indy::LOG4R_DEFAULT_FORMAT' do
+      # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
       source = ["DEBUG mylog: This is a message with level DEBUG",
         " INFO mylog: This is a message with level INFO",
         " WARN louie: This is a message with level WARN",
         "ERROR mylog: This is a message with level ERROR",
         "FATAL mylog: This is a message with level FATAL"].join("\n")
-      indy = Indy.new(:source => source).with(Indy::LOG4R_DEFAULT_FORMAT)
+      indy = Indy.new(:source => source)
+      indy.with(Indy::LOG4R_DEFAULT_FORMAT)
       result = indy.for(:application => 'louie')
       result.length.should == 1
     end
 
+    it 'Indy::LOG4J_DEFAULT_FORMAT' do
+      # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
+      source = ["This is a message with level DEBUG",
+        "This is a message with level INFO",
+        "This is a message with level WARN",
+        "This is a message with level ERROR",
+        "This is a message with level FATAL"].join("\n")
+      indy = Indy.new(:source => source).with(Indy::LOG4J_DEFAULT_FORMAT)
+      indy.all.length.should == 5
+    end
+
   end
 
-  # http://log4r.rubyforge.org/rdoc/Log4r/rdoc/patternformatter.html
-  it "should accept a log4r pattern string without error" do
-    Indy.new(:entry_regexp => "(%d) (%i) (%c) - (%m)", :entry_fields => [:time, :info, :class, :message]).class.should == Indy
-  end
+  # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/TTCCLayout.html
+  # example:
+  # 176 [main] INFO  org.apache.log4j.examples.Sort - Populating an array of 2 elements in reverse order.
+  it "should accept a log4j TTCC layout regex without error" do
+    log_data =
+"343 [main] INFO  org.apache.log4j.examples.Sort - The next log statement should be an error message.
+346 [main] ERROR org.apache.log4j.examples.SortAlgo.DUMP - Tried to dump an uninitialized array.
+        at org.apache.log4j.examples.SortAlgo.dump(SortAlgo.java:58)
+        at org.apache.log4j.examples.Sort.main(Sort.java:64)
+467 [main] INFO  org.apache.log4j.examples.Sort - Exiting main method."
 
-  # http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/PatternLayout.html
-  it "should accept a log4j pattern string without error" do
-    Indy.new(:entry_regexp => "%d [%M] %p %C{1} - %m", :entry_fields => [:time, :info, :class, :message]).class.should == Indy
+    Indy.new( :source => log_data,
+              :entry_regexp => /^(\d{3})\s+\[(\S+)\]\s+(\S+)\s+(\S+)\s*([^-]*)\s*-\s+(.+?)(?=\n\d{3}|\Z)/m,
+              :entry_fields => [:time, :thread, :level, :category, :diagnostic, :message]
+            ).class.should == Indy
   end
 
 end
