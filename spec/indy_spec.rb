@@ -128,6 +128,10 @@ describe 'Indy' do
 
       context "using :cmd" do
 
+        before(:all) do
+          Dir.chdir(File.dirname(__FILE__))
+        end
+
         it "should attempt open the command" do
           IO.stub!(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
           Indy.search(:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
@@ -144,7 +148,7 @@ describe 'Indy' do
         end
 
         it "should handle a real command" do
-          log_file = "#{File.dirname(__FILE__)}/data.log"
+          log_file = "data.log"
           cat_cmd = (is_windows? ? 'type' : 'cat')
           Indy.search(:cmd => "#{cat_cmd} #{log_file}").for(:application => 'MyApp').length.should == 2
         end

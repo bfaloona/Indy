@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
     s.add_development_dependency('yard-cucumber', '>= 2.1.1')
     s.add_development_dependency('flog', '>= 2.5.0')
     s.add_development_dependency('guard')
-    unless ENV['RUBY_VERSION'].match /jruby|rbx/
+    unless ENV['RUBY_VERSION'] &&  ENV['RUBY_VERSION'].match(/jruby|rbx/)
       s.add_development_dependency('guard-rspec')
       s.add_development_dependency('guard-cucumber')
       s.add_development_dependency('rspec-prof', '>= 0.0.3')

@@ -60,15 +60,16 @@ describe Indy do
 
     before(:each) do
       @file = Tempfile.new('file_search_spec')
-      @file_path = @file.path
+      file_name = File.basename(@file.path)
+      Dir.chdir(File.dirname(@file.path))
       @file.write([ "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.",
                     "2000-09-07 14:08:41 INFO  MyOtherApp - Exiting APPLICATION.",
                     "2000-09-07 14:10:55 INFO  MyApp - Exiting APPLICATION."
                   ].join("\n"))
       @file.flush
       cmd = is_windows? ?
-        "type #{@file_path}" :
-        "cat #{@file_path}"
+        "type #{file_name}" :
+        "cat #{file_name}"
       @indy = Indy.search(:cmd => cmd)
     end
 
