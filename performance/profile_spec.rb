@@ -6,7 +6,7 @@ describe "Search Performance" do
 
     large_file = File.open("#{File.dirname(__FILE__)}/large.log", 'r')
     before(:all) do
-      @indy = Indy.search(large_file).with([/^\[([^\|]+)\|([^\]]+)\] (.*)$/,:severity, :time, :message])
+      @indy = Indy.search(large_file).with(:entry_regexp => /^\[([^\|]+)\|([^\]]+)\] (.*)$/, :entry_fields => [:severity, :time, :message])
     end
 
     profile :file => STDOUT, :printer => :flat, :min_percent => 1  do
