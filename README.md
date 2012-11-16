@@ -50,6 +50,7 @@ Usage
 
     Indy.search(file_object).for(:application => 'MyApp')
     Indy.search(:file => file_object).for(:application => 'MyApp')
+    Indy.search(:file => '/log/data.log').for(:application => 'MyApp')
 
 ### As a string
 

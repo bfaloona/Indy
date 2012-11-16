@@ -26,16 +26,13 @@ class Indy
     #
     def initialize(param)
       raise Indy::Source::Invalid, "No source specified." if param.nil?
-      if param.respond_to?(:keys)
-        if param[:cmd] # and param[:cmd].length > 0
-          set_connection(:cmd, param[:cmd])
-        elsif param[:file] # and File.size(param[:file].path) > 0
-          set_connection(:file, param[:file])
-        elsif param[:string]
-          set_connection(:string, param[:string])
-        end
-      else
-        discover_connection(param)
+      return discover_connection(param) unless param.respond_to?(:keys)
+      if param[:cmd]
+        set_connection(:cmd, param[:cmd])
+      elsif param[:file]
+        set_connection(:file, open_or_return_file(param[:file]))
+      elsif param[:string]
+        set_connection(:string, param[:string])
       end
     end
 
@@ -58,6 +55,13 @@ class Indy
     def set_connection(type, value)
       @type = type
       @connection = value
+    end
+
+    def open_or_return_file(param)
+      return param if param.respond_to? :pos
+      file = File.open(param, 'r')
+      raise ArgumentError, "Unable to open file parameter: '#{file}'" unless file.respond_to? :pos
+      file
     end
 
     #

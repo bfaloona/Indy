@@ -101,7 +101,6 @@ describe 'Indy' do
     end
 
     it "should accept a hash with :file => filepath" do
-      pending "Indy#search should be able to accept a :file => filepath hash"
       Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").all.length.should == 2
     end
 

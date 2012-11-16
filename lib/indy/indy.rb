@@ -51,7 +51,7 @@ class Indy
     #   Indy.search(:cmd => "cat apache.log").all
     #
     # @example file source
-    #   Indy.search(:file => "apache.log").all
+    #   Indy.search(:file => "/logs/apache.log").all
     #
     # @example source as well as other parameters
     #   Indy.search(:source => {:cmd => "cat apache.log"}, :entry_regexp => REGEXP, :entry_fields => [:field_one, :field_two], :time_format => MY_TIME_FORMAT).all
