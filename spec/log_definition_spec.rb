@@ -7,7 +7,7 @@ describe 'Indy::LogDefinition' do
     context "with a valid hash" do
 
       before(:each) do
-        @ld = Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time)
+        @ld = Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one, :the_time], :time_format => '%M-%d-%Y', :time_field => :the_time)
       end
 
       it "should set entry_regexp" do
@@ -15,7 +15,7 @@ describe 'Indy::LogDefinition' do
       end
 
       it "should set entry_fields" do
-        @ld.entry_fields.should eq [:field_one]
+        @ld.entry_fields.should eq [:field_one, :the_time]
       end
 
       it "should set time_format" do
@@ -29,8 +29,15 @@ describe 'Indy::LogDefinition' do
     end
 
     it "should raise ArgumentError when missing entry_fields" do
-      pending "LogDefinition initialization should be more strict"
-      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y', :time_field => :the_time) }.should raise_error ArgumentError
+      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/) }.should raise_error ArgumentError
+    end
+
+    it "should raise ArgumentError when missing entry_regexp" do
+      lambda{ Indy::LogDefinition.new(:entry_fields => [:field_one]) }.should raise_error ArgumentError
+    end
+
+    it "should raise ArgumentError when :time_field not included in field_list" do
+      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_field => :the_time) }.should raise_error ArgumentError
     end
 
   end

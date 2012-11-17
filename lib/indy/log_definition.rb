@@ -4,8 +4,7 @@ class Indy
 
     attr_accessor :entry_regexp, :entry_fields, :time_format, :time_field, :multiline
 
-    def initialize args
-      params_hash = {}
+    def initialize(args)
       case args
       when :default, {}, nil
         params_hash = set_defaults
@@ -15,9 +14,8 @@ class Indy
       while (param = params_hash.shift) do
         send("#{param.first}=",param.last)
       end
-      # now that we know the fields
+      raise ArgumentError, "Values for entry_regexp and/or entry_fields were not supplied" unless (@entry_fields && @entry_regexp)
       define_struct
-
     end
 
     def set_defaults
@@ -31,6 +29,9 @@ class Indy
     def parse_enumerable_params(args)
       params_hash = {}
       params_hash.merge!(args)
+      if params_hash[:time_field] && !params_hash[:entry_fields].include?(params_hash[:time_field])
+        raise ArgumentError, "Value for time_field was not included in entry_fields"
+      end
       if args.keys.include? :log_format
         # support 0.3.4 params
         params_hash[:entry_regexp] = args[:log_format][0]
@@ -69,6 +70,7 @@ class Indy
     # Convert log entry into hash
     #
     def entry_hash(values)
+      assert_valid_field_list(values) unless @field_list_is_valid # just do it once
       raw_entry = values.shift
       hash = Hash[ *@entry_fields.zip( values ).flatten ]
       hash[:raw_entry] = raw_entry.strip
@@ -96,7 +98,6 @@ class Indy
     def parse_entry_captures( capture_array )
       entire_entry = capture_array.shift
       values = capture_array
-      assert_valid_field_list(capture_array)
       entry_hash([entire_entry, values].flatten)
     end
 
@@ -104,7 +105,11 @@ class Indy
     # Ensure number of fields is expected
     #
     def assert_valid_field_list(values)
-      raise "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'" unless values.length == @entry_fields.length
+      if values.length == @entry_fields.length + 1 # values also includes raw_entry
+        @field_list_is_valid = true
+      else
+        raise ArgumentError, "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'"
+      end
     end
 
   end

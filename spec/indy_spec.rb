@@ -54,16 +54,25 @@ describe 'Indy' do
         @indy.with(:default).all.length.should == 3
       end
 
+      it "should raise ArgumentError when regexp captures don't match fields" do
+        log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
+                "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."].join("\n")
+        lambda{ Indy.search(log).
+            with(:entry_regexp => Indy::LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => [:field_one]).
+            all.length.should > 0
+        }.should raise_error ArgumentError
+      end
+
       [:for, :like, :matching].each do |method|
         it "##{method} should exist" do
           @indy.should respond_to(method)
         end
 
-        it "#{method} should accept a hash of search criteria" do
+        it "##{method} should accept a hash of search criteria" do
           @indy.send(method,:severity => "INFO").should be_kind_of(Array)
         end
 
-        it "#{method} should return a set of results" do
+        it "##{method} should return a set of results" do
           @indy.send(method,:severity => "DEBUG").should be_kind_of(Array)
         end
       end
