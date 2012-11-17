@@ -15,8 +15,8 @@ describe 'Indy' do
       @entry_struct.should be_kind_of Struct::Entry
     end
 
-    it "should contain entire log entry as :entry" do
-      @entry_struct.entry.should == "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."
+    it "should contain entire log entry as :raw_entry" do
+      @entry_struct.raw_entry.should == "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."
     end
 
     context 'using Indy::DEFAULT_LOG_FORMAT' do

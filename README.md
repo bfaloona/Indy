@@ -35,7 +35,7 @@ Usage
 
     require 'indy'
     log = Indy.search(File.open('my_log.txt','r')).with(Indy::LOG4R_FORMAT)
-    puts log.all.first.entry
+    puts log.all.first.raw_entry
     # => "2012-09-07 10:01:40 INFO MyApp - Entering APPLICATION."
     puts log.after(:time => '2012-09-07 20:00:00').for(:application => 'MyApp').first.message
     # => "Exiting Application"

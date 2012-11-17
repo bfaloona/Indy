@@ -58,7 +58,7 @@ class Indy
       if !@time_field && @entry_fields.include?(:time)
         @time_field = :time
       end
-      fields = (@entry_fields + [:entry]).sort_by{|key|key.to_s}
+      fields = (@entry_fields + [:raw_entry]).sort_by{|key|key.to_s}
       verbose = $VERBOSE
       $VERBOSE = nil
       Struct.new( "Entry", *fields )
@@ -69,9 +69,9 @@ class Indy
     # Convert log entry into hash
     #
     def entry_hash(values)
-      entire_entry = values.shift
+      raw_entry = values.shift
       hash = Hash[ *@entry_fields.zip( values ).flatten ]
-      hash[:entry] = entire_entry.strip
+      hash[:raw_entry] = raw_entry.strip
       hash
     end
 
@@ -79,14 +79,13 @@ class Indy
     #
     # Return a hash of field=>value pairs for the log entry
     #
-    # @param [String] entry The log entry
+    # @param [String] raw_entry The raw log entry
     #
-    def parse_entry(entry)
-      match_data = /#{@entry_regexp}/.match(entry)
+    def parse_entry(raw_entry)
+      match_data = /#{@entry_regexp}/.match(raw_entry)
       return nil unless match_data
       values = match_data.captures
-      assert_valid_field_list(values)
-      entry_hash([entry, values].flatten)
+      entry_hash([raw_entry, values].flatten)
     end
 
     #

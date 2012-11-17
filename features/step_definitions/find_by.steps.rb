@@ -30,6 +30,6 @@ When /^searching the log for the exact match of custom field ([^"]+)\s*"([^"]+)"
 end
 
 Then /^I expect the (first|last|\d+(?:st|nd|rd|th)) entry to be:$/ do |position,expected|
-  @results[position].entry.should == expected
+  @results[position].raw_entry.should == expected
 end
 
