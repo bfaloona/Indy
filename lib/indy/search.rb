@@ -90,7 +90,7 @@ class Indy
         @start_time ||= Indy::Time.forever_ago(@log_definition.time_format)
         @end_time ||= Indy::Time.forever(@log_definition.time_format)
       end
-      @log_definition.time_field && @start_time && @end_time
+      @start_time && @end_time
     end
 
     #

@@ -60,7 +60,7 @@ class Indy
       if params.respond_to?(:keys) && params[:source]
         Indy.new(params)
       else
-        Indy.new(:source => params, :entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS, :time_field => :time)
+        Indy.new(:source => params, :entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS)
       end
     end
 

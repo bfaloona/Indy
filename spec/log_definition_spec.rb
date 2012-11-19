@@ -7,7 +7,7 @@ describe 'Indy::LogDefinition' do
     context "with a valid hash" do
 
       before(:each) do
-        @ld = Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one, :the_time], :time_format => '%M-%d-%Y', :time_field => :the_time)
+        @ld = Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_format => '%M-%d-%Y')
       end
 
       it "should set entry_regexp" do
@@ -15,15 +15,11 @@ describe 'Indy::LogDefinition' do
       end
 
       it "should set entry_fields" do
-        @ld.entry_fields.should eq [:field_one, :the_time]
+        @ld.entry_fields.should eq [:field_one]
       end
 
       it "should set time_format" do
         @ld.time_format.should eq '%M-%d-%Y'
-      end
-
-      it "should set time_field" do
-        @ld.time_field.should eq :the_time
       end
 
     end
@@ -36,10 +32,6 @@ describe 'Indy::LogDefinition' do
       lambda{ Indy::LogDefinition.new(:entry_fields => [:field_one]) }.should raise_error ArgumentError
     end
 
-    it "should raise ArgumentError when :time_field not included in field_list" do
-      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/, :entry_fields => [:field_one], :time_field => :the_time) }.should raise_error ArgumentError
-    end
-
   end
 
   context 'private method' do
@@ -47,8 +39,7 @@ describe 'Indy::LogDefinition' do
     before(:each) do
       @ld = Indy::LogDefinition.new(:entry_regexp => /^(\S+) (\S+) (.+)$/,
                               :entry_fields => [:time, :severity, :message],
-                              :time_format => '%M-%d-%Y',
-                              :time_field => :time)
+                              :time_format => '%M-%d-%Y')
     end
 
     context "#parse_entry" do

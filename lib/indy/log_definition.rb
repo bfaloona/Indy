@@ -2,7 +2,7 @@ class Indy
 
   class LogDefinition
 
-    attr_accessor :entry_regexp, :entry_fields, :time_format, :time_field, :multiline
+    attr_accessor :entry_regexp, :entry_fields, :time_format, :multiline
 
     def initialize(args)
       case args
@@ -22,16 +22,12 @@ class Indy
       params_hash = {}
       params_hash[:entry_regexp] = Indy::LogFormats::DEFAULT_ENTRY_REGEXP
       params_hash[:entry_fields] = Indy::LogFormats::DEFAULT_ENTRY_FIELDS
-      params_hash[:time_field] = :time
       params_hash
     end
 
     def parse_enumerable_params(args)
       params_hash = {}
       params_hash.merge!(args)
-      if params_hash[:time_field] && !params_hash[:entry_fields].include?(params_hash[:time_field])
-        raise ArgumentError, "Value for time_field was not included in entry_fields"
-      end
       if args.keys.include? :log_format
         # support 0.3.4 params
         params_hash[:entry_regexp] = args[:log_format][0]
@@ -56,9 +52,6 @@ class Indy
     # Define Struct::Entry with the fields from @log_definition. Ignore warnings.
     #
     def define_struct
-      if !@time_field && @entry_fields.include?(:time)
-        @time_field = :time
-      end
       fields = (@entry_fields + [:raw_entry]).sort_by{|key|key.to_s}
       verbose = $VERBOSE
       $VERBOSE = nil

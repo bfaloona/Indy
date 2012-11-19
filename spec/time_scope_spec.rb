@@ -125,21 +125,6 @@ describe Indy do
 
   end
 
-  context "explicit :time_field handling" do
-
-    it "should search within a time scope" do
-      pending "Using explicit time_field is unsupported"
-      pattern = "(\w+) (\d{4}-\d{2}-\d{2} \d{2}:) (\w+) - (.*)"
-      @indy = Indy.new(
-        :source => "INFO 2000-09-07 14:07:45 MyApp - Entering APPLICATION.\nINFO 2000-09-07 14:09:45 MyApp - Exiting APPLICATION.",
-        :entry_regexp => pattern,
-        :entry_fields => [:severity, :thetime, :application, :message],
-        :time_field => :thetime)
-      @indy.after(:time => '2000-09-07 14:08:00').all.first.thetime.should == '2000-09-07 14:09:45'
-    end
-
-  end
-
   context "explicit time format" do
 
     before(:each) do
