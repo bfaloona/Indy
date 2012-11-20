@@ -72,7 +72,7 @@ class Indy
     def multiline_search(&block)
       is_time_search = use_time_criteria?
       source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
-      results = source_io.read.scan(Regexp.new(@log_definition.entry_regexp, Regexp::MULTILINE)).collect do |entry|
+      results = source_io.read.scan(@log_definition.entry_regexp).collect do |entry|
         hash = @log_definition.parse_entry_captures(entry)
         next unless hash
         next unless Indy::Time.inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search

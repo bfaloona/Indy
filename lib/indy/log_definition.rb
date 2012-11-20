@@ -4,17 +4,22 @@ class Indy
 
     attr_accessor :entry_regexp, :entry_fields, :time_format, :multiline
 
-    def initialize(args)
+    def initialize(args=:default)
       case args
-      when :default, {}, nil
+      when :default, {}
         params_hash = set_defaults
       when Array, Hash
         params_hash = parse_enumerable_params(args)
       end
-      while (param = params_hash.shift) do
-        send("#{param.first}=",param.last)
+      raise ArgumentError, "Values for entry_regexp and/or entry_fields were not supplied" unless (params_hash[:entry_fields] && params_hash[:entry_regexp])
+      if params_hash[:multiline]
+        @entry_regexp = Regexp.new(params_hash[:entry_regexp], Regexp::MULTILINE)
+        @multiline = true
+      else
+        @entry_regexp = Regexp.new(params_hash[:entry_regexp])
       end
-      raise ArgumentError, "Values for entry_regexp and/or entry_fields were not supplied" unless (@entry_fields && @entry_regexp)
+      @entry_fields = params_hash[:entry_fields]
+      @time_format = params_hash[:time_format]
       define_struct
     end
 
