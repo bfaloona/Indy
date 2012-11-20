@@ -186,7 +186,7 @@ Multiple scope methods can be called on an instance. Use #reset_scope to remove 
     @log.all
 
     # Within Jan 1 and Feb 1 (same time scope as above)
-    Indy.search(source).within(:time => ['2011-01-01 00:00:00','2011-02-01 00:00:00']).all
+    Indy.search(source).within(:start_time => '2011-01-01 00:00:00', :end_time =>'2011-02-01 00:00:00').all
 
     # After Jan 1
     @log = Indy.search(source)
