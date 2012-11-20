@@ -218,12 +218,11 @@ describe 'Indy' do
   context "multiline log mode" do
 
     before(:each) do
-      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nfirst Application data.",
-              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
-              " ",
-              "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nApplication data.",
-              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
-              "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data."].join("\n")
+      log = [ "2000-09-07 14:07:41 INFO MyApp - Entering APPLICATION with data:\nfirst Application data. AAA",
+              "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION. BBB",
+              "2000-09-07 14:07:43 INFO MyApp - Entering APPLICATION with data:\nApplication data. CCC",
+              "2000-09-07 14:07:44 DEBUG MyApp - Initializing APPLICATION. DDD",
+              "2000-09-07 14:07:45 INFO MyApp - Exiting APPLICATION with data:\nApplications data\nMore data\n\tlast Application data. EEE"].join("\n")
       regexp = "^((#{Indy::LogFormats::DEFAULT_DATE_TIME})\\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\\s+-\\s+(.*?)(?=#{Indy::LogFormats::DEFAULT_DATE_TIME}|\\z))"
       @indy = Indy.new(:source => log, :log_format => [regexp, :time,:severity,:application,:message], :multiline => true  )
     end
@@ -240,9 +239,8 @@ describe 'Indy' do
       @indy.like(:message => 'ntering').count.should == 2
     end
 
-    it "should return correct number of entries using #before time scope" do
-      pending 'time scoped searches currently unsupported for multiline log formats'
-      results = @indy.before(:time => '2000-09-07 14:07:42', :inclusive => false).all
+    it "should return correct number of entries using #after time scope" do
+      results = @indy.after(:time => '2000-09-07 14:07:43', :inclusive => false).all
       results.length.should == 2
     end
 

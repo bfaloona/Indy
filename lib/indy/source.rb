@@ -3,8 +3,6 @@ class Indy
   # 
   # A StringIO interface to the underlying log source.
   # 
-  # TODO: Only supports single line log formats.
-  #
   class Source
 
     # log source type. :cmd, :file, or :string
@@ -16,6 +14,9 @@ class Indy
     # the StringIO object
     attr_reader :io
 
+    # log definition
+    attr_reader :log_definition
+
     # Exception raised when unable to open source
     class Invalid < Exception; end
 
@@ -24,8 +25,9 @@ class Indy
     #
     # @param [String, Hash] param The source content String, filepath String, or :cmd => 'command' Hash
     #
-    def initialize(param)
+    def initialize(param,log_definition=nil)
       raise Indy::Source::Invalid, "No source specified." if param.nil?
+      @log_definition = log_definition || LogDefinition.new()
       return discover_connection(param) unless param.respond_to?(:keys)
       if param[:cmd]
         set_connection(:cmd, param[:cmd])
@@ -76,7 +78,7 @@ class Indy
       end
       load_data
       scope_by_time(time_boundaries) if time_boundaries
-      @lines
+      @entries
     end
 
     def open_cmd
@@ -101,15 +103,15 @@ class Indy
     #
     def scope_by_time(time_boundaries)
       start_time, end_time = time_boundaries
-      scope_end = num_lines - 1
+      scope_end = num_entries - 1
       # short circuit the search if possible
       if (time_at(0) > end_time) or (time_at(-1) < start_time)
-        @lines = []
-        return @lines
+        @entries = []
+        return @entries
       end
       scope_begin = find_first(start_time, 0, scope_end)
       scope_end = find_last(end_time, scope_begin, scope_end)
-      @lines = @lines[scope_begin..scope_end]
+      @entries = @entries[scope_begin..scope_end]
     end
 
     #
@@ -153,7 +155,7 @@ class Indy
     # Return the time of a log entry index, with an optional offset
     #
     def time_at(index, delta=0)
-      ::Time.parse(@lines[index + delta])
+      ::Time.parse(@entries[index + delta])
     end
 
     #
@@ -187,17 +189,17 @@ class Indy
     #
     # the number of lines in the source
     #
-    def num_lines
-      load_data unless @num_lines
-      @num_lines
+    def num_entries
+      load_data unless @num_entries
+      @num_entries
     end
 
     #
     # array of log lines from source
     #
-    def lines
-      load_data unless @lines
-      @lines
+    def entries
+      load_data unless @entries
+      @entries
     end
 
     #
@@ -205,10 +207,15 @@ class Indy
     #
     def load_data
       self.open if @io.nil?
-      @lines = @io.readlines
+      if @log_definition.multiline
+        entire_log = @io.read
+        @entries = entire_log.scan(@log_definition.entry_regexp).map{|matchdata|matchdata[0]}
+      else
+        @entries = @io.readlines
+      end
       @io.rewind
-      @lines.delete_if {|line| line.match(/^\s*$/)}
-      @num_lines = @lines.count
+      @entries.delete_if {|entry| entry.match(/^\s*$/)}
+      @num_entries = @entries.count
     end
 
   end

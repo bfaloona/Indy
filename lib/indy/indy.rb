@@ -16,22 +16,12 @@ class Indy
   def initialize(args)
     params_hash = args.dup
     @time_format = nil
-    if params_hash.keys.include? :source
-      source_param = params_hash[:source]
-      params_hash.delete :source
-    end
+    raise ArgumentError, "Source parameter not specified" unless (params_hash.respond_to?(:keys) && params_hash.keys.include?(:source))
+    source_param = params_hash[:source]
+    params_hash.delete :source
     log_definition = LogDefinition.new(params_hash)
     @search = Search.new(:log_definition => log_definition)
-    self.source = source_param
-  end
-
-  #
-  # Create an Indy::Source object to manage the log source
-  #
-  # @param [String,Hash] source A filename, or log content as a string. Use a Hash with :cmd key to specify a command string.
-  #
-  def source=(param)
-    @search.source = Source.new(param)
+    @search.source = Source.new(source_param,log_definition)
   end
 
   class << self

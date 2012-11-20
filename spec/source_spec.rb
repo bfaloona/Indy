@@ -32,12 +32,12 @@ class Indy
         Source.new('logdata').should respond_to(:open)
       end
 
-      it "should respond to :num_lines" do
-        Source.new('logdata').should respond_to(:num_lines)
+      it "should respond to :num_entries" do
+        Source.new('logdata').should respond_to(:num_entries)
       end
 
-      it "should respond to :lines" do
-        Source.new('logdata').should respond_to(:num_lines)
+      it "should respond to :entries" do
+        Source.new('logdata').should respond_to(:entries)
       end
 
       it "should handle Files" do
@@ -61,13 +61,13 @@ class Indy
         @source.open.class.should == Array
       end
 
-      it "should return lines array from :lines" do
-        @source.lines.class.should == Array
-        @source.lines.length.should == 3
+      it "should return entries array from :entries" do
+        @source.entries.class.should == Array
+        @source.entries.length.should == 3
       end
 
-      it "should return 3 from :num_lines" do
-        @source.num_lines.should == 3
+      it "should return 3 from :num_entries" do
+        @source.num_entries.should == 3
       end
 
     end
