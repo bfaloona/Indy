@@ -40,6 +40,7 @@ describe 'Indy::LogDefinition' do
       @ld = Indy::LogDefinition.new(:entry_regexp => /^(\S+) (\S+) (.+)$/,
                               :entry_fields => [:time, :severity, :message],
                               :time_format => '%M-%d-%Y')
+      @field_captures = "2000-09-07 INFO The message!".match(@ld.entry_regexp).to_a
     end
 
     context "#parse_entry" do
@@ -58,14 +59,12 @@ describe 'Indy::LogDefinition' do
 
     context "#parse_entry_captures" do
 
-      let(:field_captures) {"2000-09-07 INFO The message!".match(@ld.entry_regexp).to_a}
-
       it "should return a hash" do
-        @ld.send(:parse_entry_captures, field_captures).class.should == Hash
+        @ld.send(:parse_entry_captures, @field_captures).class.should == Hash
       end
 
       it "should contain key/value pairs" do
-        hash = @ld.send(:parse_entry_captures, field_captures)
+        hash = @ld.send(:parse_entry_captures, @field_captures)
         hash[:time].should == "2000-09-07"
         hash[:message].should == "The message!"
       end
