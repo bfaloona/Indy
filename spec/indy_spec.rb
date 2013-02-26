@@ -213,6 +213,20 @@ describe 'Indy' do
       Indy.search(log).all.length.should == 0
     end
 
+    context "with explicit time format" do
+
+      it "returns correct number of records" do
+        log = ["09-2000-07 INFO  MyApp - Entering APPLICATION.\n \n",
+               "09-2000-07 INFO  MyApp - Opening APPLICATION.\n",
+               "2000-09-07 INFO  MyApp - Invalid Entry\n"].join
+        indy = Indy.new(:source => log,
+                        :time_format => '%d-%Y-%m',
+                        :entry_regexp => /^(\d\d-\d\d\d\d-\d\d)\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\s+-\s+(#{Indy::LogFormats::DEFAULT_MESSAGE})$/,
+                        :entry_fields => Indy::LogFormats::DEFAULT_ENTRY_FIELDS)
+        indy.all.length.should == 2
+      end
+    end
+
   end
 
   context "multiline log mode" do

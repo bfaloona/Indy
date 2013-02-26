@@ -143,10 +143,15 @@ Example:
 
 By default, Indy tries to guess your time format (courtesy of DateTime#parse). If you supply an explicit time format, it will use DateTime#strptime, as well as try to guess.
 
-This is required when log data uses a non-standard date format, e.g.: U.S. format 12-31-2000
+This is required when log data uses a non-standard date format, e.g.: U.S. format 12-31-2000, and must be used in
+conjunction with :entry_regexp and :entry_fields parameters.
 
-    # 12-31-2011 23:59:59
-    Indy.new(:time_format => '%m-%d-%Y %H:%M:%S', :source => LOG_FILE).all
+    # 12-31-2011 Application starting
+    Indy.new(   :time_format => '%m-%d-%Y',
+                :source => LOG_FILE,
+                :entry_regexp => /\d\d-\d\d-\d\d\d\d .*?/,
+                :entry_fields => [:time, :message]
+    ).all
 
 ## Match Criteria
 

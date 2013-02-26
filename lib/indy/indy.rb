@@ -15,7 +15,6 @@ class Indy
   #
   def initialize(args)
     params_hash = args.dup
-    @time_format = nil
     raise ArgumentError, "Source parameter not specified" unless (params_hash.respond_to?(:keys) && params_hash.keys.include?(:source))
     source_param = params_hash[:source]
     params_hash.delete :source
