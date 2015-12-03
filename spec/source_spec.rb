@@ -20,7 +20,7 @@ class Indy
       end
 
       it "should raise if #execute_command returns empty string" do
-        IO.stub!(:popen).and_return('')
+        IO.stub(:popen).and_return('')
         lambda{ Source.new(:cmd => 'a faux command').open }.should raise_error(Indy::Source::Invalid)
       end
 

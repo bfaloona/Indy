@@ -142,17 +142,17 @@ describe 'Indy' do
         end
 
         it "should attempt open the command" do
-          IO.stub!(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
+          IO.stub(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
           Indy.search(:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
         end
 
         it "should not throw an error for an invalid command" do
-          IO.stub!(:popen).with('an invalid command').and_return('')
+          IO.stub(:popen).with('an invalid command').and_return('')
           Indy.search(:cmd => "an invalid command").class.should == Indy
         end
 
         it "should use IO.popen on cmd value" do
-          IO.stub!(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+          IO.stub(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
           Indy.search(:cmd => "a command").for(:application => 'MyApp').length.should == 1
         end
 
@@ -163,7 +163,7 @@ describe 'Indy' do
         end
 
         it "should raise Source::Invalid for an invalid command" do
-          IO.stub!(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
+          IO.stub(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
           lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").all }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
         end
 
@@ -171,7 +171,7 @@ describe 'Indy' do
 
       it "using :file" do
         require 'tempfile'
-        file = stub!(:size).and_return(1)
+        file = stub(:size).and_return(1)
         lambda{ Indy.search(:file => file) }
       end
 
