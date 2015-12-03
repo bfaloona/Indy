@@ -13,11 +13,11 @@ Gem::Specification.new do |s|
 
   s.platform    = Gem::Platform::RUBY
   s.required_ruby_version = '>= 1.8.5'
-  s.add_dependency('activesupport', '>= 2.3.5')
+  s.add_dependency('activesupport', '3.1.12')
 
   s.add_development_dependency('rake')
-  s.add_development_dependency('i18n')
-  s.add_development_dependency('cucumber', '>= 1.1.0')
+  s.add_development_dependency('i18n', '0.6.11')
+  s.add_development_dependency('cucumber', '1.3.20')
   s.add_development_dependency('yard', '>= 0.7.2')
   s.add_development_dependency('rspec', '>= 2.9.0')
   s.add_development_dependency('rspec-mocks', '>= 2.9.0')
@@ -28,11 +28,12 @@ Gem::Specification.new do |s|
   unless ENV['TRAVIS'] == 'true'
     s.add_development_dependency('yard-cucumber', '>= 2.1.1')
     s.add_development_dependency('flog', '>= 2.5.0')
-    s.add_development_dependency('guard')
+    s.add_development_dependency('guard', '1.8.3')
     unless ENV['RUBY_VERSION'] &&  ENV['RUBY_VERSION'].match(/jruby|rbx/)
       s.add_development_dependency('guard-rspec')
       s.add_development_dependency('guard-cucumber')
-      s.add_development_dependency('rspec-prof', '>= 0.0.3')
+      s.add_development_dependency('ruby-prof', '0.13.1')
+      s.add_development_dependency('rspec-prof')
       s.add_development_dependency('simplecov', '>= 0.4.0')
     end
   end

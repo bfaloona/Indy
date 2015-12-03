@@ -22,12 +22,12 @@ Compatibility
 
 Indy supports MacOS, *nix, and MS Windows and runs on the following ruby flavors:
 
-  - 1.8.7
+  - 2.2.1
   - 1.9.3
-  - 2.0.0
+  - 1.8.7
   - ree
-  - jruby-19mode
-  - rbx-19mode
+  - jruby-1.7.20
+  - rbx-2.2.7
 
 Usage
 -----
