@@ -11,25 +11,25 @@ describe 'Indy::LogDefinition' do
       end
 
       it "should set entry_regexp" do
-        @ld.entry_regexp.should eq /foo/
+        expect(@ld.entry_regexp).to eq /foo/
       end
 
       it "should set entry_fields" do
-        @ld.entry_fields.should eq [:field_one]
+        expect(@ld.entry_fields).to eq [:field_one]
       end
 
       it "should set time_format" do
-        @ld.time_format.should eq '%M-%d-%Y'
+        expect(@ld.time_format).to eq '%M-%d-%Y'
       end
 
     end
 
     it "should raise ArgumentError when missing entry_fields" do
-      lambda{ Indy::LogDefinition.new(:entry_regexp => /foo/) }.should raise_error ArgumentError
+      expect{ Indy::LogDefinition.new(:entry_regexp => /foo/) }.to raise_error ArgumentError
     end
 
     it "should raise ArgumentError when missing entry_regexp" do
-      lambda{ Indy::LogDefinition.new(:entry_fields => [:field_one]) }.should raise_error ArgumentError
+      expect{ Indy::LogDefinition.new(:entry_fields => [:field_one]) }.to raise_error ArgumentError
     end
 
   end
@@ -46,13 +46,13 @@ describe 'Indy::LogDefinition' do
     context "#parse_entry" do
 
       it "should return a hash" do
-        @ld.send(:parse_entry, "2000-09-07 INFO The message!").class.should == Hash
+        expect(@ld.send(:parse_entry, "2000-09-07 INFO The message!").class).to eq(Hash)
       end
 
       it "should return correct key/value pairs" do
         hash = @ld.send(:parse_entry, "2000-09-07 INFO The message!")
-        hash[:time].should == "2000-09-07"
-        hash[:message].should == "The message!"
+        expect(hash[:time]).to eq("2000-09-07")
+        expect(hash[:message]).to eq("The message!")
       end
 
     end
@@ -60,13 +60,13 @@ describe 'Indy::LogDefinition' do
     context "#parse_entry_captures" do
 
       it "should return a hash" do
-        @ld.send(:parse_entry_captures, @field_captures).class.should == Hash
+        expect(@ld.send(:parse_entry_captures, @field_captures).class).to eq(Hash)
       end
 
       it "should contain key/value pairs" do
         hash = @ld.send(:parse_entry_captures, @field_captures)
-        hash[:time].should == "2000-09-07"
-        hash[:message].should == "The message!"
+        expect(hash[:time]).to eq("2000-09-07")
+        expect(hash[:message]).to eq("The message!")
       end
 
     end

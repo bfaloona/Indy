@@ -12,12 +12,12 @@ describe 'Indy' do
     end
 
     it "#last_entries should return an array of Struct::Entry object" do
-      @indy.send(:last_entries, 2).class.should == Array
-      @indy.send(:last_entries, 2).first.class.should == Struct::Entry
+      expect(@indy.send(:last_entries, 2).class).to eq(Array)
+      expect(@indy.send(:last_entries, 2).first.class).to eq(Struct::Entry)
     end
 
     it "#last_entries should return correct Struct::Entry objects" do
-      @indy.send(:last_entries, 2).first.time.should == '2000-09-07 14:07:43'
+      expect(@indy.send(:last_entries, 2).first.time).to eq('2000-09-07 14:07:43')
     end
 
   end

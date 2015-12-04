@@ -12,29 +12,29 @@ describe 'Indy' do
     end
 
     it "should be returned by #for search" do
-      @entry_struct.should be_kind_of Struct::Entry
+      expect(@entry_struct).to be_kind_of Struct::Entry
     end
 
     it "should contain entire log entry as :raw_entry" do
-      @entry_struct.raw_entry.should == "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."
+      expect(@entry_struct.raw_entry).to eq("2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.")
     end
 
     context 'using Indy::DEFAULT_LOG_FORMAT' do
 
       it "should contain :time" do
-        @entry_struct.time.should == "2000-09-07 14:07:42"
+        expect(@entry_struct.time).to eq("2000-09-07 14:07:42")
       end
 
       it "should contain :severity" do
-        @entry_struct.severity.should == "DEBUG"
+        expect(@entry_struct.severity).to eq("DEBUG")
       end
 
       it "should contain :application" do
-        @entry_struct.application.should == "MyApp"
+        expect(@entry_struct.application).to eq("MyApp")
       end
 
       it "should contain :message" do
-        @entry_struct.message.should == "Initializing APPLICATION."
+        expect(@entry_struct.message).to eq("Initializing APPLICATION.")
       end
 
     end

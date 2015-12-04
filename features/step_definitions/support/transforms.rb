@@ -8,7 +8,7 @@ Transform /^(\d+)$/ do |number|
 end
 
 Then /^I expect to have found (no|\d+) log entr(?:y|ies)$/ do |count|
-  @results.size.should == count
+  expect(@results.size).to eq(count)
 end
 
 Transform /^first$/ do |order|

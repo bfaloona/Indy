@@ -13,13 +13,13 @@ describe Indy do
     end
 
     it "should return all entries" do
-      @indy.all.length.should == 3
+      expect(@indy.all.length).to eq(3)
     end
 
     it "should search entire string on each successive search" do
-      @indy.for(:application => 'MyApp').length.should == 2
-      @indy.for(:severity => 'INFO').length.should == 3
-      @indy.for(:application => 'MyApp').length.should == 2
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
+      expect(@indy.for(:severity => 'INFO').length).to eq(3)
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
     end
 
   end
@@ -38,20 +38,20 @@ describe Indy do
     end
 
     it "should return 2 records" do
-      @indy.for(:application => 'MyApp').length.should == 2
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
     end
 
     it "should search entire file on each successive search" do
-      @indy.for(:application => 'MyApp').length.should == 2
-      @indy.for(:severity => 'INFO').length.should == 3
-      @indy.for(:application => 'MyApp').length.should == 2
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
+      expect(@indy.for(:severity => 'INFO').length).to eq(3)
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
     end
 
     it "should search reopened file on each successive search" do
-      @indy.for(:application => 'MyApp').length.should == 2
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
       @file.write("\n2000-09-07 14:10:55 INFO  MyApp - really really Exiting APPLICATION.\n")
       @file.flush
-      @indy.for(:application => 'MyApp').length.should == 3
+      expect(@indy.for(:application => 'MyApp').length).to eq(3)
     end
 
   end
@@ -75,16 +75,16 @@ describe Indy do
 
     it "should return 2 records" do
       results = @indy.for(:application => 'MyApp')
-      results.length.should == 2
+      expect(results.length).to eq(2)
     end
 
     it "should execute cmd on each successive search" do
-      @indy.for(:application => 'MyApp').length.should == 2
-      @indy.for(:severity => 'INFO').length.should == 3
+      expect(@indy.for(:application => 'MyApp').length).to eq(2)
+      expect(@indy.for(:severity => 'INFO').length).to eq(3)
       @file.write("\n2000-09-07 14:10:55 DEBUG MyApp - really really Exiting APPLICATION.\n")
       @file.flush
-      @indy.for(:application => 'MyApp').length.should == 3
-      @indy.for(:severity => 'INFO').length.should == 3
+      expect(@indy.for(:application => 'MyApp').length).to eq(3)
+      expect(@indy.for(:severity => 'INFO').length).to eq(3)
     end
 
   end

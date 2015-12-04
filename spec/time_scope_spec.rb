@@ -17,19 +17,19 @@ describe Indy do
     context "after method" do
 
       it "should find the correct entries" do
-        @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
+        expect(@indy.after(:time => '2000-09-07 14:07:42').all.length).to eq(3)
       end
 
       it "should find 0 entries with a time that is past the log" do
-        @indy.after(:time => '2000-09-07 14:07:46').all.length.should == 0
+        expect(@indy.after(:time => '2000-09-07 14:07:46').all.length).to eq(0)
       end
 
       it "should find all entries with a time that is before the log" do
-        @indy.after(:time => '2000-09-07 14:07:40').all.length.should == 5
+        expect(@indy.after(:time => '2000-09-07 14:07:40').all.length).to eq(5)
       end
 
       it "should find entries using inclusive" do
-        @indy.after(:time => '2000-09-07 14:07:42', :inclusive => true).all.length.should == 4
+        expect(@indy.after(:time => '2000-09-07 14:07:42', :inclusive => true).all.length).to eq(4)
       end
 
     end
@@ -37,19 +37,19 @@ describe Indy do
     context "before method" do
 
       it "should find the correct entries" do
-        @indy.before(:time => '2000-09-07 14:07:44').all.length.should == 3
+        expect(@indy.before(:time => '2000-09-07 14:07:44').all.length).to eq(3)
       end
 
       it "should find 0 entries with a time that is before the log" do
-        @indy.before(:time => '2000-09-07 14:07:40').all.length.should == 0
+        expect(@indy.before(:time => '2000-09-07 14:07:40').all.length).to eq(0)
       end
 
       it "should find all entries with a time that is after the log" do
-        @indy.before(:time => '2000-09-07 14:07:47').all.length.should == 5
+        expect(@indy.before(:time => '2000-09-07 14:07:47').all.length).to eq(5)
       end
 
       it "should find entries using inclusive" do
-        @indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).all.length.should == 4
+        expect(@indy.before(:time => '2000-09-07 14:07:44', :inclusive => true).all.length).to eq(4)
       end
 
     end
@@ -57,11 +57,11 @@ describe Indy do
     context "within method" do
 
       it "should find the correct entries" do
-        @indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43').all.length.should == 1
+        expect(@indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43').all.length).to eq(1)
       end
 
       it "should find the correct entries using inclusive" do
-        @indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43', :inclusive => true).all.length.should == 3
+        expect(@indy.within(:start_time => '2000-09-07 14:07:41', :end_time => '2000-09-07 14:07:43', :inclusive => true).all.length).to eq(3)
       end
 
     end
@@ -82,19 +82,19 @@ describe Indy do
     end
 
     it "using after should find the correct entries" do
-      @indy.after(:time => '2000-09-07 14:07:42', :span => 1).all.length.should == 1
+      expect(@indy.after(:time => '2000-09-07 14:07:42', :span => 1).all.length).to eq(1)
     end
 
     it "using before should find the correct entries" do
-      @indy.before(:time => '2000-09-07 14:12:00', :span => 4).all.length.should == 4
+      expect(@indy.before(:time => '2000-09-07 14:12:00', :span => 4).all.length).to eq(4)
     end
 
     it "using around should find the correct entries" do
-      @indy.around(:time => '2000-09-07 14:11:00', :span => 2).all.length.should == 2
+      expect(@indy.around(:time => '2000-09-07 14:11:00', :span => 2).all.length).to eq(2)
     end
 
     it "using after and inclusive should find the correct entries" do
-      @indy.after(:time => '2000-09-07 14:07:41', :span => 2, :inclusive => true).all.length.should == 3
+      expect(@indy.after(:time => '2000-09-07 14:07:41', :span => 2, :inclusive => true).all.length).to eq(3)
     end
 
   end
@@ -113,14 +113,14 @@ describe Indy do
 
     # Issue #3 (by design) assumed that the time scope.
     it "should each add scope criteria to the instance" do
-      @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
-      @indy.before(:time => '2000-09-07 14:07:45').all.length.should == 2
+      expect(@indy.after(:time => '2000-09-07 14:07:42').all.length).to eq(3)
+      expect(@indy.before(:time => '2000-09-07 14:07:45').all.length).to eq(2)
     end
 
     it "should specify the entire scope if #reset_scope was called" do
-      @indy.after(:time => '2000-09-07 14:07:42').all.length.should == 3
+      expect(@indy.after(:time => '2000-09-07 14:07:42').all.length).to eq(3)
       @indy.reset_scope
-      @indy.before(:time => '2000-09-07 14:07:45').all.length.should == 4
+      expect(@indy.before(:time => '2000-09-07 14:07:45').all.length).to eq(4)
     end
 
   end
@@ -136,8 +136,8 @@ describe Indy do
 
     it "should search within time scope using a different format than explicitly set" do
       pending 'Flexible time date time formatting is not implemented'
-      @indy.after(:time => 'Jan 13 2002').all.length.should == 2
-      @indy.after(:time => 'Jan 14 2002').all.last._time.mday.should == 15
+      expect(@indy.after(:time => 'Jan 13 2002').all.length).to eq(2)
+      expect(@indy.after(:time => 'Jan 14 2002').all.last._time.mday).to eq(15)
     end
 
   end
@@ -156,7 +156,7 @@ describe Indy do
       :source => logdata,
       :log_format => [/^(\d[^\s]+\d) (.+)$/, :time, :message])
     @indy.after(:time => '13-03-2000')
-    @indy.all.length.should == 4
+    expect(@indy.all.length).to eq(4)
   end
 
 end

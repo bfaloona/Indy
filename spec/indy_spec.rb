@@ -7,20 +7,20 @@ describe 'Indy' do
     it "should accept v0.3.4 initialization params" do
       indy_obj = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
       search_obj = indy_obj.search
-      search_obj.log_definition.class.should eq Indy::LogDefinition
-      search_obj.log_definition.entry_regexp.class.should eq Regexp
-      search_obj.log_definition.entry_fields.class.should eq Array
+      expect(search_obj.log_definition.class).to eq Indy::LogDefinition
+      expect(search_obj.log_definition.entry_regexp.class).to eq Regexp
+      expect(search_obj.log_definition.entry_fields.class).to eq Array
     end
 
     it "should not raise error with non-conforming data" do
       @indy = Indy.new(:source => " \nfoobar\n\n baz", :entry_regexp => '([^\s]+) (\w+)', :entry_fields => [:time, :message])
-      @indy.all.class.should == Array
+      expect(@indy.all.class).to eq(Array)
     end
 
     it "should accept time_format parameter" do
       @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :entry_regexp => '^([^\s]+) (\w+)$', :entry_fields => [:time, :message])
-      @indy.all.class.should == Array
-      @indy.search.log_definition.time_format.should == '%d-%m-%Y'
+      expect(@indy.all.class).to eq(Array)
+      expect(@indy.search.log_definition.time_format).to eq('%d-%m-%Y')
     end
 
     it "should accept an initialization hash passed to #search" do
@@ -29,8 +29,8 @@ describe 'Indy' do
         :entry_regexp => '^([^\s]+) (\w+)$',
         :entry_fields => [:time, :message]}
       @indy = Indy.search(hash)
-      @indy.class.should == Indy
-      @indy.all.length.should == 1
+      expect(@indy.class).to eq(Indy)
+      expect(@indy.all.length).to eq(1)
     end
 
   end
@@ -47,49 +47,49 @@ describe 'Indy' do
     context "method" do
 
       it "#with should return self" do
-        @indy.with().class.should == Indy
+        expect(@indy.with().class).to eq(Indy)
       end
 
       it "#with should use default log pattern when passed :default" do
-        @indy.with(:default).all.length.should == 3
+        expect(@indy.with(:default).all.length).to eq(3)
       end
 
       it "should raise ArgumentError when regexp captures don't match fields" do
         log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
                 "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."].join("\n")
-        lambda{ Indy.search(log).
+        expect{ expect(Indy.search(log).
             with(:entry_regexp => Indy::LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => [:field_one]).
-            all.length.should > 0
-        }.should raise_error ArgumentError
+            all.length).to be > 0
+        }.to raise_error ArgumentError
       end
 
       [:for, :like, :matching].each do |method|
         it "##{method} should exist" do
-          @indy.should respond_to(method)
+          expect(@indy).to respond_to(method)
         end
 
         it "##{method} should accept a hash of search criteria" do
-          @indy.send(method,:severity => "INFO").should be_kind_of(Array)
+          expect(@indy.send(method,:severity => "INFO")).to be_kind_of(Array)
         end
 
         it "##{method} should return a set of results" do
-          @indy.send(method,:severity => "DEBUG").should be_kind_of(Array)
+          expect(@indy.send(method,:severity => "DEBUG")).to be_kind_of(Array)
         end
       end
 
       it "#last should return self" do
-        @indy.last(:span => 1).should be_kind_of Indy
+        expect(@indy.last(:span => 1)).to be_kind_of Indy
       end
 
       it "#last should set the time scope to the correct number of minutes" do
-        @indy.last(:span => 1).all.count.should == 2
+        expect(@indy.last(:span => 1).all.count).to eq(2)
       end
 
       it "#last should raise an error if passed an invalid parameter" do
-        lambda{ @indy.last('a') }.should raise_error( ArgumentError )
-        lambda{ @indy.last() }.should raise_error( ArgumentError )
-        lambda{ @indy.last(nil) }.should raise_error( ArgumentError )
-        lambda{ @indy.last({}) }.should raise_error( ArgumentError )
+        expect{ @indy.last('a') }.to raise_error( ArgumentError )
+        expect{ @indy.last() }.to raise_error( ArgumentError )
+        expect{ @indy.last(nil) }.to raise_error( ArgumentError )
+        expect{ @indy.last({}) }.to raise_error( ArgumentError )
       end
 
     end
@@ -98,39 +98,39 @@ describe 'Indy' do
   context '#search' do
 
     it "should be a class method" do
-      Indy.should respond_to(:search)
+      expect(Indy).to respond_to(:search)
     end
 
     it "should accept a string parameter" do
-      Indy.search("String Log").class.should == Indy
+      expect(Indy.search("String Log").class).to eq(Indy)
     end
 
     it "should accept a hash with :cmd key" do
-      Indy.search(:cmd => "ls").class.should == Indy
+      expect(Indy.search(:cmd => "ls").class).to eq(Indy)
     end
 
     it "should accept a hash with :file => filepath" do
-      Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").all.length.should == 2
+      expect(Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").all.length).to eq(2)
     end
 
     it "should accept a hash with :file => File" do
-      Indy.search(:file => File.open("#{File.dirname(__FILE__)}/data.log")).all.length.should == 2
+      expect(Indy.search(:file => File.open("#{File.dirname(__FILE__)}/data.log")).all.length).to eq(2)
     end
 
     it "should accept a valid :source hash" do
-      Indy.search(:source => {:cmd => 'ls'}).class.should == Indy
+      expect(Indy.search(:source => {:cmd => 'ls'}).class).to eq(Indy)
     end
 
     it "should create an instance of Indy::Source in Search object" do
-      Indy.search("source string").search.source.should be_kind_of(Indy::Source)
+      expect(Indy.search("source string").search.source).to be_kind_of(Indy::Source)
     end
 
     it "should raise an exception when passed an invalid source: nil" do
-      lambda{ Indy.search(nil) }.should raise_error(Indy::Source::Invalid, /No source specified/)
+      expect{ Indy.search(nil) }.to raise_error(Indy::Source::Invalid, /No source specified/)
     end
 
     it "should raise an exception when the arity is incorrect" do
-      lambda{ Indy.search( ) }.should raise_error Indy::Source::Invalid
+      expect{ Indy.search( ) }.to raise_error Indy::Source::Invalid
     end
 
     context "with explicit source hash" do
@@ -142,48 +142,46 @@ describe 'Indy' do
         end
 
         it "should attempt open the command" do
-          IO.stub(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
+          allow(IO).to receive(:popen).with('ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
           Indy.search(:cmd => 'ssh user@system "bash --login -c \"cat /var/log/standard.log\" "')
         end
 
         it "should not throw an error for an invalid command" do
-          IO.stub(:popen).with('an invalid command').and_return('')
-          Indy.search(:cmd => "an invalid command").class.should == Indy
+          allow(IO).to receive(:popen).with('an invalid command').and_return('')
+          expect(Indy.search(:cmd => "an invalid command").class).to eq(Indy)
         end
 
         it "should use IO.popen on cmd value" do
-          IO.stub(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
-          Indy.search(:cmd => "a command").for(:application => 'MyApp').length.should == 1
+          allow(IO).to receive(:popen).with("a command").and_return(StringIO.new("2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."))
+          expect(Indy.search(:cmd => "a command").for(:application => 'MyApp').length).to eq(1)
         end
 
         it "should handle a real command" do
           log_file = "data.log"
           cat_cmd = (is_windows? ? 'type' : 'cat')
-          Indy.search(:cmd => "#{cat_cmd} #{log_file}").for(:application => 'MyApp').length.should == 2
+          expect(Indy.search(:cmd => "#{cat_cmd} #{log_file}").for(:application => 'MyApp').length).to eq(2)
         end
 
         it "should raise Source::Invalid for an invalid command" do
-          IO.stub(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
-          lambda{ Indy.search(:cmd => "zzzzzzzzzzzz").all }.should raise_error( Indy::Source::Invalid, /Unable to open log source/)
+          allow(IO).to receive(:popen).with("zzzzzzzzzzzz").and_return('Invalid command')
+          expect{ Indy.search(:cmd => "zzzzzzzzzzzz").all }.to raise_error( Indy::Source::Invalid, /Unable to open log source/)
         end
 
       end
 
       it "using :file" do
-        require 'tempfile'
-        file = stub(:size).and_return(1)
-        lambda{ Indy.search(:file => file) }
+        expect(Indy.search(:file => "#{File.dirname(__FILE__)}/data.log").all.length).to eq(2)
       end
 
       it "using :string" do
         string = "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION."
         string_io = StringIO.new(string)
-        StringIO.should_receive(:new).with(string).ordered.and_return(string_io)
-        Indy.search(:string => string).for(:application => 'MyApp').length.should == 1
+        expect(StringIO).to receive(:new).with(string).ordered.and_return(string_io)
+        expect(Indy.search(:string => string).for(:application => 'MyApp').length).to eq(1)
       end
 
       it "should raise error when given an invalid key" do
-        lambda{ Indy.search(:foo => "a string").all }.should raise_error( Indy::Source::Invalid )
+        expect{ Indy.search(:foo => "a string").all }.to raise_error( Indy::Source::Invalid )
       end
 
     end
@@ -196,7 +194,7 @@ describe 'Indy' do
       log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
               "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION.",
               "2000-09-07 14:07:43 INFO MyApp - Exiting APPLICATION."].join("\n")
-      Indy.search(log).all.length.should == 3
+      expect(Indy.search(log).all.length).to eq(3)
     end
 
     it "should ignore invalid entries" do
@@ -204,13 +202,13 @@ describe 'Indy' do
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n",
             " bad \n",
             "2000-09-07 14:07:41 INFO  MyApp - Entering APPLICATION.\n\n"].join("\n")
-      Indy.search(log).all.length.should == 3
+      expect(Indy.search(log).all.length).to eq(3)
     end
 
     it "should handle no matching entries" do
       log = ["2000-09-07   MyApp - Entering APPLICATION.\n \n",
             "2000-09-07 14:07:41\n"].join
-      Indy.search(log).all.length.should == 0
+      expect(Indy.search(log).all.length).to eq(0)
     end
 
     context "with explicit time format" do
@@ -223,7 +221,7 @@ describe 'Indy' do
                         :time_format => '%d-%Y-%m',
                         :entry_regexp => /^(\d\d-\d\d\d\d-\d\d)\s+(#{Indy::LogFormats::DEFAULT_SEVERITY_PATTERN})\s+(#{Indy::LogFormats::DEFAULT_APPLICATION})\s+-\s+(#{Indy::LogFormats::DEFAULT_MESSAGE})$/,
                         :entry_fields => Indy::LogFormats::DEFAULT_ENTRY_FIELDS)
-        indy.all.length.should == 2
+        expect(indy.all.length).to eq(2)
       end
     end
 
@@ -242,20 +240,20 @@ describe 'Indy' do
     end
 
     it "should return all entries using #all" do
-      @indy.all.count.should == 5
+      expect(@indy.all.count).to eq(5)
     end
 
     it "should return correct number of entries with #for" do
-      @indy.for(:severity => 'INFO').count.should == 3
+      expect(@indy.for(:severity => 'INFO').count).to eq(3)
     end
 
     it "should return correct number of entries with #like" do
-      @indy.like(:message => 'ntering').count.should == 2
+      expect(@indy.like(:message => 'ntering').count).to eq(2)
     end
 
     it "should return correct number of entries using #after time scope" do
       results = @indy.after(:time => '2000-09-07 14:07:43', :inclusive => false).all
-      results.length.should == 2
+      expect(results.length).to eq(2)
     end
 
   end
@@ -270,7 +268,7 @@ describe 'Indy' do
     
     it "with #for should yield Struct::Entry" do
       Indy.search(log).all do |result|
-        result.should be_kind_of(Struct::Entry)
+        expect(result).to be_kind_of(Struct::Entry)
       end
     end
 
@@ -279,7 +277,7 @@ describe 'Indy' do
       Indy.search(log).all do |result|
         actual_yield_count += 1
       end
-      actual_yield_count.should == 3
+      expect(actual_yield_count).to eq(3)
     end
 
     it "with #for should yield each entry" do
@@ -287,7 +285,7 @@ describe 'Indy' do
       Indy.search(log).for(:severity => 'INFO') do |result|
         actual_yield_count += 1
       end
-      actual_yield_count.should == 2
+      expect(actual_yield_count).to eq(2)
     end
 
     it "with #like should yield each entry" do
@@ -295,7 +293,7 @@ describe 'Indy' do
       Indy.search(log).like(:message => '\be\S+ing') do |result|
         actual_yield_count += 1
       end
-      actual_yield_count.should == 2
+      expect(actual_yield_count).to eq(2)
     end
 
   end

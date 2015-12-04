@@ -11,7 +11,7 @@ describe Indy do
         "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300"].join("\n")
       indy = Indy.new(:source => source).with(Indy::COMMON_LOG_FORMAT)
       result = indy.for(:authuser => 'louie')
-      result.length.should == 1
+      expect(result.length).to eq(1)
     end
 
     it 'Indy::COMBINED_LOG_FORMAT' do
@@ -21,7 +21,7 @@ describe Indy do
         "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\""].join("\n")
       indy = Indy.new(:source => source).with(Indy::COMBINED_LOG_FORMAT)
       result = indy.for(:authuser => 'louie')
-      result.length.should == 1
+      expect(result.length).to eq(1)
     end
 
     it 'Indy::LOG4R_DEFAULT_FORMAT' do
@@ -34,7 +34,7 @@ describe Indy do
       indy = Indy.new(:source => source)
       indy.with(Indy::LOG4R_DEFAULT_FORMAT)
       result = indy.for(:application => 'louie')
-      result.length.should == 1
+      expect(result.length).to eq(1)
     end
 
     it 'Indy::LOG4J_DEFAULT_FORMAT' do
@@ -45,7 +45,7 @@ describe Indy do
         "This is a message with level ERROR",
         "This is a message with level FATAL"].join("\n")
       indy = Indy.new(:source => source).with(Indy::LOG4J_DEFAULT_FORMAT)
-      indy.all.length.should == 5
+      expect(indy.all.length).to eq(5)
     end
 
   end
@@ -61,10 +61,10 @@ describe Indy do
         at org.apache.log4j.examples.Sort.main(Sort.java:64)
 467 [main] INFO  org.apache.log4j.examples.Sort - Exiting main method."
 
-    Indy.new( :source => log_data,
+    expect(Indy.new( :source => log_data,
               :entry_regexp => /^(\d{3})\s+\[(\S+)\]\s+(\S+)\s+(\S+)\s*([^-]*)\s*-\s+(.+?)(?=\n\d{3}|\Z)/m,
               :entry_fields => [:time, :thread, :level, :category, :diagnostic, :message]
-            ).class.should == Indy
+            ).class).to eq(Indy)
   end
 
 end
