@@ -14,11 +14,11 @@ class Indy
   #  Indy.new(:time_format => '%m-%d-%Y', :entry_regexp => LOG_REGEX_PATTERN, :entry_fields => [:time,:application,:message], :source => LOG_FILE)
   #
   def initialize(args)
-    params_hash = args.dup
-    raise ArgumentError, "Source parameter not specified" unless (params_hash.respond_to?(:keys) && params_hash.keys.include?(:source))
-    source_param = params_hash[:source]
-    params_hash.delete :source
-    log_definition = LogDefinition.new(params_hash)
+    params = args.dup
+    raise ArgumentError, "Source parameter not specified" unless (params.respond_to?(:keys) && params.keys.include?(:source))
+    source_param = params[:source]
+    params.delete :source
+    log_definition = LogDefinition.new(params)
     @search = Search.new(:log_definition => log_definition)
     @search.source = Source.new(source_param,log_definition)
   end
