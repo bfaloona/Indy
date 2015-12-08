@@ -2,7 +2,7 @@
 Feature: Finding log entries in a file
 
   Background:
-    Given the following log file:
+    Given the following log file object:
     """
     spec/data.log
     """
