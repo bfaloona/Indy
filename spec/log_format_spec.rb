@@ -2,14 +2,24 @@ require "#{File.dirname(__FILE__)}/helper"
 
 describe Indy do
 
-  context "log format can be set to" do
+  context "log format" do
 
-    it 'Indy::COMMON_LOG_FORMAT' do
+    it 'can be set to Indy::COMMON_LOG_FORMAT' do
       source = ["127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326",
-        "127.0.0.1 - frank [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326",
-        "127.0.0.1 - louie [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb2.gif HTTP/1.0\" 200 2327",
-        "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300"].join("\n")
+                "127.0.0.1 - frank [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326",
+                "127.0.0.1 - louie [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb2.gif HTTP/1.0\" 200 2327",
+                "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300"].join("\n")
       indy = Indy.new(:source => source).with(Indy::COMMON_LOG_FORMAT)
+      result = indy.for(:authuser => 'louie')
+      expect(result.length).to eq(1)
+    end
+
+    it 'configuration can be set using: Indy.search(string).with(FORMAT_CLASS)' do
+      source = ["127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326",
+                "127.0.0.1 - frank [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326",
+                "127.0.0.1 - louie [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb2.gif HTTP/1.0\" 200 2327",
+                "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300"].join("\n")
+      indy = Indy.search(source).with(Indy::COMMON_LOG_FORMAT)
       result = indy.for(:authuser => 'louie')
       expect(result.length).to eq(1)
     end
@@ -17,8 +27,8 @@ describe Indy do
     it 'Indy::COMBINED_LOG_FORMAT' do
       source = ["127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\"",
         "127.0.0.1 - frank [10/Oct/2000:13:55:36 -0700] \"GET /apache_pb1.gif HTTP/1.0\" 200 2326 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\"",
-        "127.0.0.1 - louie [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb2.gif HTTP/1.0\" 200 2327 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\"",
-        "127.0.0.1 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\""].join("\n")
+        "127.0.0.2 - louie [10/Oct/2000:13:55:37 -0700] \"GET /apache_pb2.gif HTTP/1.0\" 200 2327 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\"",
+        "127.0.0.3 - frank [10/Oct/2000:13:55:38 -0700] \"GET /apache_pb3.gif HTTP/1.0\" 404 300 \"http://www.example.com/start.html\" \"Mozilla/4.08 [en] (Win98; I ;Nav)\""].join("\n")
       indy = Indy.new(:source => source).with(Indy::COMBINED_LOG_FORMAT)
       result = indy.for(:authuser => 'louie')
       expect(result.length).to eq(1)
@@ -61,10 +71,12 @@ describe Indy do
         at org.apache.log4j.examples.Sort.main(Sort.java:64)
 467 [main] INFO  org.apache.log4j.examples.Sort - Exiting main method."
 
-    expect(Indy.new( :source => log_data,
+    result = Indy.new( :source => log_data,
               :entry_regexp => /^(\d{3})\s+\[(\S+)\]\s+(\S+)\s+(\S+)\s*([^-]*)\s*-\s+(.+?)(?=\n\d{3}|\Z)/m,
               :entry_fields => [:time, :thread, :level, :category, :diagnostic, :message]
-            ).class).to eq(Indy)
+            )
+    expect(result.class).to eq(Indy)
+    expect(result.all.first.level).to eq('INFO')
   end
 
 end

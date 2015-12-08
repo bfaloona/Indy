@@ -7,9 +7,9 @@ describe 'Indy' do
     it "should accept v0.3.4 initialization params" do
       indy_obj = Indy.new(:source => "foo\nbar\n").with(Indy::DEFAULT_LOG_FORMAT)
       search_obj = indy_obj.search
-      expect(search_obj.log_definition.class).to eq Indy::LogDefinition
-      expect(search_obj.log_definition.entry_regexp.class).to eq Regexp
-      expect(search_obj.log_definition.entry_fields.class).to eq Array
+      expect(search_obj.source.log_definition.class).to eq Indy::LogDefinition
+      expect(search_obj.source.log_definition.entry_regexp.class).to eq Regexp
+      expect(search_obj.source.log_definition.entry_fields.class).to eq Array
     end
 
     it "should not raise error with non-conforming data" do
@@ -20,7 +20,7 @@ describe 'Indy' do
     it "should accept time_format parameter" do
       @indy = Indy.new(:time_format => '%d-%m-%Y', :source => "1-13-2000 yes", :entry_regexp => '^([^\s]+) (\w+)$', :entry_fields => [:time, :message])
       expect(@indy.all.class).to eq(Array)
-      expect(@indy.search.log_definition.time_format).to eq('%d-%m-%Y')
+      expect(@indy.search.source.log_definition.time_format).to eq('%d-%m-%Y')
     end
 
     it "should accept an initialization hash passed to #search" do
@@ -54,13 +54,15 @@ describe 'Indy' do
         expect(@indy.with(:default).all.length).to eq(3)
       end
 
-      it "should raise ArgumentError when regexp captures don't match fields" do
+      it "should raise Exception when regexp captures don't match fields" do
         log = [ "2000-09-07 14:06:41 INFO MyApp - Entering APPLICATION.",
                 "2000-09-07 14:07:42 DEBUG MyApp - Initializing APPLICATION."].join("\n")
-        expect{ expect(Indy.search(log).
-            with(:entry_regexp => Indy::LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => [:field_one]).
-            all.length).to be > 0
-        }.to raise_error ArgumentError
+        expect{
+          expect(Indy.search(log).
+                    with(:entry_regexp => Indy::LogFormats::DEFAULT_ENTRY_REGEXP,
+                         :entry_fields => [:field_one]
+                        ).all.length).to be > 0
+        }.to raise_error Indy::Source::FieldMismatchException
       end
 
       [:for, :like, :matching].each do |method|

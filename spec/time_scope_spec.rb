@@ -128,35 +128,40 @@ describe Indy do
   context "explicit time format" do
 
     before(:each) do
-      pattern = "^([^\s]+) (.*)$"
-      @indy = Indy.new(:time_format => '%m-%d-%Y', 
-        :source => "1-13-2002 message\n1-14-2002 another message\n1-15-2002 another message",
-        :log_format => [pattern, :time, :message])
+      @indy = Indy.new(
+          :time_format => '[%m %d %Y]',
+          :source => "[1 13 2002] message\n[1 14 2002] another message\n[1 15 2002] another message",
+          :entry_regexp => "^(\\[.+\\]) (.*)$",
+          :entry_fields => [:time, :message])
     end
 
-    it "should search within time scope using a different format than explicitly set" do
-      pending 'Flexible time date time formatting is not implemented'
-      expect(@indy.after(:time => 'Jan 13 2002').all.length).to eq(2)
-      expect(@indy.after(:time => 'Jan 14 2002').all.last._time.mday).to eq(15)
+    it "using before finds correct number of entries" do
+      expect(@indy.before(:time => '[1 14 2002]').all.length).to eq(1)
+    end
+
+    it "using default (not explicit) time format finds correct number of entries" do
+      expect(@indy.after(:time => '2002-01-13').all.length).to eq(2)
     end
 
   end
 
-  it "should parse dates when log includes non-conforming data" do
+  it "should raise ParseException when log includes non-conforming data" do
     logdata = [ "12-03-2000 message1",
       "13-03-2000 message2",
       "14-03-2000 ",
       " message4",
-      "a14-03-2000 message5",
-      "14-03-2000 message6\n\n\n\n",
-      "15-03-2000 message7",
-      "16-03-2000 message8\r\n",
-      "17-03-2000 message9"].join("\n")
+      "16-03-2000 message6\n\n\n\n",
+      "a17-03-2000 message5",
+      "18-03-2000 message7",
+      "19-03-2000 message8\r\n",
+      "20-03-2000 message9"].join("\n")
     @indy = Indy.new(
       :source => logdata,
       :log_format => [/^(\d[^\s]+\d) (.+)$/, :time, :message])
-    @indy.after(:time => '13-03-2000')
-    expect(@indy.all.length).to eq(4)
+    @indy.after(:time => '16-03-2000')
+    expect{
+      @indy.all
+    }.to raise_exception( Indy::Time::ParseException )
   end
 
 end

@@ -5,6 +5,12 @@ class Indy
   # 
   class Source
 
+    # Exception raised when entry regexp does not match data
+    class FieldMismatchException < Exception; end
+
+    # log definition
+    attr_accessor :log_definition
+
     # log source type. :cmd, :file, or :string
     attr_reader :type
 
@@ -13,9 +19,6 @@ class Indy
 
     # the StringIO object
     attr_reader :io
-
-    # log definition
-    attr_reader :log_definition
 
     # Exception raised when unable to open source
     class Invalid < Exception; end
@@ -27,7 +30,7 @@ class Indy
     #
     def initialize(param,log_definition=nil)
       raise Indy::Source::Invalid, "No source specified." if param.nil?
-      @log_definition = log_definition || LogDefinition.new()
+      self.log_definition = log_definition || LogDefinition.new()
       return discover_connection(param) unless param.respond_to?(:keys)
       if param[:cmd]
         set_connection(:cmd, param[:cmd])
@@ -155,7 +158,20 @@ class Indy
     # Return the time of a log entry index, with an optional offset
     #
     def time_at(index, delta=0)
-      ::Time.parse(@entries[index + delta])
+      begin
+        entry = @entries[index + delta]
+        time = @log_definition.parse_entry(entry)[:time]
+        result = Indy::Time.parse_date(time, @log_definition.time_format)
+      rescue FieldMismatchException => fme
+        raise
+      rescue Exception => e
+        msg = "Unable to parse time from entry. Time value was #{time.inspect}. Original exception was:\n#{e.class}\n"
+        raise Indy::Time::ParseException, msg + e.message
+      end
+      if result.nil?
+        raise Indy::Time::ParseException, "Unable to parse datetime. Raw value was #{time.inspect}. Entry was #{entry}."
+      end
+      result
     end
 
     #

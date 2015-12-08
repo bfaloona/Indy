@@ -3,11 +3,10 @@ class Indy
   class Search
 
     attr_accessor :source
-    attr_accessor :log_definition
 
     attr_accessor :start_time, :end_time, :inclusive
 
-    def initialize(params_hash)
+    def initialize(params_hash={})
       while (param = params_hash.shift) do
         send("#{param.first}=",param.last)
       end
@@ -25,7 +24,7 @@ class Indy
       results = []
       results += search do |entry|
         if type == :all || is_match?(type,entry,search_criteria)
-          result_struct = @log_definition.create_struct(entry)
+          result_struct = @source.log_definition.create_struct(entry)
           if block_given?
             block.call(result_struct)
           else
@@ -38,12 +37,12 @@ class Indy
 
     #
     # Search the @source and yield to the block the entry that was found
-    # with @log_definition
+    # with the LogDefinition
     #
     # This method is supposed to be used internally.
     #
     def search(&block)
-      if @log_definition.multiline
+      if @source.log_definition.multiline
         multiline_search(&block)
       else
         standard_search(&block)
@@ -58,9 +57,9 @@ class Indy
       results = []
       source_lines = (is_time_search ? @source.open([@start_time,@end_time]) : @source.open)
       source_lines.each do |single_line|
-        hash = @log_definition.parse_entry(single_line)
+        hash = @source.log_definition.parse_entry(single_line)
         next unless hash
-        next unless Indy::Time.inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
+        next unless inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
         results << (block.call(hash) if block_given?)
       end
       results.compact
@@ -72,10 +71,10 @@ class Indy
     def multiline_search(&block)
       is_time_search = use_time_criteria?
       source_io = StringIO.new( (is_time_search ? @source.open([@start_time,@end_time]) : @source.open ).join("\n") )
-      results = source_io.read.scan(@log_definition.entry_regexp).collect do |entry|
-        hash = @log_definition.parse_entry_captures(entry)
+      results = source_io.read.scan(@source.log_definition.entry_regexp).collect do |entry|
+        hash = @source.log_definition.parse_entry_captures(entry)
         next unless hash
-        next unless Indy::Time.inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
+        next unless inside_time_window?(hash[:time],@start_time,@end_time,@inclusive) if is_time_search
         block.call(hash) if block_given?
       end
       results.compact
@@ -87,8 +86,8 @@ class Indy
     def use_time_criteria?
       if @start_time || @end_time
         # ensure both boundaries are set
-        @start_time ||= Indy::Time.forever_ago(@log_definition.time_format)
-        @end_time ||= Indy::Time.forever(@log_definition.time_format)
+        @start_time ||= Indy::Time.forever_ago(@source.log_definition.time_format)
+        @end_time ||= Indy::Time.forever(@source.log_definition.time_format)
       end
       @start_time && @end_time
     end
@@ -114,8 +113,8 @@ class Indy
       if params_hash[:time]
         time_scope_from_direction(params_hash[:direction], params_hash[:span], params_hash[:time])
       else
-        @start_time = Indy::Time.parse_date(params_hash[:start_time]) if params_hash[:start_time]
-        @end_time = Indy::Time.parse_date(params_hash[:end_time]) if params_hash[:end_time]
+        @start_time = Indy::Time.parse_date(params_hash[:start_time], @source.log_definition.time_format) if params_hash[:start_time]
+        @end_time = Indy::Time.parse_date(params_hash[:end_time], @source.log_definition.time_format) if params_hash[:end_time]
       end
       @inclusive = params_hash[:inclusive]
     end
@@ -124,7 +123,7 @@ class Indy
     # Parse direction, span, and time to set @start_time and @end_time
     #
     def time_scope_from_direction(direction, span, time)
-       time = Indy::Time.parse_date(time)
+      time = Indy::Time.parse_date(time, @source.log_definition.time_format)
       span = (span.to_i * 60).seconds if span
       if direction == :before
         @end_time = time
@@ -142,6 +141,19 @@ class Indy
       @inclusive = @start_time = @end_time = nil
     end
 
-  end
+    #
+    # Evaluate if a log entry satisfies the configured time conditions
+    #
+    def inside_time_window?(time_string,start_time,end_time,inclusive)
+      time = Indy::Time.parse_date(time_string, @source.log_definition.time_format)
+      return false unless time
+      if inclusive
+        return true unless (time > end_time || time < start_time)
+      else
+        return true unless (time >= end_time || time <= start_time)
+      end
+      return false
+    end
 
+  end
 end

@@ -18,9 +18,8 @@ class Indy
     raise ArgumentError, "Source parameter not specified" unless (params.respond_to?(:keys) && params.keys.include?(:source))
     source_param = params[:source]
     params.delete :source
-    log_definition = LogDefinition.new(params)
-    @search = Search.new(:log_definition => log_definition)
-    @search.source = Source.new(source_param,log_definition)
+    @search = Search.new()
+    @search.source = Source.new( source_param, LogDefinition.new(params) )
   end
 
   class << self
@@ -68,7 +67,10 @@ class Indy
   #  Indy.search(LOG_FILE).with(/^(\d{2}.\d{2}.\d{2})\s*(.+)$/,:time,:message)
   #
   def with(params=:default)
-    @search.log_definition = LogDefinition.new(params)
+    if params.kind_of?(String) && params.match(/^Indy::/)
+      params = params.constantize
+    end
+    @search.source.log_definition = LogDefinition.new(params)
     self
   end
 
@@ -119,8 +121,8 @@ class Indy
     raise ArgumentError, "Unsupported parameter to last(): #{scope_criteria.inspect}" unless scope_criteria.respond_to?(:keys) and scope_criteria[:span]
     span = (scope_criteria[:span].to_i * 60).seconds
     entry = last_entries(1)[0]
-    start_time = Indy::Time.parse_date(entry[:time],@search.log_definition.time_format) - span
-    within(:start_time => start_time, :end_time => Indy::Time.forever(@search.log_definition.time_format))
+    start_time = Indy::Time.parse_date(entry[:time], @search.source.log_definition.time_format) - span
+    within(:start_time => start_time, :end_time => Indy::Time.forever(@search.source.log_definition.time_format))
     self
   end
 
@@ -165,7 +167,7 @@ class Indy
   #
   def around(scope_criteria)
     raise ArgumentError unless scope_criteria.respond_to?(:keys) and scope_criteria[:time]
-    time = Indy::Time.parse_date(scope_criteria[:time])
+    time = Indy::Time.parse_date(scope_criteria[:time], @search.source.log_definition.time_format)
     mid_span = ((scope_criteria[:span].to_i * 60)/2).seconds rescue 300.seconds
     within(:start_time => time - mid_span, :end_time => time + mid_span, :inclusive => nil)
     self
@@ -207,14 +209,14 @@ class Indy
     result = []
     source_io = @search.source.open
     source_io.reverse_each do |entry|
-      hash = @search.log_definition.parse_entry(entry)
+      hash = @search.source.log_definition.parse_entry(entry)
       if hash
         num_entries += 1
         result << hash
         break if num_entries >= num
       end
     end
-    result.collect{|entry| @search.log_definition.create_struct(entry)}
+    result.collect{|entry| @search.source.log_definition.create_struct(entry)}
   end
 
 end

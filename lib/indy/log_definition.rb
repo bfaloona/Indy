@@ -19,7 +19,7 @@ class Indy
         @entry_regexp = Regexp.new(params_hash[:entry_regexp])
       end
       @entry_fields = params_hash[:entry_fields]
-      @time_format = params_hash[:time_format]
+      @time_format = params_hash[:time_format] || Indy::LogFormats::DEFAULT_DATE_TIME # '%Y-%m-%d %H:%M:%S'
       define_struct
     end
 
@@ -27,6 +27,7 @@ class Indy
       params_hash = {}
       params_hash[:entry_regexp] = Indy::LogFormats::DEFAULT_ENTRY_REGEXP
       params_hash[:entry_fields] = Indy::LogFormats::DEFAULT_ENTRY_FIELDS
+      params_hash[:time_format] = Indy::LogFormats::DEFAULT_DATE_TIME
       params_hash
     end
 
@@ -54,7 +55,7 @@ class Indy
     end
 
     #
-    # Define Struct::Entry with the fields from @log_definition. Ignore warnings.
+    # Define Struct::Entry. Ignore warnings.
     #
     def define_struct
       fields = (@entry_fields + [:raw_entry]).sort_by{|key|key.to_s}
@@ -85,13 +86,14 @@ class Indy
       match_data = /#{@entry_regexp}/.match(raw_entry)
       return nil unless match_data
       values = match_data.captures
+      values.shift if @multiline
       entry_hash([raw_entry, values].flatten)
     end
 
     #
     # Return a hash of field=>value pairs for the array of captured values from a log entry
     #
-    # @param [Array] capture_array The array of values captured by the @log_definition.entry_regexp
+    # @param [Array] capture_array The array of values captured by the LogDefinition regexp
     #
     def parse_entry_captures( capture_array )
       entire_entry = capture_array.shift
@@ -106,7 +108,7 @@ class Indy
       if values.length == @entry_fields.length + 1 # values also includes raw_entry
         @field_list_is_valid = true
       else
-        raise ArgumentError, "Field mismatch between log pattern and log data. The data is: '#{values.join(':::')}'"
+        raise Indy::Source::FieldMismatchException, "Number of expected fields does not match those captured via the regexp pattern.\nThe expected fields are:\n=> #{@entry_fields.join("\n=> ")}\nThe log entry and captured fields are:\n=> #{values.join("\n=> ")}"
       end
     end
 

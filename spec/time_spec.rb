@@ -43,14 +43,5 @@ describe Indy::Time do
 
     end
 
-    context 'inside_time_window?' do
-
-      it 'should respond_to' do
-        expect(Indy::Time).to respond_to(:inside_time_window?)
-      end
-
-    end
-
   end
-
 end

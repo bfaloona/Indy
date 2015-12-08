@@ -17,17 +17,18 @@ class Indy
     NUMBER_REGEXP = '(\d+)'
     DQUOTE_DELIM_REGEXP = '"([^"]+)"'
 
-    DEFAULT_DATE_TIME = '\d{4}.\d{2}.\d{2}\s+\d{2}.\d{2}.\d{2}' #"%Y-%m-%d %H:%M:%S"
+    DEFAULT_DATE_TIME = '\d{4}.\d{2}.\d{2}\s+\d{2}.\d{2}.\d{2}'  # "%Y-%m-%d %H:%M:%S"
     DEFAULT_SEVERITY = [:trace,:debug,:info,:warn,:error,:fatal]
     DEFAULT_SEVERITY_PATTERN = "(?:#{DEFAULT_SEVERITY.map{|s| s.to_s.upcase}.join("|")})"
     DEFAULT_APPLICATION = '\w+'
     DEFAULT_MESSAGE = '.+'
 
-    DEFAULT_ENTRY_FIELDS = [:time,:severity,:application,:message]
+    DEFAULT_ENTRY_FIELDS = [:time, :severity, :application, :message]
     DEFAULT_ENTRY_REGEXP = /^(#{DEFAULT_DATE_TIME})\s+(#{DEFAULT_SEVERITY_PATTERN})\s+(#{DEFAULT_APPLICATION})\s+-\s+(#{DEFAULT_MESSAGE})$/
 
     COMMON_FIELDS = [:host, :ident, :authuser, :time, :request, :status, :bytes]
     COMMON_REGEXP = /^#{IPV4_REGEXP} #{SPACE_DELIM_REGEXP} #{SPACE_DELIM_REGEXP} #{BRACKET_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP} #{HTTP_STATUS_REGEXP} #{NUMBER_REGEXP}$/
+    COMMON_TIME_FORMAT = "%d\/%b\/%Y:%H:%M:%S %z"
 
     COMBINED_FIELDS = COMMON_FIELDS + [:referrer, :user_agent]
     COMBINED_REGEXP = /^#{IPV4_REGEXP} #{SPACE_DELIM_REGEXP} #{SPACE_DELIM_REGEXP} #{BRACKET_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP} #{HTTP_STATUS_REGEXP} #{NUMBER_REGEXP} #{DQUOTE_DELIM_REGEXP} #{DQUOTE_DELIM_REGEXP}$/
@@ -42,7 +43,7 @@ class Indy
   #
   # Indy default log format 
   # e.g.:
-  # INFO 2000-09-07 MyApp - Entering APPLICATION.
+  # 2000-09-07 INFO MyApp - Entering APPLICATION.
   #
   DEFAULT_LOG_FORMAT = {:entry_regexp => LogFormats::DEFAULT_ENTRY_REGEXP, :entry_fields => LogFormats::DEFAULT_ENTRY_FIELDS}
 
@@ -59,11 +60,11 @@ class Indy
   #
   # NCSA Common Log Format log format
   #
-  COMMON_LOG_FORMAT = {:entry_regexp => LogFormats::COMMON_REGEXP, :entry_fields => LogFormats::COMMON_FIELDS}
+  COMMON_LOG_FORMAT = {:entry_regexp => LogFormats::COMMON_REGEXP, :entry_fields => LogFormats::COMMON_FIELDS, :time_format => LogFormats::COMMON_TIME_FORMAT}
 
   #
   # NCSA Combined Log Format log format
   #
-  COMBINED_LOG_FORMAT = {:entry_regexp => LogFormats::COMBINED_REGEXP, :entry_fields => LogFormats::COMBINED_FIELDS}
+  COMBINED_LOG_FORMAT = {:entry_regexp => LogFormats::COMBINED_REGEXP, :entry_fields => LogFormats::COMBINED_FIELDS, :time_format => LogFormats::COMMON_TIME_FORMAT}
 
 end
