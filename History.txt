@@ -1,8 +1,15 @@
-=== 0.4.0 / unreleased
+=== 0.5.0 / 2015-12-08
 
+* Improved time format handling
+* Multiline :entry_regexp now requires a capture group for the entire entry
 * Faster time scoped searches when using single line log formats
-* result[:entry] had replaced result[:line]
+* result.raw_entry has replaced result.line
 * Indy#all has replaced Indy#for(:all)
+* LogDefinition internal cleanup
+* Restored support for Ruby 1.8.7
+
+=== 0.4.0.pre (unreleased)
+
 
 === 0.3.4 / 2011-08-07
 
