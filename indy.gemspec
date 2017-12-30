@@ -13,12 +13,12 @@ Gem::Specification.new do |s|
 
   s.platform    = Gem::Platform::RUBY
   s.required_ruby_version = '>= 1.8.7'
-  s.add_dependency('activesupport', '~> 3.1.12')
+  s.add_dependency('activesupport', '~> 4.1.11')
 
   s.add_development_dependency('rake', '~> 10.4.0')
   s.add_development_dependency('i18n', '~> 0.6.11')
   s.add_development_dependency('cucumber', '~> 1.3.20')
-  s.add_development_dependency('yard', '~> 0.8.7.6')
+  s.add_development_dependency('yard', '~> 0.9.11')
   s.add_development_dependency('rspec', '~> 3.4.0')
   s.add_development_dependency('rspec-mocks', '~> 3.4.0')
   s.add_development_dependency('rb-fsevent', '~> 0.9.0')
