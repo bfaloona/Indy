@@ -258,8 +258,7 @@ Indy was developed on MacOS, and should support MS Windows. Travis builds run th
   - 2.3.6
   - 2.2.9
   - 1.9.3
-  - jruby (?)
-  - rbx-3 (?)
+  - jruby
 
 LICENSE
 -------
