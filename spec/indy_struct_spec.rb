@@ -12,7 +12,7 @@ describe 'Indy' do
     end
 
     it "should be returned by #for search" do
-      expect(@entry_struct).to be_kind_of Struct::Entry
+      expect(@entry_struct).to be_a_kind_of Struct::Entry
     end
 
     it "should contain entire log entry as :raw_entry" do

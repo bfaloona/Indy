@@ -252,21 +252,21 @@ To create a report in /coverage, run
 Compatibility
 -------------
 
-Indy supports MacOS, *nix, and MS Windows and runs on the following ruby flavors:
+Indy was developed on MacOS, and should support MS Windows. Travis builds run the following ruby flavors:
 
-  - 2.2.1
+  - 2.4.3
+  - 2.3.6
+  - 2.2.9
   - 1.9.3
-  - 1.8.7
-  - ree
-  - jruby-1.7.20
-  - rbx-2.2.7
+  - jruby (?)
+  - rbx-3 (?)
 
 LICENSE
 -------
 
 (The MIT License)
 
-Copyright (c) 2010 Franklin Webber
+Copyright (c) 2010 Franklin Webber, Brandon Faloona
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

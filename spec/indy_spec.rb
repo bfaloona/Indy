@@ -71,16 +71,16 @@ describe 'Indy' do
         end
 
         it "##{method} should accept a hash of search criteria" do
-          expect(@indy.send(method,:severity => "INFO")).to be_kind_of(Array)
+          expect(@indy.send(method,:severity => "INFO")).to be_a_kind_of(Array)
         end
 
         it "##{method} should return a set of results" do
-          expect(@indy.send(method,:severity => "DEBUG")).to be_kind_of(Array)
+          expect(@indy.send(method,:severity => "DEBUG")).to be_a_kind_of(Array)
         end
       end
 
       it "#last should return self" do
-        expect(@indy.last(:span => 1)).to be_kind_of Indy
+        expect(@indy.last(:span => 1)).to be_a_kind_of Indy
       end
 
       it "#last should set the time scope to the correct number of minutes" do
@@ -270,7 +270,7 @@ describe 'Indy' do
     
     it "with #for should yield Struct::Entry" do
       Indy.search(log).all do |result|
-        expect(result).to be_kind_of(Struct::Entry)
+        expect(result).to be_a_kind_of(Struct::Entry)
       end
     end
 

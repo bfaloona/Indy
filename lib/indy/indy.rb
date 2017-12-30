@@ -202,7 +202,7 @@ class Indy
   #
   # Return an array of Struct::Entry objects for the last N valid entries from the source
   #
-  # @param [Fixnum] num the number of entries to retrieve
+  # @param [Integer] num the number of entries to retrieve
   #
   def last_entries(num)
     num_entries = 0
