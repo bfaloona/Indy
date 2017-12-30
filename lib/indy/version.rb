@@ -1,7 +1,7 @@
 
 class Indy
 
-  VERSION = '0.5.0'
+  VERSION = '0.5.1'
 
   def self.show_version_changes(version)
     date = ""
