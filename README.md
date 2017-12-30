@@ -5,6 +5,7 @@ Synopsis
 --------
 
 [![build status](https://travis-ci.org/bfaloona/Indy.png)](http://travis-ci.org/bfaloona/Indy)
+[![gem version](https://badge.fury.io/rb/indy.svg)](https://badge.fury.io/rb/indy)
 
 Log files are often searched for particular strings but are not often treated as data structures.  Indy attempts to deliver log content via more powerful features by allowing the ability to collect segments of a log from particular time; find a particular event; or monitor/reflect on a log to see if a particular event occurred (or not occurred).
 
