@@ -1,3 +1,18 @@
+⚠️ **DEPRECATED** ⚠️
+====================================
+
+**This repository is no longer actively maintained and is provided as-is for reference purposes only.**
+
+This project is deprecated and will not receive further updates, bug fixes, or support. The code remains available for historical reference and for those who wish to fork and maintain their own version.
+
+If you're looking for modern log analysis tools, consider exploring:
+- [Logstash](https://www.elastic.co/logstash) - Part of the Elastic Stack
+- [Fluentd](https://www.fluentd.org/) - Open source data collector
+- [Graylog](https://www.graylog.org/) - Log management platform
+- [Loki](https://grafana.com/oss/loki/) - Log aggregation system by Grafana
+
+---
+
 Indy: A Log Archaeology Tool
 ====================================
 
